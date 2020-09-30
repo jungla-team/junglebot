@@ -1,0 +1,4 @@
+pyTelegramBotAPI==3.7.2
+netaddr==0.7.19
+requests==2.23.0
+pyga==2.6.1

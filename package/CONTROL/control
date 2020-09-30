@@ -1,0 +1,6 @@
+Package: junglebot
+Version: 2.3.14
+Architecture: all
+Depends: curl, python-pip, python-requests,python-threading,python-pyopenssl,python-logging
+Maintainer: jungle-team
+Description: Telegram bot for enigma2

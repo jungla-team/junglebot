@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [ -d /opt ]; then rm -rf /opt; fi
+mkdir /opt
+cd /opt
+wget http://bin.entware.net/armv7sf-k3.2/installer/generic.sh
+sh generic.sh
+wget -O /opt/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
+chmod +x /opt/bin/speedtest-cli
+
+/opt/bin/opkg update
+/opt/bin/opkg install python3-pip
+
+/opt/bin/pip install --upgrade pip
+/opt/bin/pip install --upgrade setuptools
+/opt/bin/pip install -r /usr/bin/junglebot/requirements-vti.txt
+
+tar -xvf /tmp/i18n_yaml.tar -C /usr/lib/python2.7/site-packages/
+rm -f /tar/i18n_yaml.tar
+
+chmod +x /usr/bin/junglebot/bot.py
+/etc/init.d/junglebot-daemon start

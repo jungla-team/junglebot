@@ -1,0 +1,8 @@
+#!/bin/sh
+
+pip install --upgrade setuptools
+pip install -r /usr/bin/junglebot/requirements.txt
+
+chmod 755 /usr/bin/junglebot/bot.py
+
+/etc/init.d/junglebot-daemon start

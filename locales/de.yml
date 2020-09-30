@@ -1,0 +1,246 @@
+de:
+    menu:
+        command:
+            title: Befehle
+            status: Rezeptor Status
+            reboot: Rezeptor Neustarten
+            standby: Zum Ruhe-modus
+            wakeup: Rezeptor einschalten
+            restartgui: Enigma2 neustarten
+            stopstream: Streamproxy stoppen
+            freeram: RAM reinigen
+            screenshot: Bildschirmfoto
+            update: Sources aktualisieren
+            upgrade: Pakete aktualisieren
+            factory_reset: Werkeinstellung zurücksetzen
+            resetpass: Root paswort löschen
+            exec_command: Befehlen ausführen
+        connections:
+            title: Verbindungsmanagement
+            config: Parameter
+            set_config: Parameter ändern
+            add_friend: Freund Autorisieren
+            del_friend: Freund entfernen
+            friends: IP-Liste deiner Freunde
+            ssh: SSH-Verbindungen anzeigen
+            ftp: FTP-Verbindungen anzeigen
+            autossh: Nicht autorisierte SSH-Kontrolle
+            autoftp: Nicht autorisierte FTP-Kontrolle
+        emu:
+            title: Emulator CCCAM / OSCAM
+            status: Status
+            addlinecccam: Cccam-Zeile hinzufügen
+            addlineoscam: Oscam-Zeile hinzufügen
+            start: Emulator starten
+            stop: Emulator stoppen
+            restart: Emulator neustarten
+            oscam_version: Siehe oscam version
+            cccam_version: Siehe cccam version
+            install_conclave: Oscam Autoupdater instalieren
+            update_autooscam: Autooscam.sh script aktualisieren
+            run_autooscam: Oscam Autoupdater aktualisieren
+            force_autooscam: Oscam Autoupdater aktualisieren zwingen
+        epg:
+            title: EPG-Management
+            path_epg: Siehe epg.dat Pfad
+            date_epg: Siehe epg.dat Datum 
+            update_epg: EPG aktualisieren
+            del_epg: EPG löschen
+            restart_gui: Interface neustarten
+            uninstall_epgimport: EPGImport Desinstalieren
+            uninstall_crossepg: CrossEPG Desinstalieren
+        guides:
+            title: Menü zum Starten von Kurzanleitungen
+            openatv: Starten Sie den OpenATV-Leitfaden
+            openpli: Starten Sie den OpenPLI-Leitfaden
+            vti: Starten Sie den VTI-Leitfaden
+            blackhole: Starten Sie die Blackhole-Anleitung
+            pure2: Starten Sie die Pure2-Anleitung
+        help:
+            title: Hilfemenü mit Liste der verfügbaren Menüs
+        info:
+            title: Informationen zum Empfängersystem
+            channel: Aktueller Kanal
+            system: System Information
+            machineid: Rezeptoren-ID
+            top: Top 10 Prozesse mit CPU
+        junglebot:
+            title: Bot-Einstellungen
+            send_message: Nachricht senden
+            send_remote: Kanal wechseln
+            config: Parameter
+            set_config: Parameter ändern
+            update: Bot aktualisieren
+            reboot: Bot neustarten
+            log: Bot Log anzeigen
+            purge_log: Bot Log leeren
+            changelog: Changelog
+        junglescript:
+            title: JungleScript-Einstellung
+            config: Parameter
+            set_config: Parameter ändern
+            install: JungleScript Instalieren
+            uninstall: JungleScript Desinstalieren 
+            run: JungleScript ausführen
+            force_channels: Aktualisieren Kanalliste
+            log: JungleScript Log sehen
+            channel_list: Siehe Datum der Kanalliste
+            picon_list: Siehe Datum der Picons
+            add_bouquet: Bouquet zu favoriten hinzufügen
+            del_bouquet: Bouquet von favoriten löschen
+        letsencrypt:
+            title: Letsencrypt-Zertifikatverwaltung für duckdns
+            create: Zertifikate erstellen
+            status: Zertifikatstatus
+            check_ip: Duckdns-IP überprüfen
+            check_port: Offenen Port überprüfen
+        network:
+            title: Netzwerkinformationen
+            status: Status
+            connections: TCP-Verbindungen hergestellt
+            speedtest: Netzwerkgeschwindigkeitstest
+            check_duckdns_ip: Duckdns-IP überprüfen
+            check_open_port: Offenen Port überprüfen
+            zerotier: Zerotier Status
+        pystreamy:
+            title: Pystreamy Management
+            status: Pystreamy Status
+            stop: Pystreamy stoppen
+            start: Pystreamy starten
+            restart: Pystreamy neustarten
+            config: Einstellungen
+            set_config: Einstellungen ändern
+            check_config: Einstellungen überprüfen
+            install: Pystreamy instalieren
+            uninstall: Pystreamy deinstalieren
+            log: Pystreamy Log Sehen
+        records:
+            title: Aufnahmemanagement
+            list: Aufnahmeliste
+            delete: Aufnahme löschen
+            clean: Abgelaufene Aufnahmen löschen
+            save: Aktuelles Programm aufnehmen
+            file_list: Dateiliste
+            delete_file: Datei löschen
+            delete_all: Alle Dateien löschen
+            path: aufnahmepfad
+        stream:
+            title: Stream-Management
+            show: Was sehen deine Freunde?
+            friends: IPs deiner Freunde
+            add_friend: Freund zum Streamen autorisieren
+            delete_friend: Freund zum Streamen löschen
+            autocheck: Nicht autorisierte Streams kontrollieren
+            stop_streamproxy: Streamproxy stoppen
+    msg:
+        boot_info: "Bot wird gestartet "
+        autoftp_started: "Autoftp wird gestartet"
+        autossh_started: "Autossh wird gestartet"
+        cccam_not_installed: "Die CCcam Emulator ist nicht instaliert"
+        cccam_stopped: "Cccam gestoppt"
+        check_certs: "ZERTIFIKAT WIRD GEPRÜFT:"
+        check_external_ip: "EXTERNE IP WIRD GEPRÜFT"
+        check_external_port: "EXTERNER PORT WITD GEPRÜFT"
+        check_ip_deco: "DECO IP WIRD GEPRÜFT"
+        check_ip_deco_error: "ERROR: Die IP deco_ip %{deco_ip} passt nicht mit der Deco IP %{real_ip}"
+        click_button: "Drück de knopf zum Ausführen:\n\n"
+        cline_info: "* Cline: %{name} (%{ip}:%{port}): %{connect}"
+        cline_bad_format: "Falsches Zeilenformat. Format -> C: Server port user paswort"
+        command_execute_success: "Befehl erfolgreich ausgeführt"
+        command_not_found: command not found
+        command_freeram: "Der RAM-Speicher wurde bereinigt"
+        command_reboot: "Rezeptor wuird neugestartet"
+        command_resetpass: "Root passwort würde vom Rezeptor gelöscht"
+        command_restartgui: "Enigma2 wird neugestartet"
+        command_restore: "Rezeptor wurde mit mit dem Werkswerte zurück gesetzt"
+        command_screenshot: "Bildschirmfoto wird bearbeitet..."
+        command_sleep: "Rezeptor wird ins ruhe-modus gesetzt"
+        command_stopstream: "Streamproxy wird gestoppt: "
+        command_update: "Sourcen des Systems werde aktualisiert:"
+        command_upgrade: "Rezeptor paketen werden aktualisiert, bitte haben sie geduld. Im anschluss wird es neugestartet"
+        command_wakeup: "Rezeptor wird eingeschaltet"
+        confirmation: "¿Bist du sicher?"
+        control_ftp_unauthorized: "Nicht autorisierte FTP-Verbindung"
+        control_ssh_unauthorized: "Nicht autorisierte SSH-Verbindung"
+        control_access: "Eindringling!!!!  "
+        crossepg_installed: "Crossepg instaliert"
+        crossepg_uninstalled: "CrossEPG Deinstalation ausgeführt"
+        crossepg_uninstall_error: "Du hast CrossEPG nicht instaliert, also ist es unmöglich es zu löschen"
+        emu_active: "Aktiver Emulator erfolgreich geändert"
+        emu_image_not_found: "Option im Bild nicht verfügbar"
+        emu_not_active: "Es gibt kein aktiven Emulator"
+        emu_info_sharing: "Informationsaustausch"
+        emu_notification: "Der angegebene Emulator existiert nicht oder hat keinen aktiven Emulator"
+        emu_not_found: "Ich kann den aktuell aktiven Emulator nicht finden."
+        emu_not_installed: "Ich kann keine installierte Emulatoren finden"
+        emu_stopped: "Emulator gestoppt"
+        epgimport_installed: "EPGImport instaliert"
+        epgimport_uninstalled: "EPGImport Desintalation ausgeführt"
+        epgimport_uninstall_error: "Du hastEPGImport nicht instaliert, also ist es unmöglich es zu löschen"
+        epg_days_error: "Anzahl der Tage falsch eingegeben"
+        epg_two_apps_installed: "Du hast sowohl Crossepg als auch EPGImport installiert, bitte lass nur einen"
+        epg_update_error: "Update konnte nicht abgeschlossen werden"
+        epg_app_install: "Du musst zuerst Crossepg oder EPGImport installieren"
+        epg_update_success: " %{info} Tage Aktualisierung erfolgreich ausgeführt"
+        file_erased: "Die datei %{file} wurde elfolgreich gelöscht"
+        file_notfound: "Die datei %{file} existiert nicht"
+        ftp_conn: "FTP-Verbindung = %{info}" 
+        ftp_conn_notfound: "Es wurden keine FTP-Verbindungen hergestellt"
+        geo_block_ip: "Die eingegebene IP wurde gesperrt"
+        geo_unblock_ip: "Die eingegebene IP wurde entsperrt"
+        text_help: "JungleBot <i> %{version} </i>\nIch kann dir bei der Verwaltung Ihres Enigma2-Empfängers helfen %{brand} durch Telegramm. Wenn du neu in diener Verwendung bist, besuche die folgende <a href=%{telegram_url}> Telegramm Gruppe</a>\n\n <b>Liste der verfügbaren Befehle:\n\n</b>"
+        info_connections: "Hergestellte Verbindungen an deinem rezeptor"
+        info_cpu: "CPU auslastung"
+        info_duckdns_ok: "OK %{host} => %{public_ip}"
+        info_duckdns_ko: "ERROR public ip: %{public_ip} %{host} ip: %{host_ip}"
+        info_port_open: "Port offen %{host}:%{port}"
+        info_port_closed: "Port zu %{host}:%{port}, oder service gestoppt"
+        info_mac: "Gefundene MACs"
+        info_machineid: "Die ID des Rezeptores lautet"
+        info_networkcard: "Die Netzwerkkartenkonfiguration ist"
+        info_ram: "Ram Verbrauch"
+        info_top: "Die 10 Prozesse, die am meisten verbrauchen, sind"
+        info_uptime: "Zeit An"
+        info_zerotier: "[+] ZEROTIER INFORMATION"
+        info_zerotier_notinstalled: "Zerotier ist nicht instaliert"
+        init: "Willkommen bei Jungle Bot, um dem Rezeptor vom Telegramm aus zu steuern, Gebe /hilfe um verfügbare Befehle anzuzeigen"
+        next_param: "Gebe mir den wert **%{param}**:"
+        new_version: "Es gibt eine neue Version von Junglebot%{version}"
+        text_no: "Nein"
+        not_signal: "Es gibt keine Signalinformationen, da die Deko im Schlaf-modus / Aus ist"
+        ok: "OK"
+        operation_cancelled: "Vorgang abgebrochen"
+        oscam_conn_error: "Ich kann mich mit oscam nicht verbinden"
+        oscam_conclave_error: "Oscam Autoupdater ist nicht richtig instaliert"
+        oscam_conclave_installed: "Der oscam Autoupdater emulator ist bereits installiert"
+        oscam_stopped: "Oscam gestoppt"
+        oscam_tunner: "Derzeit ist kein tunner aktiv"
+        oscam_version: "%{version} version"
+        oscam_version_error: "Es gibt eine Oscam-Binärdatei, aber ich kann die Version nicht überprüfen"
+        pystreamy_restart: "Daemon pystreamy wird neugestartet"
+        pystreamy_start: "Daemon pystreamy wird gestartet"
+        pystreamy_started: "Pystreamy startet"
+        pystreamy_stop: "Daemon pystreamy wird gestoppt"
+        pystreamy_stopped: "Pystreamy ist gestoppt"
+        recording_delete_success: "Aufnahme erfolgreich gelöscht"
+        recording_indexnotexist : "Dieser Index existiert für keine Aufzeichnung. Konsultieren Sie die Liste"
+        recording_notexist: "Es gibt keine Aufnahme in %{location}"
+        recording_schedule_notexist: "Es ist keine Aufnahme geplant"
+        restarting: "Neustarten"
+        satbox_standy: "Rezeptor im Ruhe-modus"
+        satbox_started: "Rezeptor an"
+        send_msg_error: "Fehler beim Senden der Nachricht"
+        send_msg_success: "Nachricht erfolgreich gesendet"
+        send_remote_error: "Error: Es sind nur Ziffern von 0 bis 9 zulässig"
+        starting: "Startet"
+        stoping: "Stoppt"
+        streams_notexist: "Keine Streams in Bearbeitung"
+        ssh_conn: "SSH-Verbindung = %{info}"  
+        ssh_conn_notfound: "Es wurden keine SSH-Verbindungen hergestellt"
+        unauthorized: "ZUGANG VERWEIGERT!!"
+        unknown_error: "Unknown error: %{error}"
+        updated_at: "Letzte Änderung: %{date}" 
+        user_connected: "* Benutzer verbunden: %{user} (%{ip}): %{status}"
+        wrong_external_access: "WARNING: Nicht konfigurierter externer Zugriff"
+        wrong_password: "ERROR: Benutzer und Passwort falsch konfiguriert"
+        text_yes: "Ja"

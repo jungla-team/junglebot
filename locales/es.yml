@@ -1,0 +1,247 @@
+es:
+    menu:
+        command:
+            title: Comandos
+            status: Estado receptor
+            reboot: Reinicio receptor
+            standby: Ir a Reposo
+            wakeup: Despierta receptor
+            restartgui: Reiniciar enigma2
+            stopstream: Parar streamproxy
+            freeram: Liberar memoria
+            screenshot: Capturar pantalla
+            update: Actualizar sources
+            upgrade: Actualizar paquetes
+            factory_reset: Restaurar valores fabrica
+            resetpass: Eliminar password root
+            exec_command: Ejecutar comando
+        connections:
+            title: Gestión de conexiones
+            config: Parámetros
+            set_config: Cambiar parámetros
+            add_friend: Autorizar amigo
+            del_friend: Elimina amigo
+            friends: Lista IPs de amigos
+            ssh: Ver conexiones SSH
+            ftp: Ver conexiones FTP
+            autossh: Control ssh no autorizados
+            autoftp: Control ftp no autorizados
+        emu:
+            title: Emuladora CCCAM / OSCAM
+            status: Estado
+            addlinecccam: Añadir línea Cccam
+            addlineoscam: Añadir línea Oscam
+            start: Iniciar Emuladora
+            stop: Parar Emuladora
+            restart: Reiniciar Emuladora
+            oscam_version: Ver version oscam
+            cccam_version: Ver version cccam
+            install_conclave: Instalar oscam conclave
+            update_autooscam: Actualizar script autooscam.sh
+            run_autooscam: Actualizar oscam conclave
+            force_autooscam: Forzar actualización oscam conclave
+        epg:
+            title: Gestión de EPG
+            path_epg: Ver ruta epg.dat
+            date_epg: Ver fecha epg.dat
+            update_epg: Actualizar EPG
+            del_epg: Borrar EPG
+            restart_gui: Reiniciar interfaz
+            uninstall_epgimport: Desinstalar EPGImport
+            uninstall_crossepg: Desinstalar CrossEPG
+        guides:
+            title: Menú para lanzamiento de las guías rápidas
+            openatv: Lanzar guía OpenATV
+            openpli: Lanzar guía OpenPLI
+            vti: Lanzar guía VTI
+            blackhole: Lanzar guía BlackHole
+            pure2: Lanzar guía Pure2
+        help:
+            title: Menú ayuda con listado de menús disponibles
+        info:
+            title: Informacion sistema receptor
+            channel: Canal actual
+            system: Informacion del sistema
+            machineid: Id del receptor
+            top: Top 10 procesos uso cpu
+        junglebot:
+            title: Ajustes del bot
+            send_message: Enviar mensaje
+            send_remote: Cambiar canal
+            config: Parámetros
+            set_config: Cambiar parámetros
+            update: Actualizar bot
+            reboot: Reiniciar bot
+            log: Ver log del bot
+            purge_log: Vaciar log del bot
+            changelog: Changelog
+        junglescript:
+            title: Gestión JungleScript
+            config: Parámetros
+            set_config: Cambiar parámetros
+            install: Instalar JungleScript
+            uninstall: Desinstalar JungleScript
+            run: Ejecutar JungleScript
+            force_channels: Forzar update lista canales
+            log: Ver log JungleScript
+            channel_list: Ver fecha lista canales
+            picon_list: Ver fecha picons
+            add_bouquet: Añadir bouquet fav
+            del_bouquet: Borrar bouquet fav
+        letsencrypt:
+            title: Gestión de certificados letsencrypt para duckdns
+            create: Crear certificados
+            status: Estado de certificados
+            check_ip: Comprobar duckdns ip
+            check_port: Comprobar puerto abierto
+        network:
+            title: Información Red
+            status: Estado
+            connections: Conexiones tcp establecidas
+            speedtest: Test velocidad de red
+            check_duckdns_ip: Comprobar duckdns ip
+            check_open_port: Comprobar puerto abierto
+            zerotier: Estado Zerotier
+        pystreamy:
+            title: Gestión de pystreamy
+            status: Estado pystreamy
+            stop: Para pystreamy
+            start: Iniciar pystreamy
+            restart: Reiniciar pystreamy
+            config: Configuración
+            set_config: Cambiar configuración
+            check_config: Comprobar configuracion
+            install: Instalar pystreamy
+            uninstall: Desinstalar pystreamy
+            log: Ver log pystreamy
+        records:
+            title: Gestión de grabaciones
+            list: Listado grabaciones
+            delete: Borrar grabación
+            clean: Limpiar grabaciones expiradas
+            save: Grabar programa actual
+            file_list: Listado ficheros
+            delete_file: Borrar fichero
+            delete_all: Borrar todos los ficheros
+            path: Ruta grabaciones
+        stream:
+            title: Gestión de streams
+            show: Que ven tu amigos
+            friends: IPs de amigos
+            add_friend: Autorizar amigo para stream
+            delete_friend: Elimina amigo para stream
+            autocheck: Control streams no autorizados
+            stop_streamproxy: Parar streamproxy
+    msg:
+        boot_info: "Iniciado bot "
+        autoftp_started: "Autoftp iniciado"
+        autossh_started: "Autossh iniciado"
+        cccam_not_installed: "La emu CCcam no esta instalada"
+        cccam_stopped: "Cccam parado"
+        check_certs: "COMPROBANDO CERTIFICADO:"
+        check_external_ip: "COMPROBANDO IP EXTERNA"
+        check_external_port: "COMPROBANDO PUERTO EXTERNO"
+        check_ip_deco: "COMPROBANDO IP DECO"
+        check_ip_deco_error: "ERROR: No coincide deco_ip %{deco_ip} con la ip del deco %{real_ip}"
+        click_button: "Pulsa boton para ejecutar:\n\n"
+        cline_info: "* Cline: %{name} (%{ip}:%{port}): %{connect}"
+        cline_bad_format: "Formato de linea incorrecto. Formato -> C: servidor puerto usuario password"
+        command_execute_success: "Comando ejecutado correctamente"
+        command_not_found: command not found
+        command_freeram: "Se ha limpiado memoria ram"
+        command_reboot: "Se reinicia completamente el receptor"
+        command_resetpass: "Se ha eliminado password root del receptor"
+        command_restartgui: "Se reinicia sistema enigma2"
+        command_restore: "Se restaura receptor a valores de fabrica"
+        command_screenshot: "Realizando captura espere..."
+        command_sleep: "Enviando al modo reposo al receptor"
+        command_stopstream: "Se para streamproxy: "
+        command_update: "Se actualizan sources del sistema:"
+        command_upgrade: "Se actualiza paquetes del receptor, tenga paciendia al terminar se reiniciara"
+        command_wakeup: "Despertando del modo reposo al receptor"
+        confirmation: "¿Estas seguro?"
+        control_ftp_unauthorized: "Conexion ftp no autorizada"
+        control_ssh_unauthorized: "Conexion ssh no autorizada"
+        control_access: "Intrusooooooooooooo!!!!  "
+        crossepg_installed: "Crossepg instalado"
+        crossepg_uninstalled: "Desintalación de CrossEPG realizada"
+        crossepg_uninstall_error: No tienes instalado CrossEPG, así que imposible borrarlo
+        emu_active: "Emuladora activa cambiada con exito"
+        emu_image_not_found: "Opción no disponible en la imagen "
+        emu_not_active: "No hay ningún emu activa"
+        emu_info_sharing: "Informacion sharing"
+        emu_notification: "No existe la emuladora indicada o no tiene emuladora activa"
+        emu_not_found: "No encuentro la emuladora actualmente activa"
+        emu_not_installed: "No encuentro emuladoras instaladas"
+        emu_stopped: "Emuladora parada"
+        epgimport_installed: "EPGImport instalado"
+        epgimport_uninstalled: "Desintalación de EPGImport realizada"
+        epgimport_uninstall_error: "No tienes instalado EPGImport, así que imposible borrarlo"
+        epg_days_error: "Numero de días mal introducido"
+        epg_two_apps_installed: "Tienes instalados tanto Crossepg como EPGImport, por favor deja solamente uno"
+        epg_update_error: "No se ha podido completar la actualización"
+        epg_app_install: "Debes instalar primero Crossepg o EPGImport"
+        epg_update_success: "Actualización de %{info} días realizada correctamente"
+        file_erased: "El fichero %{file} se ha borrado correctamente"
+        file_notfound: "No existe el fichero %{file}"
+        ftp_conn: "Conexion ftp = %{info}" 
+        ftp_conn_notfound: "No hay conexiones FTP establecidas"
+        geo_block_ip: "Se ha bloqueado la ip introducida"
+        geo_unblock_ip: "Se ha desbloqueado la ip introducida"
+        text_help: "JungleBot <i> %{version} </i>\nPuedo ayudarte a administrar tu receptor Enigma2 %{brand} a traves de Telegram. Si eres nuevo en su uso visita <a href=%{telegram_url}>grupo telegram</a>\n\n <b>lista comandos disponibles:\n\n</b>"
+        info_connections: "Las conexiones establecidas en su receptor"
+        info_cpu: "Uso CPU"
+        info_duckdns_ok: "OK %{host} => %{public_ip}"
+        info_duckdns_ko: "ERROR public ip: %{public_ip} %{host} ip: %{host_ip}"
+        info_port_open: "Puerto abierto %{host}:%{port}"
+        info_port_closed: "Puerto cerrado %{host}:%{port}, o servicio parado"
+        info_mac: "MACs encontradas"
+        info_machineid: "El id de nuestro receptor es"
+        info_networkcard: "La configuracion tarjeta red es"
+        info_ram: "Consumo de ram"
+        info_top: "Los 10 procesos que mas estan consumiendo son"
+        info_uptime: "Tiempo encendido"
+        info_zerotier: "[+] INFORMACION ZEROTIER"
+        info_zerotier_notinstalled: "Zerotier no está instalado"
+        init: "Bienvenido a Junglebot para controlar nuestro receptor desde telegram, introduce /ayuda para ver comandos disponibles"
+        next_param: "Dame el valor de **%{param}**:"
+        new_version: "Existe nueva versión de Junglebot %{version}"
+        text_no: "No"
+        not_signal: "No hay info de señal, ya que el deco está en reposo/apagado"
+        ok: "OK"
+        operation_cancelled: "Operación cancelada"
+        oscam_conn_error: "No puedo conectar con oscam"
+        oscam_conclave_error: "No está bien instalado oscam conclave"
+        oscam_conclave_installed: "Ya se encuentra instalada la emuladora de oscam conclave"
+        oscam_stopped: "Oscam parado"
+        oscam_tunner: "No hay ningún tunner activo en este momento"
+        oscam_version: "%{version} version"
+        oscam_version_error: "Existe binario de oscam pero no puedo chequear la version"
+        pystreamy_restart: "Se reinicia el daemon pystreamy"
+        pystreamy_start: "Se arranca el daemon pystreamy"
+        pystreamy_started: "pystreamy esta arrancado"
+        pystreamy_stop: "Se para el daemon pystreamy"
+        pystreamy_stopped: "pystreamy esta parado"
+        recording_delete_success: "Borrado de grabación correcto"
+        recording_indexnotexist : "Ese indice no existe para ninguna grabación, consulta el listado"
+        recording_notexist: "No hay ninguna grabación en %{location}"
+        recording_schedule_notexist: "No existe ninguna grabación programada"
+        restarting: "Reiniciando"
+        satbox_standy: "Receptor en reposo"
+        satbox_started: "Receptor encendido"
+        send_msg_error: "Error enviando mensaje"
+        send_msg_success: "Mensaje enviado correctamente"
+        send_remote_error: "Error: Solo se admiten digitos del 0 a 9"
+        starting: "Iniciando"
+        stoping: "Parando"
+        streams_notexist: "No hay streams en curso"
+        ssh_conn: "Conexion ssh = %{info}"  
+        ssh_conn_notfound: "No hay conexiones SSH establecidas"
+        unauthorized: " ¡¡PERMISO DENEGADO!!"
+        unknown_error: "Unknown error: %{error}"
+        updated_at: "Última modificación: %{date}" 
+        user_connected: "* Usuario conectado: %{user} (%{ip}): %{status}"
+        wrong_external_access: "WARNING: No configurado acceso externo"
+        wrong_password: "ERROR: user y password mal configurados"
+        text_yes: "Sí"    
+
