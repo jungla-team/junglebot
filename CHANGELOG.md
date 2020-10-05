@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.5.3] - 05/10/2020 
+
+- Correción de errores
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-253-10-05
+
 ## [2.5.2] - 05/10/2020 
 
 - Añadidos botones en opciones de elección tipo qué amigo quiero borrar de mi lista

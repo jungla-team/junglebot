@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.2"   
+VERSION="2.5.3"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -349,7 +349,8 @@ def callback_menu(call):
         except Exception as e:
             bot.send_message(identificacion, i18n.t('msg.unknown_error', error=str(e)))
 
-def check_version(): 
+def check_version():
+    global new_version 
     commands = """
             curl https://raw.githubusercontent.com/jungla-team/junglebot/master/bot.py > /tmp/bot.py
             """
