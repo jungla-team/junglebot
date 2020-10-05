@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.5.2] - 05/10/2020 
+
+- Añadidos botones en opciones de elección tipo qué amigo quiero borrar de mi lista
+- Añadidos parametros AUTORAM para que envíe aviso si se supera el 80% de consumo de memoria RAM
+- Añadidos parametros AUTOTEMP para que envíe aviso si se superan los 90 grados de temperatura del micro
+- Reducción de opciones en /emu y listado de emus con la que está activa marcada con asterisco
+- En test de velocidad la posibilidad de elegir contra qué servidor lanzar la prueba a través de botones
+- Mejora en cómo obtener la información de la RAM en /info_sistema
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-252-10-05
+
 ## [2.5.1] - 28/09/202
 
 - Posibilidad de elegir qué emuladora usar en imágenes VTi

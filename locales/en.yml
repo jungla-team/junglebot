@@ -34,8 +34,8 @@ en:
             start: Start Emu
             stop: Stop Emu
             restart: Reboot Emu
-            oscam_version: Show oscam version
-            cccam_version: Show cccam version
+            oscam_version: Show active version of oscam 
+            cccam_version: Show active version of cccam 
             install_conclave: Install oscam conclave
             update_autooscam: Update autooscam.sh script
             run_autooscam: Update oscam conclave
@@ -135,14 +135,18 @@ en:
     msg:
         boot_info: "Bot started "
         autoftp_started: "Autoftp started"
+        autoram_started: "Autoram started"
         autossh_started: "Autossh started"
-        cccam_not_installed: "The emu CCcam is not installed"
+        autotemp_started: "Autotemp started"
+        cccam_not_installed: "⚠️ The emu CCcam is not installed"
         cccam_stopped: "Cccam stopped"
+        cccam_version_error: "⚠️ There is cccam binary but I can't check the version"
         check_certs: "CHECKING CERTIFICATE:"
         check_external_ip: "CHECKING EXTERNAL IP"
         check_external_port: "CHECKING EXTERNAL PORT"
         check_ip_deco: "COMPROBANDO RECEIVER IP"
-        check_ip_deco_error: "ERROR: Doesn't match %{deco_ip} with %{real_ip}"
+        check_ip_deco_error: "⚠️ ERROR: Doesn't match %{deco_ip} with %{real_ip}"
+        choose_option: "Choose an option"
         click_button: "Press button to execute:\n\n"
         cline_info: "* Cline: %{name} (%{ip}:%{port}): %{connect}"
         cline_bad_format: "Wrong line format. Format -> C: server port user password"
@@ -160,9 +164,11 @@ en:
         command_upgrade: "Receiver packages are updated, have patience when finished it will restart"
         command_wakeup: "Waking the receiver from sleep mode"
         confirmation: "Are you sure?"
-        control_ftp_unauthorized: "Unauthorized ftp connection"
-        control_ssh_unauthorized: "Unauthorized ssh connection"
-        control_access: "Intruderrrrrrr!!!!  "
+        control_ftp_unauthorized: "⚠️ Unauthorized ftp connection"
+        control_ram_background: "⚠️ Ram consumption is high, it has exceeded 80%"
+        control_ssh_unauthorized: "⚠️ Unauthorized ssh connection"
+        control_temp_background: "⚠️ The temperatures are high, it has exceeded 90 degrees"
+        control_access: "⚠️ Intruderrrrrrr!!!!  "
         crossepg_installed: "Crossepg installed"
         crossepg_uninstalled: "Uninstall CrossEPG done"
         crossepg_uninstall_error: "You do not have CrossEPG installed, so it is impossible to delete it"
@@ -199,11 +205,14 @@ en:
         info_machineid: "The id of our receiver is"
         info_networkcard: "The network card configuration is"
         info_ram: "RAM usage"
+        info_speedtest_error: "🚫 An error has occurred or the host code is not correct"
+        info_temp: "CPU temperature is:"
         info_top: "Top ten cpu usage"
         info_uptime: "Uptime"
         info_zerotier: "[+] ZEROTIER INFORMATION"
         info_zerotier_notinstalled: "Zerotier is not installed"
         init: "Welcome to Junglebot to control our receiver from telegram, enter /help to see available commands"
+        junglebot_update: "Ya tienes la última versión %{version} instalada"
         next_param: "Give me the value of **%{param}**:"
         new_version: "There is a new version %{version} of Junglebot"
         text_no: "No"
@@ -229,9 +238,9 @@ en:
         restarting: "Rebooting"
         satbox_standy: "Receiver idle"
         satbox_started: "Receiver on"
-        send_msg_error: "Error sending message"
+        send_msg_error: "🚫 Error sending message"
         send_msg_success: "Message sent successfully"
-        send_remote_error: "Error: Only digits from 0 to 9 are allowed"
+        send_remote_error: "🚫 Error: Only digits from 0 to 9 are allowed"
         starting: "Starting"
         stoping: "Stopping"
         streams_notexist: "No streams in progress"
@@ -242,5 +251,5 @@ en:
         updated_at: "Last modification: %{date}" 
         user_connected: "* User logged in: %{user} (%{ip}): %{status}"
         wrong_external_access: "WARNING: Not configured external access"
-        wrong_password: "ERROR: user and password incorrectly configured"
+        wrong_password: "🚫 ERROR: user and password incorrectly configured"
         text_yes: "Yes"

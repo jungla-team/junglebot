@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.1"   
+VERSION="2.5.2"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -35,6 +35,8 @@ alias_desconoidentificacionos = []
 g_autoftp_thread = None
 g_autossh_thread = None
 g_autostream_thread = None
+g_autoram_thread = None
+g_autotemp_thread = None
 
 def execute_os_commands(commands, message = None, background = False):
     from subprocess import PIPE, Popen
@@ -90,7 +92,9 @@ G_CONFIG = {
     'autoftp': '0',
     'locales_path': '/usr/bin/junglebot/locales',
     'locale': 'es',
-    'ga': True
+    'ga': True,
+    'autoram': '0',
+    'autotemp': '0'
 }
 
 G_CONFIG.update({ k.lower(): v.strip().strip('"').strip("'") for k,v in read_config_file(CONFIG_FILE) })
@@ -225,11 +229,21 @@ def execute_command(chat_id, menu_option):
                 send_large_message(chat_id, command_output.strip(), "{} (/{})".format(option.description, option.callback_id()))
             else:
                 next_param = g_current_menu_option.next_param()
-                if (next_param == 'jb_confirm'):
+                if isinstance(next_param, list):
+                    if next_param[0] == JB_BUTTONS:
+                        jb_buttons= next_param[1]()
+                        buttons = []
+                        keyboard = types.InlineKeyboardMarkup()
+                        keyboard.row_width = 2
+                        for b in jb_buttons:
+                            buttons.append(types.InlineKeyboardButton(text=b[1], callback_data="{}_{}".format(JB_BUTTONS,b[0])))
+                        keyboard.add(*buttons)
+                        bot.send_message(chat_id, i18n.t('msg.choose_option'), reply_markup=keyboard)
+                elif (next_param == JB_CONFIRM):
                     keyboard = types.InlineKeyboardMarkup()
                     keyboard.row_width = 2
-                    button1 = types.InlineKeyboardButton(text=i18n.t('msg.text_yes'), callback_data='jb_confirm_si')
-                    button2 = types.InlineKeyboardButton(text=i18n.t('msg.text_no'), callback_data='jb_confirm_no') 
+                    button1 = types.InlineKeyboardButton(text=i18n.t('msg.text_yes'), callback_data="{}_si".format(JB_CONFIRM))
+                    button2 = types.InlineKeyboardButton(text=i18n.t('msg.text_no'), callback_data="{}_no".format(JB_CONFIRM)) 
                     keyboard.add(button1, button2)
                     bot.send_message(chat_id, i18n.t('msg.confirmation'), reply_markup=keyboard)
                 else:
@@ -254,6 +268,11 @@ def execute_command(chat_id, menu_option):
             bot.send_message(chat_id, i18n.t('msg.click_button'), reply_markup=keyboard)
 
 # DECORATORS
+JB_CONFIRM='jb_confirm'
+params_confirmation = [JB_CONFIRM]
+JB_BUTTONS = 'jb_buttons'
+params_buttons = ["jb_buttons"]
+
 def with_confirmation(func):
     def wrapper_with_confirmation(*args, **kwargs):
         result = i18n.t("msg.operation_canceled")
@@ -316,8 +335,9 @@ def callback_menu(call):
     if allowed(call.message):
         try:
             data = call.data
-            if data.startswith('jb_confirm'):
-                value = call.data.split('_')[2]
+            if data.startswith('jb_'):
+                parts = data.split('_')
+                value = data[len("{}_{}_".format(parts[0], parts[1])):]
                 global g_current_menu_option
                 if g_current_menu_option:
                     g_current_menu_option.set_current_param(value)
@@ -525,8 +545,6 @@ def controlacceso_backgroundvti(identificacion):
         if output:
             logger.info(output)
             bot.send_message(identificacion, "\n".join(output))
-        else:
-            logger.info('controlacceso_background - no hay streams intrusos en este momento')
         time.sleep(G_CONFIG['timerbot'])
 
 def ips_autorizadas():
@@ -575,8 +593,6 @@ def controlacceso_background(identificacion):
         if output:
             logger.info(output)
             bot.send_message(identificacion, "\n".join(output))
-        else:
-            logger.info('controlacceso_background - no hay streams intrusos en este momento')
         time.sleep(G_CONFIG['timerbot'])
 
 def controlssh_background():
@@ -591,8 +607,6 @@ def controlssh_background():
         if output:
             logger.info(output)
             bot.send_message(G_CONFIG['chat_id'], "\n".join(output))
-        else:
-            logger.info('controlssh_background - no hay conexiones ssh intrusas en este momento')
         time.sleep(G_CONFIG['timerbot'])
         
 def controlftp_background():
@@ -606,10 +620,25 @@ def controlftp_background():
                 output.append(i18n.t('msg.control_ftp_unauthorized') + " = " + linea) 
         if output:
             logger.info(output)
-            bot.send_message(G_CONFIG['chat_id'], "\n".join(output))
-        else:
-            logger.info('controlftp_background - no hay conexiones ftp intrusas en este momento')
+            bot.send_message(G_CONFIG['chat_id'], output)
         time.sleep(G_CONFIG['timerbot'])   
+
+def controlram_background():
+    while True:
+        ram = info_ram()
+        if int(ram) >= 80:
+            logger.info('controlram_background - ' + i18n.t('msg.control_ram_background'))
+            bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.control_ram_background'))
+        time.sleep(G_CONFIG['timerbot'])
+
+def controltemp_background():
+    while True:
+        temperatura = info_temperatura()
+        logger.info('controltemp_background - temperatura: ' + str(temperatura))
+        if int(temperatura) >= 90:
+            logger.info('controltemp_background - ' + i18n.t('msg.control_temp_background'))
+            bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.control_temp_background'))
+        time.sleep(G_CONFIG['timerbot'])
         
 #INFO BOX
 def info_brand():
@@ -707,6 +736,22 @@ def start_autoftp():
         logger.info("Autoftp iniciado")
         return i18n.t("msg.autoftp_started")
 
+def start_autoram():
+    global g_autoram_thread
+    if G_CONFIG['autoram'] == '1' and not g_autoram_thread:
+        g_autoram_thread = threading.Thread(target=controlram_background)
+        g_autoram_thread.start()
+        logger.info("Autoram iniciado")
+        return i18n.t("msg.autoram_started")
+        
+def start_autotemp():
+    global g_autotemp_thread
+    if G_CONFIG['autotemp'] == '1' and not g_autotemp_thread:
+        g_autotemp_thread = threading.Thread(target=controltemp_background)
+        g_autotemp_thread.start()
+        logger.info("Autotemp iniciado")
+        return i18n.t("msg.autotemp_started")
+        
 # INFO
 def diskSpace():
     p = os.popen("df -h /")
@@ -757,20 +802,20 @@ def system_info():
     output.append("  Used: %s" % diskSpace()[1])
     output.append("  Available: %s" % diskSpace()[2])
     output.append("* RAM")
-    output.append("  %s" % getoutput('cat /proc/meminfo | grep MemTotal'))
-    output.append("  %s" % getoutput('cat /proc/meminfo | grep MemFree'))
-    output.append("  %s" % getoutput('cat /proc/meminfo | grep MemAvailable'))
-    output.append("  %s" % info_ram())
+    output.append("  MemTotal:  %s" % getoutput("free | grep Mem  | awk '{ print $2 }'") + " kb")
+    output.append("  MemFree:  %s" % getoutput("free | grep Mem  | awk '{ print $4 }'") + " kb")
+    output.append("  MemAvailable:  %s" % getoutput("free | grep Mem  | awk '{ print $7 }'") + " kb")
+    output.append(i18n.t('msg.info_ram') + ": " + str(round(info_ram(),2)) + "%")
     output.append("* CPU")
     output.append("  %s" % info_cpu())
-    output.append("  %s" % info_temperatura())
+    output.append("  %s" % i18n.t('msg.info_temp') + " " + str(info_temperatura()) + "°C")
     return "\n".join(output)
 
 def info_ram():
-    memAvailable = float(getoutput("cat /proc/meminfo | grep MemAvailable | awk '{ print $2 }'"))
-    memTotal = float(getoutput("cat /proc/meminfo | grep MemTotal | awk '{ print $2 }'"))
+    memAvailable = float(getoutput("free | grep Mem | awk '{ print $7 }'"))
+    memTotal = float(getoutput("free | grep Mem | awk '{ print $2 }'"))
     porcentajeMemoria = (memAvailable / memTotal) * 100
-    return  i18n.t('msg.info_ram') + ": " + str(round(porcentajeMemoria,2)) + "%"
+    return porcentajeMemoria
 
 def info_cpu():
     line = getoutput("grep 'cpu ' /proc/stat | awk '{print($2+$4)*100/($2+$4+$5)}'")
@@ -804,14 +849,38 @@ def info_ip():
 def info_tarjetared():
     line = getoutput("ethtool eth0").split("Speed: ")[1]
     return i18n.t('msg.info_networkcard') + ":\n" + line
-
-def info_speedtest():
+    
+def list_speedtest():
     distro = enigma_distro()
     if (distro == "VTi"):
-        velocidad = getoutput("/opt/bin/speedtest-cli --share --simple | awk 'NR==4' | awk '{print $3}'")
+        lista = getoutput("/opt/bin/speedtest-cli --list")
     else:
-        velocidad = getoutput("/usr/bin/speedtest-cli --share --simple | awk 'NR==4' | awk '{print $3}'")
-    bot.send_photo(G_CONFIG['chat_id'], photo=velocidad)
+        lista = getoutput("/usr/bin/speedtest-cli --list")
+    return lista
+
+def info_speedtest_options():
+    result = []
+    items = []
+    for item in list_speedtest().split('\n')[1:]:
+        m = re.search('(\d+)\)(.+)\(.+\)\s\[(\d+.\d+)', item)
+        items.append((m.group(1), m.group(2), m.group(3)))
+    seen = set()
+    seen_add = seen.add
+    items = [i for i in items if i[2] not in seen and not seen_add(i[2])]
+    for i in items[:10]:
+        result.append((i[0], "{} [{} km]".format(i[1], i[2])))
+    return result
+
+def info_speedtest(hostspeed):
+    distro = enigma_distro()
+    try:
+        if (distro == "VTi"):
+            velocidad = getoutput("/opt/bin/speedtest-cli --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'")
+        else:
+            velocidad = getoutput("/usr/bin/speedtest-cli --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'")
+        bot.send_photo(G_CONFIG['chat_id'], photo=velocidad)
+    except:
+        return i18n.t('msg.info_speedtest_error')
 
 def network_status():
     output = ["* Hostname: {}".format(info_hostname())]
@@ -823,9 +892,7 @@ def network_status():
     
 def info_temperatura():
     temperatura = ""
-
     tempinfo = ""
-
     if path.exists('/proc/stb/sensors/temp0/value'):
 		f = open('/proc/stb/sensors/temp0/value', 'r')
 		tempinfo = f.read()
@@ -872,8 +939,8 @@ def info_temperatura():
     if tempinfo and int(tempinfo.replace('\n', '')) > 0:
 		mark = str('\xc2\xb0')
 		temperatura = tempinfo.replace('\n', '').replace(' ','') + mark + "C\n"
-		
-    return "La temperatura CPU es " + temperatura                       
+    temperatura = int(filter(str.isdigit, temperatura))
+    return temperatura                       
 
 def estado_zerotier():
     var_zerotier = getoutput("which /usr/sbin/zerotier-cli")
@@ -982,7 +1049,7 @@ def cotillearamigos():
     output = []
     distro = enigma_distro()
     ### Sacar streams todas las imagenes menos VTI
-    if distro == "openatv" or distro == "openpli" or distro == "openspa" or distro == "teamblue":
+    if distro != VTI:
         j = webif_api("about?")
         ip_deco = obtener_ip_deco()
         if j['info']['streams']:
@@ -1020,10 +1087,18 @@ def cotillearamigos():
         output.append(i18n.t('msg.streams_notexist'))
     return "\n".join(output)
 
-def amigos():
+def stream_amigos():
     fichero = "/usr/bin/junglebot/amigos.cfg"
     if os.path.isfile(fichero):
-        return execute_os_commands("cat " + fichero)
+        return execute_os_commands("cat " + fichero).split('\n')
+    else:
+        return []
+
+def amigos():
+    fichero = "/usr/bin/junglebot/amigos.cfg"
+    items = stream_amigos()
+    if len(items) > 0:
+        return '\n'.join(items)
     else:
         return i18n.t('msg.file_notfound', file=fichero)
 
@@ -1058,12 +1133,10 @@ def start_autostream():
             g_autostream_thread = threading.Thread(target=controlacceso_backgroundvti, args=(G_CONFIG['chat_id'],))
             g_autostream_thread.start()
             logger.info("Autostream iniciado")
-        elif distro == "openatv" or distro == "openpli" or distro == "openspa":
+        else:
             g_autostream_thread = threading.Thread(target=controlacceso_background, args=(G_CONFIG['chat_id'],))
             g_autostream_thread.start()
             logger.info("Autostream iniciado")
-        else:
-            logger.info("No puedo sacar los streams de esta imagen. Cambia de imagen a una soportada")
 
 # CCCAM
 def addlinea_cccam(cline):
@@ -1159,7 +1232,7 @@ def oscam_config_dir():
 
     return oscamdir
 
-def oscam_init_command():
+def emu_init_command():
     distro = enigma_distro()
     vti_script = "/etc/init.d/current_cam.sh"
     openspa_script = getoutput("ls -t /usr/script/Oscam* | head -1")
@@ -1202,18 +1275,6 @@ def cccam_status():
             output.append("\n" + i18n.t('msg.emu_info_sharing') + ":\n")
             output.append(execute_os_commands("cat " + archivo))
         return "\n".join(output)
-
-def cccam_version():
-    binario_cccam = '/usr/bin/CCcam'
-    if os.path.exists(binario_cccam):
-        daemon_cccam = '/etc/init.d/softcam.CCcam'
-        if os.path.exists(daemon_cccam):
-            cccam_version = getoutput(i18n.t("msg.oscam_version", version=daemon_cccam))
-        else:
-            cccam_version = i18n.t('msg.oscam_version_error')
-    else:
-        cccam_version = i18n.t('msg.cccam_not_installed')
-    return cccam_version
     
 def emucam_status():
     if cccam_get('servers'):
@@ -1250,12 +1311,16 @@ def oscam_status():
                 table = True
             if line.find('</tbody>') >= 0:
                 table = False
+            if line.find('<LI><B>OSCam:</B>') >= 0:
+                parts = re.split('[<>]', line)
+                version = "Version OSCam {}:{}\n".format(parts[6].strip(), parts[10].strip())
+        output.insert(0, version)
         output.append(estado_clines_oscam())
         output.append(oscam_info())
         return "\n".join(output) 
 
 def oscam_start():
-    command = oscam_init_command()
+    command = emu_init_command()
     if command:
         line = execute_os_commands("{} start".format(command)) or i18n.t("msg.starting")
         time.sleep(5)
@@ -1265,7 +1330,7 @@ def oscam_start():
     return line
 
 def oscam_stop():
-    command = oscam_init_command()
+    command = emu_init_command()
     if command:
         line = execute_os_commands("{} stop".format(command)) or i18n.t("msg.stoping")
         time.sleep(5)
@@ -1275,22 +1340,13 @@ def oscam_stop():
     return line
 
 def oscam_restart():
-    command = oscam_init_command()
+    command = emu_init_command()
     if command:
         line = execute_os_commands("{} restart".format(command)) or i18n.t('msg.restarting')
         line += "\n" + emucam_status()
     else:
         line = i18n.t("msg.emu_not_active")
     return line
-
-def oscam_version():
-    response = oscam_get('status.html')
-    if not response:
-        oscam_version = i18n.t('msg.oscam_conn_error')
-    else:
-        oscam_file_version = '/tmp/.oscam/oscam.version'
-        oscam_version = getoutput("grep -i 'Version:' {} | cut -d':' -f2".format(oscam_file_version)).strip()
-    return oscam_version
 
 @with_confirmation
 def install_oscam_conclave():
@@ -1340,61 +1396,50 @@ def force_autooscam():
     else:
         return i18n.t('msg.oscam_conclave_error')
 
-def show_active_emu():
-    command = oscam_init_command()
-    if command:    
-        filename_softcam_activa = getoutput("readlink -f " + oscam_init_command())
-        logger.info("Emu activa: " + filename_softcam_activa)
-        if not filename_softcam_activa or not os.path.exists(filename_softcam_activa):
-           softcam_activa = i18n.t('msg.emu_not_found')
-        return os.path.basename(filename_softcam_activa)
-    else:
-        softcam_activa = i18n.t('msg.emu_not_found')
-        return softcam_activa
-        
-def list_installed_emus():
-    distro = enigma_distro()
-    vti_scripts = getoutput("ls /usr/script/*.sh | wc -l")
-    openspa_scripts = getoutput("ls /usr/script/*cam.sh | wc -l")
-    all_scripts = getoutput("ls /etc/init.d/softcam.* | grep -v None | wc -l")
-    if vti_scripts > 0 and distro == VTI:
-        listado_emus = getoutput("ls /usr/script/*.sh | xargs -n 1 basename")
-    elif openspa_scripts > 0 and distro == "openspa":
-        listado_emus = getoutput("ls /usr/script/*cam.sh | xargs -n 1 basename")
-    elif all_scripts > 0 and (distro == "openatv" or distro == "openpli"):
-        listado_emus = getoutput("ls /etc/init.d/softcam.* | grep -v None | xargs -n 1 basename")
-    else:
-        listado_emus = i18n.t('msg.emu_not_installed')
-    return listado_emus
+def get_active_emu():
+    active_emu = getoutput("readlink -f {}".format(emu_init_command())).split('/')[-1]
+    return active_emu
 
-def active_emu(emuladora):
+def emu_list():
     distro = enigma_distro()
-    all_script = "/etc/init.d/softcam"
+    if distro == VTI:
+        command = "ls /usr/script/*.sh"
+    elif distro == "openspa":
+        command = "ls /usr/script/*cam.sh"
+    else: #(distro == "openatv" or distro == "openpli"):
+        command = "ls /etc/init.d/softcam.*"
+    output = getoutput("{} 2> /dev/null | grep -v None".format(command)).split()
+    emus = map(lambda x: x.split('/')[-1], output)
+    return emus
+
+def list_installed_emus():
+    emus = emu_list()
+    active_emu = get_active_emu()
+    emus = map(lambda x: "* {}".format(x) if x == active_emu else x, emus)
+    return '\n'.join(emus)
+
+def set_active_emu(emuladora):
+    distro = enigma_distro()
+    script = "/etc/init.d/softcam"
+    new_emu = "/etc/init.d/" + emuladora
+
     if (distro == "openatv" or distro == "openpli" or distro == "teamblue"):
-        new_emu = "/etc/init.d/" + emuladora
-        if os.path.exists(new_emu):
-            oscam_stop()
-            time.sleep(5)
-            commands = new_emu + " start" "; ln -sf " + new_emu + " " + (all_script)
-            execute_os_commands(commands)
-            return i18n.t('msg.emu_active')
-        else:
-            return i18n.t('msg.emu_notification')
-    
-    if (distro == VTI):
+        pass
+    elif (distro == VTI):
         new_emu = "/usr/script/" + emuladora
-        vti_script = "/etc/init.d/current_cam.sh"
-        if os.path.exists(new_emu):
-            oscam_stop()
-            time.sleep(5)
-            commands = new_emu + " start" "; ln -sf " + new_emu + " " + (vti_script)
-            execute_os_commands(commands)
-            return i18n.t('msg.emu_active')
-        else:
-            return i18n.t('msg.emu_notification')     
+        script = "/etc/init.d/current_cam.sh"
     else:
         return i18n.t('msg.emu_image_not_found') + distro
-        
+    if os.path.exists(new_emu):
+        oscam_stop()
+        time.sleep(5)
+        commands = "{} start; ln -sf {} {}".format(new_emu, new_emu, script)
+        execute_os_commands(commands)
+        result = i18n.t('msg.emu_active')  
+    else:
+        result = i18n.t('msg.emu_notification')   
+    return "{}\n{}".format(result, list_installed_emus())
+  
 # JUNGLESCRIPT
 @with_confirmation
 def junglescript_install():    
@@ -1466,8 +1511,9 @@ def junglescript_fecha_picons():
 
 def fav_bouquet():
     fichero = "/etc/enigma2/fav_bouquets"
-    if os.path.isfile(fichero):
-        return execute_os_commands("cat " + fichero)
+    bouquets = junglescript_fav_bouquets()
+    if len(bouquets) > 0:
+        return '\n'.join(bouquets)
     else:
         return i18n.t('msg.file_notfound', file=fichero)
         
@@ -1475,7 +1521,15 @@ def junglescript_addbouquet(bouquet):
     with open ('/etc/enigma2/fav_bouquets','a') as f:
         f.write(bouquet + "\n")
     return fav_bouquet()
-	
+
+def junglescript_fav_bouquets():
+    fichero = "/etc/enigma2/fav_bouquets"
+    items = execute_os_commands("cat " + fichero).split('\n')
+    if len(items) > 0:
+        return items
+    else:
+        return []
+        
 def junglescript_delbouquet(bouquet):
     lines = None
     with open('/etc/enigma2/fav_bouquets', 'r') as file:
@@ -1500,7 +1554,7 @@ def junglebot_update():
         command = "/usr/bin/opkg install --force-reinstall --force-overwrite /tmp/{package} &".format(package=package)
         os.system(command)
     else:
-        bot.send_message(G_CONFIG['chat_id'], "Ya tienes la última versión " + VERSION + "instalada")
+        bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.junglebot_update', version=VERSION))
 
 @with_confirmation		
 def junglebot_restart():
@@ -1705,8 +1759,17 @@ def desbloquear_ip(desbloquear):
     execute_os_commands(commands)
     return i18n.t('msg.geo_unblock_ip')
     
+def rejected_ips():
+    lines = getoutput("route -n")
+    rejected_ips = []
+    for line in lines.split('\n'):
+        items = line.split()
+        if len(items) > 6 and items[3].startswith('!'):
+            rejected_ips.append(items[0])
+    return rejected_ips
+
 def mostrar_ip():
-    return getoutput("route -n")
+    return '\n'.join(rejected_ips())
 
 @with_confirmation 
 def delete_epg_dat():
@@ -1767,8 +1830,6 @@ def controlftp():
         return "\n".join(output)
     else:
         return i18n.t('msg.ftp_conn_notfound')       
-
-params_confirmation = ["jb_confirm"]
 
 @with_confirmation
 def conn_autoftp():
@@ -1840,13 +1901,13 @@ menu_info.add_option(MenuOption(name = "top", description = i18n.t('menu.info.to
 menu_network = MenuOption(name = 'red', description = i18n.t('menu.network.title'))
 menu_network.add_option(MenuOption(name = "status", description = i18n.t('menu.network.status'), command = network_status))
 menu_network.add_option(MenuOption(name = "conexiones", description = i18n.t('menu.network.connections'), command = info_conexiones))
-menu_network.add_option(MenuOption(name = "speedtest", description = i18n.t('menu.network.speedtest'), command = info_speedtest))
+menu_network.add_option(MenuOption(name = "speedtest", description = i18n.t('menu.network.speedtest'), command = info_speedtest, params=[[JB_BUTTONS, lambda: info_speedtest_options()]]))
 menu_network.add_option(MenuOption(name = "check_duckdns_ip", description = i18n.t('menu.network.check_duckdns_ip'), command = info_check_duckdns_ip, params =["host"]))
 menu_network.add_option(MenuOption(name = "check_open_port", description = i18n.t('menu.network.check_open_port'), command = info_check_open_port, params =["host", "port"]))
 menu_network.add_option(MenuOption(name = "zerotier", description = i18n.t('menu.network.zerotier'), command = estado_zerotier))
 menu_network.add_option(MenuOption(name = "geolocalizar_ip", description = "Geolocalizar IP", command = geolocalizar_ip, params=['geolocalizar']))
 menu_network.add_option(MenuOption(name = "bloquear_ip", description = "Bloquear IP", command = bloquear_ip, params=['bloquear']))
-menu_network.add_option(MenuOption(name = "desbloquear_ip", description = "Desbloquear IP", command = desbloquear_ip, params=['desbloquear']))
+menu_network.add_option(MenuOption(name = "desbloquear_ip", description = "Desbloquear IP", command = desbloquear_ip, params=[[JB_BUTTONS, lambda: zip(rejected_ips(), rejected_ips())]]))
 menu_network.add_option(MenuOption(name = "ver_ip_bloqueadas", description = "Mostrar ip Bloqueadas", command = mostrar_ip))
 
 
@@ -1869,7 +1930,7 @@ menu_stream = MenuOption(name = 'stream', description = i18n.t('menu.stream.titl
 menu_stream.add_option(MenuOption(name = "ver", description = i18n.t('menu.stream.show'), command = cotillearamigos))
 menu_stream.add_option(MenuOption(name = "amigos", description = i18n.t('menu.stream.friends'), command = amigos))
 menu_stream.add_option(MenuOption(name = "addamigo", description = i18n.t('menu.stream.add_friend'), command = stream_addamigo, params=['ip amigo']))
-menu_stream.add_option(MenuOption(name = "delamigo", description = i18n.t('menu.stream.delete_friend'), command = stream_delamigo, params=['ip amigo']))
+menu_stream.add_option(MenuOption(name = "delamigo", description = i18n.t('menu.stream.delete_friend'), command = stream_delamigo, params=[[JB_BUTTONS, lambda: zip(stream_amigos(), stream_amigos())]]))
 menu_stream.add_option(MenuOption(name = "autocheck", description = i18n.t('menu.stream.autocheck'), command = stream_autocheck, params=params_confirmation))
 menu_stream.add_option(MenuOption(name = "stopstream", description = i18n.t('menu.stream.stop_streamproxy'), command = command_stopstream))
 
@@ -1877,7 +1938,7 @@ menu_conexiones = MenuOption(name = 'conexiones', description = i18n.t('menu.con
 menu_conexiones.add_option(MenuOption(name = "config", description = i18n.t('menu.connections.config'), command = lambda : config("/usr/bin/junglebot/parametros.py")))
 menu_conexiones.add_option(MenuOption(name = "set_config_parameters", description = i18n.t('menu.connections.set_config'), command = set_value_parameters, params =['clave', 'valor']))
 menu_conexiones.add_option(MenuOption(name = "addamigo", description = i18n.t('menu.connections.add_friend'), command = stream_addamigo, params=['ip amigo']))
-menu_conexiones.add_option(MenuOption(name = "delamigo", description = i18n.t('menu.connections.del_friend'), command = stream_delamigo, params=['ip amigo']))
+menu_conexiones.add_option(MenuOption(name = "delamigo", description = i18n.t('menu.connections.del_friend'), command = stream_delamigo, params=[[JB_BUTTONS, lambda: zip(stream_amigos(), stream_amigos())]]))
 menu_conexiones.add_option(MenuOption(name = "amigos", description = i18n.t('menu.connections.friends'), command = amigos))
 menu_conexiones.add_option(MenuOption(name = "ssh", description = i18n.t('menu.connections.ssh'), command = controlssh))
 menu_conexiones.add_option(MenuOption(name = "ftp", description = i18n.t('menu.connections.ftp'), command = controlftp))
@@ -1886,20 +1947,17 @@ menu_conexiones.add_option(MenuOption(name = "autoftp", description = i18n.t('me
 
 menu_emu = MenuOption(name='emu', description= i18n.t('menu.emu.title'), info = 'https://jungle-team.com/conclave-oscam-autoupdate/')
 menu_emu.add_option(MenuOption(name = "status", description = i18n.t('menu.emu.status'), command = emucam_status))
+menu_emu.add_option(MenuOption(name = "list_emus", description = "Ver emus instaladas", command = list_installed_emus))
 menu_emu.add_option(MenuOption(name = "addlineacccam", description = i18n.t('menu.emu.addlinecccam'), command = addlinea_cccam, params=['clinea (C: servidor puerto usuario password)']))
 menu_emu.add_option(MenuOption(name = "addlineoscam", description = i18n.t('menu.emu.addlineoscam'), command = addlinea_oscam, params=['protocolo', 'clinea (C: servidor puerto usuario password)']))
 menu_emu.add_option(MenuOption(name = "start", description = i18n.t('menu.emu.start'), command = oscam_start))
 menu_emu.add_option(MenuOption(name = "stop", description = i18n.t('menu.emu.stop'), command = oscam_stop))
 menu_emu.add_option(MenuOption(name = "restart", description = i18n.t('menu.emu.restart'), command = oscam_restart))
-menu_emu.add_option(MenuOption(name = "oscam_version", description = i18n.t('menu.emu.oscam_version'), command = oscam_version))
-menu_emu.add_option(MenuOption(name = "cccam_version", description = i18n.t('menu.emu.cccam_version'), command = cccam_version))
 menu_emu.add_option(MenuOption(name = "install_oscam_conclave", description = i18n.t('menu.emu.install_conclave'), command = install_oscam_conclave, params=params_confirmation))
 menu_emu.add_option(MenuOption(name = "update_autooscam", description = i18n.t('menu.emu.update_autooscam'), command = update_autooscam, params=params_confirmation))
 menu_emu.add_option(MenuOption(name = "run_autooscam", description = i18n.t('menu.emu.run_autooscam'), command = run_autooscam, params=params_confirmation))
 menu_emu.add_option(MenuOption(name = "force_autooscam", description = i18n.t('menu.emu.force_autooscam'), command = force_autooscam, params=params_confirmation))
-menu_emu.add_option(MenuOption(name = "show_active_emu", description = "Ver emu activa", command = show_active_emu))
-menu_emu.add_option(MenuOption(name = "list_emus", description = "Ver emus instaladas", command = list_installed_emus))
-menu_emu.add_option(MenuOption(name = "change_active_emu", description = "Activar emu", command = active_emu, params=['emuladora']))
+menu_emu.add_option(MenuOption(name = "change_active_emu", description = "Activar emu", command = set_active_emu, params=[[JB_BUTTONS, lambda: zip(emu_list(), emu_list())]]))
 
 menu_pystreamy = MenuOption(name = 'pystreamy', description = i18n.t('menu.pystreamy.title'), info = 'https://gitlab.com/amoyse/pystreamy/')
 menu_pystreamy.add_option(MenuOption(name = "status", description = i18n.t('menu.pystreamy.status'), command = pystreamy_status))
@@ -1941,7 +1999,7 @@ menu_junglescript.add_option(MenuOption(name = "log", description = i18n.t('menu
 menu_junglescript.add_option(MenuOption(name = "ver_fecha_lista", description = i18n.t('menu.junglescript.channel_list'), command = junglescript_fecha_listacanales))
 menu_junglescript.add_option(MenuOption(name = "ver_fecha_picons", description = i18n.t('menu.junglescript.picon_list'), command = junglescript_fecha_picons))
 menu_junglescript.add_option(MenuOption(name = "addbouquet", description = i18n.t('menu.junglescript.add_bouquet'), command = junglescript_addbouquet, params=['bouquet']))
-menu_junglescript.add_option(MenuOption(name = "delbouquet", description = i18n.t('menu.junglescript.del_bouquet'), command = junglescript_delbouquet, params=['bouquet']))
+menu_junglescript.add_option(MenuOption(name = "delbouquet", description = i18n.t('menu.junglescript.del_bouquet'), command = junglescript_delbouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_fav_bouquets(), junglescript_fav_bouquets())]]))
 
 menu_grabaciones = MenuOption(name = 'grabaciones', description = i18n.t('menu.records.title'))
 menu_grabaciones.add_option(MenuOption(name = "listado_timers", description = i18n.t('menu.records.list'), command = list_recording_timers))
@@ -1985,6 +2043,8 @@ if __name__ == "__main__":
         start_autostream()
         start_autossh()
         start_autoftp()
+        start_autoram()
+        start_autotemp()
         fill_command_list()
     except Exception as e:
         logger.exception(e)

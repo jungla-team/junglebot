@@ -14,5 +14,9 @@ AUTOSTREAM=0
 AUTOSSH=0 
 # Se lanza el autocheckftp cada vez que arranca el bot. Activado 1, no activado 0
 AUTOFTP=0 
+# Se lanza el autocheckram cada vez que arranca el bot. Activado 1, no activado 0
+AUTORAM=0
+# Se lanza el autochecktemp cada vez que arranca el bot. Activado 1, no activado 0
+AUTOTEMP=0
 # Variable idioma español (es), inglés (en), alemán (de)
 LOCALE=es
