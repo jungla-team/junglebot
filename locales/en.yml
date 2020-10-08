@@ -164,6 +164,7 @@ en:
         command_upgrade: "Receiver packages are updated, have patience when finished it will restart"
         command_wakeup: "Waking the receiver from sleep mode"
         confirmation: "Are you sure?"
+        control_flash_background: "⚠️ The flash disk has exceeded 90% occupancy"
         control_ftp_unauthorized: "⚠️ Unauthorized ftp connection"
         control_ram_background: "⚠️ Ram consumption is high, it has exceeded 80%"
         control_ssh_unauthorized: "⚠️ Unauthorized ssh connection"

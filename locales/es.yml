@@ -164,6 +164,7 @@ es:
         command_upgrade: "Se actualiza paquetes del receptor, tenga paciendia al terminar se reiniciara"
         command_wakeup: "Despertando del modo reposo al receptor"
         confirmation: "¿Estas seguro?"
+        control_flash_background: "⚠️ El disco flash, ha superado el 90% de ocupación"
         control_ftp_unauthorized: "⚠️ Conexion ftp no autorizada"
         control_ram_background: "⚠️ El consumo de ram es elevado, se ha superado el 80% de uso"
         control_ssh_unauthorized: "⚠️ Conexion ssh no autorizada"

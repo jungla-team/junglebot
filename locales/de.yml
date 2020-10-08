@@ -164,6 +164,7 @@ de:
         command_upgrade: "Rezeptor paketen werden aktualisiert, bitte haben sie geduld. Im anschluss wird es neugestartet"
         command_wakeup: "Rezeptor wird eingeschaltet"
         confirmation: "¿Bist du sicher?"
+        control_flash_background: "⚠️ El disco flash, ha superado el 90% de ocupación"
         control_ftp_unauthorized: "Nicht autorisierte FTP-Verbindung"
         control_ram_background: "⚠️ El consumo de ram es elevado ha superado el 80%"
         control_ssh_unauthorized: "⚠️ Nicht autorisierte SSH-Verbindung"

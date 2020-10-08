@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.3"   
+VERSION="2.5.4"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -37,6 +37,7 @@ g_autossh_thread = None
 g_autostream_thread = None
 g_autoram_thread = None
 g_autotemp_thread = None
+g_autoflash_thread = None
 
 def execute_os_commands(commands, message = None, background = False):
     from subprocess import PIPE, Popen
@@ -94,7 +95,8 @@ G_CONFIG = {
     'locale': 'es',
     'ga': True,
     'autoram': '0',
-    'autotemp': '0'
+    'autotemp': '0',
+    'autoflash': '0'
 }
 
 G_CONFIG.update({ k.lower(): v.strip().strip('"').strip("'") for k,v in read_config_file(CONFIG_FILE) })
@@ -635,10 +637,19 @@ def controlram_background():
 def controltemp_background():
     while True:
         temperatura = info_temperatura()
-        logger.info('controltemp_background - temperatura: ' + str(temperatura))
         if int(temperatura) >= 90:
             logger.info('controltemp_background - ' + i18n.t('msg.control_temp_background'))
             bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.control_temp_background'))
+        time.sleep(G_CONFIG['timerbot'])
+
+def controlflash_background():
+    while True:
+        temp = len(diskSpace()[3])
+        espacio_ocupado = diskSpace()[3]
+        espacio_ocupado = espacio_ocupado[:temp - 1]
+        if int(espacio_ocupado) >= 90:
+            logger.info('controlflash_background -' + i18n.t('msg.control_flash_background'))
+            bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.control_flash_background'))
         time.sleep(G_CONFIG['timerbot'])
         
 #INFO BOX
@@ -752,6 +763,14 @@ def start_autotemp():
         g_autotemp_thread.start()
         logger.info("Autotemp iniciado")
         return i18n.t("msg.autotemp_started")
+
+def start_autoflash():
+    global g_autoflash_thread
+    if G_CONFIG['autoflash'] == '1' and not g_autoflash_thread:
+        g_autoflash_thread = threading.Thread(target=controlflash_background)
+        g_autoflash_thread.start()
+        logger.info("Autoflash iniciado")
+        return i18n.t("msg.autoflash_started")
         
 # INFO
 def diskSpace():
@@ -940,7 +959,8 @@ def info_temperatura():
     if tempinfo and int(tempinfo.replace('\n', '')) > 0:
 		mark = str('\xc2\xb0')
 		temperatura = tempinfo.replace('\n', '').replace(' ','') + mark + "C\n"
-    temperatura = int(filter(str.isdigit, temperatura))
+    if temperatura:
+        temperatura = int(filter(str.isdigit, temperatura))
     return temperatura                       
 
 def estado_zerotier():
@@ -2037,7 +2057,7 @@ if __name__ == "__main__":
     try:
         logger.info('junglebot esta funcionando...' + VERSION)
         send_large_message(G_CONFIG['chat_id'], i18n.t('msg.boot_info') + VERSION)
-        ga('system', enigma_version())
+        ga('system', enigma_distro())
         ga('version', VERSION)
         ga('locale', G_CONFIG['locale'])
         check_version()
@@ -2046,6 +2066,7 @@ if __name__ == "__main__":
         start_autoftp()
         start_autoram()
         start_autotemp()
+        start_autoflash()
         fill_command_list()
     except Exception as e:
         logger.exception(e)

@@ -1,8 +1,14 @@
 # Changelog
 
+## [2.5.4] - 08/10/2020
+
+- Añadido parámetro AUTOFLASH para que envíe aviso si se supera el 90% de ocupación en la FLASH
+- Corrección de errores
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-254-10-08
+
 ## [2.5.3] - 05/10/2020 
 
-- Correción de errores
+- Corrección de errores
 - Para más info consultar: https://telegra.ph/Nueva-version-junglebot-253-10-05
 
 ## [2.5.2] - 05/10/2020 
