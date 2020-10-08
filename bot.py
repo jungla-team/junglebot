@@ -1564,6 +1564,7 @@ def junglescript_delbouquet(bouquet):
 #JUNGLEBOT
 @with_confirmation 
 def junglebot_update():
+    check_version()
     if new_version == True:
         distro = enigma_distro()
         if distro == VTI:
