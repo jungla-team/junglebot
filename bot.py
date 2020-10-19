@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.4"   
+VERSION="2.5.5"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -363,7 +363,7 @@ def check_version():
     n_version_github = version_github.replace(".","")
     if n_version_github > n_VERSION:
         new_version = True
-        logger.info('Existe nueva versión de Junglebot ' + version_github)
+        logger.info('Existe nueva versión de Junglebot {}'.format(version_github))
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.new_version', version=version_github))
     execute_os_commands("rm -f /tmp/bot.py")
     
@@ -895,9 +895,9 @@ def info_speedtest(hostspeed):
     distro = enigma_distro()
     try:
         if (distro == "VTi"):
-            velocidad = getoutput("/opt/bin/speedtest-cli --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'")
+            velocidad = getoutput("/opt/bin/speedtest-cli --share --simple --server {} | awk 'NR==4' | awk '{print $3}'").format(hostspeed)
         else:
-            velocidad = getoutput("/usr/bin/speedtest-cli --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'")
+            velocidad = getoutput("/usr/bin/speedtest-cli --share --simple --server {} | awk 'NR==4' | awk '{print $3}'").format(hostspeed)
         bot.send_photo(G_CONFIG['chat_id'], photo=velocidad)
     except:
         return i18n.t('msg.info_speedtest_error')
@@ -1493,6 +1493,16 @@ def junglescript_channels():
             """
     return execute_os_commands(commands)
 
+@with_confirmation
+def junglescript_picons():
+    picons_act = buscar_fich_act_picons()
+    if os.path.exists(picons_act):
+        commands = """
+                rm -f {}
+                /usr/bin/enigma2_pre_start.sh
+                """.format(picons_act)
+    return execute_os_commands(commands)
+    
 def junglescript_fecha_listacanales():
     listacanales_act = "/etc/enigma2/actualizacion"
     if os.path.exists(listacanales_act): 
@@ -1797,7 +1807,7 @@ def mostrar_ip():
 def delete_epg_dat():
     epg_dat = find_epg_dat()
     if os.path.exists(epg_dat):
-        commands = "rm -f " + epg_dat + "; killall -9 enigma2;"
+        commands = "rm -f {}; killall -9 enigma2;".format(epg_dat)
         execute_os_commands(commands)
         salida = i18n.t('msg.file_erased', file=epg_dat)         
     else:        
@@ -1809,7 +1819,7 @@ def remove_epgimport():
     epgimport = "enigma2-plugin-extensions-epgimport"
     appli_epgimport = getoutput("opkg list-installed | grep " + epgimport).strip()
     if appli_epgimport:
-        command = "opkg remove " + epgimport
+        command = "opkg remove {}".format(epgimport)
         execute_os_commands(command)
         salida = i18n.t('msg.epgimport_uninstalled')
     else:
@@ -1821,7 +1831,7 @@ def remove_crossepg():
     crossepg = "enigma2-plugin-systemplugins-crossepg"
     appli_crossepg = getoutput("opkg list-installed | grep " + crossepg).strip()
     if appli_crossepg:
-        command = "opkg remove " + crossepg
+        command = "opkg remove {}".format(crossepg)
         execute_os_commands(command)
         salida = i18n.t('msg.crossepg_uninstalled')
     else:
@@ -2017,6 +2027,7 @@ menu_junglescript.add_option(MenuOption(name = "install", description = i18n.t('
 menu_junglescript.add_option(MenuOption(name = "uninstall", description = i18n.t('menu.junglescript.uninstall'), command = junglescript_uninstall, params=params_confirmation))
 menu_junglescript.add_option(MenuOption(name = "run", description = i18n.t('menu.junglescript.run'), command = junglescript_run, params=params_confirmation))
 menu_junglescript.add_option(MenuOption(name = "force_channels", description = i18n.t('menu.junglescript.force_channels'), command = junglescript_channels, params=params_confirmation))
+menu_junglescript.add_option(MenuOption(name = "force_picons", description = i18n.t('menu.junglescript.force_picons'), command = junglescript_picons, params=params_confirmation))
 menu_junglescript.add_option(MenuOption(name = "log", description = i18n.t('menu.junglescript.log'), command = junglescript_log))
 menu_junglescript.add_option(MenuOption(name = "ver_fecha_lista", description = i18n.t('menu.junglescript.channel_list'), command = junglescript_fecha_listacanales))
 menu_junglescript.add_option(MenuOption(name = "ver_fecha_picons", description = i18n.t('menu.junglescript.picon_list'), command = junglescript_fecha_picons))
