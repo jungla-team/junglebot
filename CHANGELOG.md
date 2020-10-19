@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.5.5] - 19/10/2020
+
+- Añadida opción para poder forzar la actualización de picons /junglescript_force_picons
+- Corrección de errores
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-255-10-19
+
 ## [2.5.4] - 08/10/2020
 
 - Añadido parámetro AUTOFLASH para que envíe aviso si se supera el 90% de ocupación en la FLASH
