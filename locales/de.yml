@@ -83,6 +83,7 @@ de:
             uninstall: JungleScript Desinstalieren 
             run: JungleScript ausführen
             force_channels: Aktualisieren Kanalliste
+            force_picons: Forzar update picons
             log: JungleScript Log sehen
             channel_list: Siehe Datum der Kanalliste
             picon_list: Siehe Datum der Picons

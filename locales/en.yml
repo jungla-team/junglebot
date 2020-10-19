@@ -83,6 +83,7 @@ en:
             uninstall: Uninstall JungleScript
             run: Run JungleScript
             force_channels: Force update channel list
+            force_picons: Force update picons
             log: Show JungleScript log
             channel_list: Show channel list date
             picon_list: Show picons date

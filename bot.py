@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.5"   
+VERSION="2.5.6"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
