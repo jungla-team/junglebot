@@ -1,6 +1,11 @@
 # Changelog
 
-## [2.5.5] - 19/10/2020
+## [2.5.7] - 19/10/2020
+
+- Corrección de errores
+- Para más info consultar:https://telegra.ph/Nueva-version-junglebot-257-10-20
+
+## [2.5.6] - 19/10/2020
 
 - Corrección de errores
 - Para más info consultar: https://telegra.ph/Nueva-version-junglebot-256-10-19

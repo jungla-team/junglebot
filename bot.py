@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.6"   
+VERSION="2.5.7"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -834,7 +834,8 @@ def system_info():
 def info_ram():
     memAvailable = float(getoutput("free | grep Mem | awk '{ print $7 }'"))
     memTotal = float(getoutput("free | grep Mem | awk '{ print $2 }'"))
-    porcentajeMemoria = (memAvailable / memTotal) * 100
+    menusada = float(getoutput("free | grep Mem | awk '{ print $3 }'"))
+    porcentajeMemoria = (menusada / memTotal) * 100
     return porcentajeMemoria
 
 def info_cpu():
