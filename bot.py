@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.7"   
+VERSION="2.5.8"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -896,13 +896,13 @@ def info_speedtest(hostspeed):
     distro = enigma_distro()
     try:
         if (distro == "VTi"):
-            velocidad = getoutput("/opt/bin/speedtest-cli --share --simple --server {} | awk 'NR==4' | awk '{print $3}'").format(hostspeed)
+            velocidad = getoutput("/opt/bin/speedtest-cli --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'")
         else:
-            velocidad = getoutput("/usr/bin/speedtest-cli --share --simple --server {} | awk 'NR==4' | awk '{print $3}'").format(hostspeed)
+            velocidad = getoutput("/usr/bin/speedtest-cli --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'")
         bot.send_photo(G_CONFIG['chat_id'], photo=velocidad)
     except:
         return i18n.t('msg.info_speedtest_error')
-
+        
 def network_status():
     output = ["* Hostname: {}".format(info_hostname())]
     output.append("* IP local: {}".format(obtener_ip_deco()))
