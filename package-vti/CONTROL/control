@@ -1,5 +1,5 @@
 Package: junglebot
-Version: 2.3.14
+Version: 2.5.10
 Architecture: all
 Depends: curl, python-requests,python-threading,python-pyopenssl,python-logging
 Maintainer: jungle-team
