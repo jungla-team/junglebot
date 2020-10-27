@@ -398,9 +398,11 @@ def pystreamy_restart():
 
 @with_confirmation
 def pystreamy_install():
+    pystreamy_ipk = 'enigma2-plugin-extensions-pystreamy.ipk'
     commands = """
-                curl http://tropical.jungle-team.online/oasis/H2O/pystreamy_all.ipk > /tmp/pystreamy_all.ipk
-                opkg install --force-reinstall --force-overwrite /tmp/pystreamy_all.ipk
+                curl http://tropical.jungle-team.online/oasis/H2O/pystreamy_all.ipk > /tmp/{pystreamy_ipk}
+                opkg remove pystreamy
+                opkg install --force-reinstall --force-overwrite /tmp/{pystreamy_ipk}
                 """
     return execute_os_commands(commands)
 
@@ -1457,10 +1459,12 @@ def set_active_emu(emuladora):
   
 # JUNGLESCRIPT
 @with_confirmation
-def junglescript_install():    
+def junglescript_install():
+    junglescript_ipk = 'enigma2-plugin-extensions-junglescript.ipk'    
     commands = """
-                curl -L http://tropical.jungle-team.online/oasis/H2O/junglescript_all.ipk > /tmp/junglescript_all.ipk
-                opkg install --force-reinstall --force-overwrite /tmp/junglescript_all.ipk
+                curl -L http://tropical.jungle-team.online/oasis/H2O/junglescript_all.ipk > /tmp/{junglescript_ipk}
+                opkg remove junglescript
+                opkg install --force-reinstall --force-overwrite /tmp/{junglescript_ipk}
                 """
     return execute_os_commands(commands)
 
@@ -1577,11 +1581,13 @@ def junglebot_update():
         distro = enigma_distro()
         if distro == VTI:
             package = 'junglebot_vti.ipk'
+            package_tmp = 'enigma2-plugin-settings-extensions-junglebot.ipk'
         else:
             package = 'junglebot_all.ipk'
-        commands = "curl -L http://tropical.jungle-team.online/oasis/H2O/{package} > /tmp/{package}".format(package=package)
+            package_tmp = 'enigma2-plugin-settings-extensions-junglebot-vti.ipk'
+        commands = "curl -L http://tropical.jungle-team.online/oasis/H2O/{package} > /tmp/{package_tmp}".format(package=package,package_tmp=package_tmp)
         bot.send_message(G_CONFIG['chat_id'], execute_os_commands(commands))
-        command = "/usr/bin/opkg install --force-reinstall --force-overwrite /tmp/{package} &".format(package=package)
+        command = "opkg remove junglebot --force-remove; /usr/bin/opkg install --force-reinstall --force-overwrite /tmp/{package_tmp} &".format(package_tmp=package_tmp)
         os.system(command)
     else:
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.junglebot_update', version=VERSION))
