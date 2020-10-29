@@ -10,9 +10,11 @@ NEW_VERSION=$(eval echo $NEW_VERSION)
 if [ "$1" == "vti" ]; then
   DIR_PKG_BUILD=$DIR_SRC/package-vti/
   TYPE="vti"
+  PKG_NAME_ORIG=enigma2-plugin-extensions-junglebot-vti_${NEW_VERSION}_all
 else
   DIR_PKG_BUILD=$DIR_SRC/package/
   TYPE="all"
+  PKG_NAME_ORIG=enigma2-plugin-extensions-junglebot_${NEW_VERSION}_all
 fi
 
 PKG_NAME=junglebot_${NEW_VERSION}_all
@@ -33,9 +35,9 @@ cp -rf $DIR_SRC/bot.py $DIR_SRC/$REQ_FILE $DIR_SRC/amigos.cfg $DIR_SRC/parametro
 ipkg-build ${DIR_PKG_BUILD}
 
 mkdir -p ${DIR_RELEASES}
-cp -p ${PKG_NAME}.ipk ${DIR_RELEASES}/junglebot_${NEW_VERSION}_${TYPE}.ipk
-echo "Moved ${PKG_NAME}.ipk to ${DIR_RELEASES}/junglebot_${NEW_VERSION}_${TYPE}.ipk"
-cp -p ${PKG_NAME}.ipk ${DIR_RELEASES}/junglebot_${TYPE}.ipk
-echo "Moved ${PKG_NAME}.ipk to ${DIR_RELEASES}/junglebot_${TYPE}.ipk"
-rm ${PKG_NAME}.ipk
+cp -p ${PKG_NAME_ORIG}.ipk ${DIR_RELEASES}/junglebot_${NEW_VERSION}_${TYPE}.ipk
+echo "Moved ${PKG_NAME_ORIG}.ipk to ${DIR_RELEASES}/junglebot_${NEW_VERSION}_${TYPE}.ipk"
+cp -p ${PKG_NAME_ORIG}.ipk ${DIR_RELEASES}/junglebot_${TYPE}.ipk
+echo "Moved ${PKG_NAME_ORIG}.ipk to ${DIR_RELEASES}/junglebot_${TYPE}.ipk"
+rm ${PKG_NAME_ORIG}.ipk
 rm -rf ${DIR_IPK_TMP}

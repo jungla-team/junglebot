@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.10"   
+VERSION="2.5.11"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -353,19 +353,14 @@ def callback_menu(call):
 
 def check_version():
     global new_version 
-    commands = """
-            curl http://tropical.jungle-team.online/oasis/junglebot/oealliance/usr/bin/junglebot/bot.py > /tmp/bot.py
-            """
-    execute_os_commands(commands)
-    version_github = getoutput("grep -i VERSION= /tmp/bot.py | cut -d'=' -f2 | head -n 1").strip()
-    version_github = version_github.replace('"','').strip()
-    n_VERSION = VERSION.replace(".","")
-    n_version_github = version_github.replace(".","")
-    if int(n_version_github) > int(n_VERSION):
+    command = "opkg update"
+    execute_os_commands(command)
+    new_version_bot = getoutput("opkg list-upgradable | grep junglebot | grep Telegram | grep -v vti")
+    if new_version_bot:
         new_version = True
-        logger.info('Existe nueva versión de Junglebot {}'.format(version_github))
-        bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.new_version', version=version_github))
-    execute_os_commands("rm -f /tmp/bot.py")
+        new_version_bot = new_version_bot.split(' ')[2]
+        logger.info('Existe nueva versión de Junglebot {}'.format(new_version_bot))
+        bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.new_version', version=VERSION))
     
 def ga(action, label):
     try:
@@ -398,12 +393,16 @@ def pystreamy_restart():
 
 @with_confirmation
 def pystreamy_install():
-    pystreamy_ipk = 'enigma2-plugin-extensions-pystreamy.ipk'
-    commands = """
-                curl http://tropical.jungle-team.online/oasis/H2O/pystreamy_all.ipk > /tmp/{pystreamy_ipk}
-                opkg remove pystreamy
-                opkg install --force-reinstall --force-overwrite /tmp/{pystreamy_ipk}
-                """
+    command = "opkg update"
+    execute_os_commands(command)
+    hay_pystreamy = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-pystreamy | wc -l"))
+    if hay_pystreamy > 0:
+        commands = "opkg upgrade enigma2-plugin-extensions-pystreamy"
+    else:
+        commands = """
+                    opkg remove pystreamy
+                    opkg install enigma2-plugin-extensions-pystreamy
+                    """
     return execute_os_commands(commands)
 
 def pystreamy_status(quiet = False):
@@ -427,7 +426,7 @@ def pystreamy_status(quiet = False):
 @with_confirmation
 def pystreamy_uninstall():
     commands = """
-            opkg remove --force-remove pystreamy
+            opkg remove --force-remove enigma2-plugin-extensions-pystreamy
             echo 'Deleted file /etc/enigma2/pystreamy.conf'
             rm /etc/enigma2/pystreamy.conf
             """ 
@@ -1370,9 +1369,7 @@ def install_oscam_conclave():
     file_autooscam = "/usr/bin/autooscam.sh"
     file_update_oscam = "/etc/oscam.update"
     if not os.path.exists(file_autooscam) and not os.path.exists(file_update_oscam):
-        commands = """
-            wget -O - -q http://tropical.jungle-team.online/oscam/conclave_install.sh | sh -h
-            """
+        commands = "opkg install enigma2-plugin-softcams-oscam-conclave"
         return execute_os_commands(commands)
     else:
         return i18n.t('msg.oscam_conclave_installed')
@@ -1460,12 +1457,16 @@ def set_active_emu(emuladora):
 # JUNGLESCRIPT
 @with_confirmation
 def junglescript_install():
-    junglescript_ipk = 'enigma2-plugin-extensions-junglescript.ipk'    
-    commands = """
-                curl -L http://tropical.jungle-team.online/oasis/H2O/junglescript_all.ipk > /tmp/{junglescript_ipk}
-                opkg remove junglescript
-                opkg install --force-reinstall --force-overwrite /tmp/{junglescript_ipk}
-                """
+    command = "opkg update"
+    execute_os_commands(command)
+    hay_junglescript = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-junglescript | wc -l"))
+    if hay_junglescript > 0:
+        commands = "opkg upgrade enigma2-plugin-extensions-junglescript"
+    else:
+        commands = """
+                    opkg remove junglescript
+                    opkg install enigma2-plugin-extensions-junglescript
+                    """
     return execute_os_commands(commands)
 
 @with_confirmation
@@ -1474,10 +1475,7 @@ def junglescript_run():
 
 @with_confirmation
 def junglescript_uninstall():
-    commands = """
-            rm -f /usr/bin/enigma2_pre_start.sh
-            rm -r /usr/bin/enigma2_pre_start.conf
-            """
+    commands = "opkg remove enigma2-plugin-extensions-junglescript"
     return execute_os_commands(commands)
        
 def junglescript_log():
@@ -1580,14 +1578,10 @@ def junglebot_update():
     if new_version == True:
         distro = enigma_distro()
         if distro == VTI:
-            package = 'junglebot_vti.ipk'
-            package_tmp = 'enigma2-plugin-settings-extensions-junglebot.ipk'
+            package = 'enigma2-plugin-extensions-junglebot-vti'
         else:
-            package = 'junglebot_all.ipk'
-            package_tmp = 'enigma2-plugin-settings-extensions-junglebot-vti.ipk'
-        commands = "curl -L http://tropical.jungle-team.online/oasis/H2O/{package} > /tmp/{package_tmp}".format(package=package,package_tmp=package_tmp)
-        bot.send_message(G_CONFIG['chat_id'], execute_os_commands(commands))
-        command = "opkg remove junglebot --force-remove; /usr/bin/opkg install --force-reinstall --force-overwrite /tmp/{package_tmp} &".format(package_tmp=package_tmp)
+            package = 'enigma2-plugin-extensions-junglebot'
+        command = "opkg remove junglebot --force-remove; opkg upgrade {package}".format(package=package)
         os.system(command)
     else:
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.junglebot_update', version=VERSION))
