@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.11"   
+VERSION="2.5.12"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -355,10 +355,10 @@ def check_version():
     global new_version 
     command = "opkg update"
     execute_os_commands(command)
-    new_version_bot = getoutput("opkg list-upgradable | grep junglebot | grep Telegram | grep -v vti")
-    if new_version_bot:
+    hay_new_version_bot = int(getoutput("opkg list-upgradable | grep 'enigma2-plugin-extensions-junglebot ' | wc -l"))
+    if hay_new_version_bot > 0:
         new_version = True
-        new_version_bot = new_version_bot.split(' ')[2]
+        new_version_bot = getoutput("opkg list-upgradable | grep 'enigma2-plugin-extensions-junglebot '").split(' ')[2]
         logger.info('Existe nueva versión de Junglebot {}'.format(new_version_bot))
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.new_version', version=VERSION))
     

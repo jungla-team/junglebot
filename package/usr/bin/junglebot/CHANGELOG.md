@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.5.12] - 30/10/2020
+- Fix en el chequeo de versión
+- Para más info consultar https://telegra.ph/Nueva-version-junglebot-2512-10-30
+
 ## [2.5.11] - 29/10/2020
 - Adaptaciones para usar nuestro feed en las instalaciones de nuestras utilidades
 - Para más info consultar https://telegra.ph/Nueva-version-junglebot-2511-10-29
