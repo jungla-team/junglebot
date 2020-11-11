@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.12"   
+VERSION="2.5.13"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -1577,11 +1577,11 @@ def junglebot_update():
     check_version()
     if new_version == True:
         distro = enigma_distro()
+        package = 'enigma2-plugin-extensions-junglebot'
         if distro == VTI:
-            package = 'enigma2-plugin-extensions-junglebot-vti'
+            command = "opkg remove junglebot --force-remove; opkg remove enigma2-plugin-extensions-junglebot-vti --force-remove; opkg install {package}; opkg upgrade {package}".format(package=package)
         else:
-            package = 'enigma2-plugin-extensions-junglebot'
-        command = "opkg remove junglebot --force-remove; opkg upgrade {package}".format(package=package)
+            command = "opkg remove junglebot --force-remove; opkg upgrade {package}".format(package=package)
         os.system(command)
     else:
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.junglebot_update', version=VERSION))

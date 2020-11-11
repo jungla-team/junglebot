@@ -1,6 +1,0 @@
-Package: enigma2-plugin-extensions-junglebot-vti
-Version: 2.5.12
-Architecture: all
-Depends: curl, python-requests,python-threading,python-pyopenssl,python-logging
-Maintainer: jungle-team
-Description: Telegram bot for enigma2
