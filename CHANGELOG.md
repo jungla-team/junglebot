@@ -1,8 +1,8 @@
 # Changelog
 
 ## [2.5.13] - 11/11/2020
-- Adaptaci贸n dl bot para instalaci胣 a trav胹 de un unico ipk tanto para im谩genes oealliance como para i
-- Para m胹 info consultar: https://telegra.ph/Nueva-version-junglebot-2513-11-11
+- Adaptaci贸n dl bot para instalaci贸n a trav茅s de un unico ipk tanto para im谩genes oealliance como para VTi
+- Para m谩s info consultar: https://telegra.ph/Nueva-version-junglebot-2513-11-11
 
 ## [2.5.12] - 30/10/2020
 - Fix en el chequeo de versi贸n
