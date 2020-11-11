@@ -358,7 +358,7 @@ def check_version():
     hay_new_version_bot = int(getoutput("opkg list-upgradable | grep 'enigma2-plugin-extensions-junglebot ' | wc -l"))
     if hay_new_version_bot > 0:
         new_version = True
-        new_version_bot = getoutput("opkg list-upgradable | grep 'enigma2-plugin-extensions-junglebot '").split(' ')[2]
+        new_version_bot = getoutput("opkg list-upgradable | grep 'enigma2-plugin-extensions-junglebot '").split(' ')[4]
         logger.info('Existe nueva versión de Junglebot {}'.format(new_version_bot))
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.new_version', version=VERSION))
     
