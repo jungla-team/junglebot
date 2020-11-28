@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.5.13] - 27/11/2020
+- A�adida soporte para ghostreamy
+- Quitado soporte para pystreamy
+- Para m�s info consultar: https://telegra.ph/Nueva-version-junglebot-2514-11-27
+
 ## [2.5.13] - 11/11/2020
 - Adaptación dl bot para instalación a través de un unico ipk tanto para imágenes oealliance como para VTi
 - Para más info consultar: https://telegra.ph/Nueva-version-junglebot-2513-11-11

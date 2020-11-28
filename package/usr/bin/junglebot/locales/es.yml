@@ -103,18 +103,18 @@ es:
             check_duckdns_ip: Comprobar duckdns ip
             check_open_port: Comprobar puerto abierto
             zerotier: Estado Zerotier
-        pystreamy:
-            title: Gestión de pystreamy
-            status: Estado pystreamy
-            stop: Para pystreamy
-            start: Iniciar pystreamy
-            restart: Reiniciar pystreamy
+        ghostreamy:
+            title: Gestión de ghostreamy
+            status: Estado ghostreamy
+            stop: Parar ghostreamy
+            start: Iniciar ghostreamy
+            restart: Reiniciar ghostreamy
             config: Configuración
             set_config: Cambiar configuración
             check_config: Comprobar configuracion
-            install: Instalar pystreamy
-            uninstall: Desinstalar pystreamy
-            log: Ver log pystreamy
+            install: Instalar ghostreamy
+            uninstall: Desinstalar ghostreamy
+            log: Ver log ghostreamy
         records:
             title: Gestión de grabaciones
             list: Listado grabaciones
@@ -228,11 +228,11 @@ es:
         oscam_tunner: "No hay ningún tunner activo en este momento"
         oscam_version: "%{version} version"
         oscam_version_error: "Existe binario de oscam pero no puedo chequear la version"
-        pystreamy_restart: "Se reinicia el daemon pystreamy"
-        pystreamy_start: "Se arranca el daemon pystreamy"
-        pystreamy_started: "pystreamy esta arrancado"
-        pystreamy_stop: "Se para el daemon pystreamy"
-        pystreamy_stopped: "pystreamy esta parado"
+        ghostreamy_restart: "Se reinicia el daemon ghostreamy"
+        ghostreamy_start: "Se arranca el daemon ghostreamy"
+        ghostreamy_started: "ghostreamy esta arrancado"
+        ghostreamy_stop: "Se para el daemon ghostreamy"
+        ghostreamy_stopped: "ghostreamy esta parado"
         recording_delete_success: "Borrado de grabación correcto"
         recording_indexnotexist : "Ese indice no existe para ninguna grabación, consulta el listado"
         recording_notexist: "No hay ninguna grabación en %{location}"

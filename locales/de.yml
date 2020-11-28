@@ -103,18 +103,18 @@ de:
             check_duckdns_ip: Duckdns-IP überprüfen
             check_open_port: Offenen Port überprüfen
             zerotier: Zerotier Status
-        pystreamy:
-            title: Pystreamy Management
-            status: Pystreamy Status
-            stop: Pystreamy stoppen
-            start: Pystreamy starten
-            restart: Pystreamy neustarten
+        ghostreamy:
+            title: ghostreamy Management
+            status: ghostreamy Status
+            stop: ghostreamy stoppen
+            start: ghostreamy starten
+            restart: ghostreamy neustarten
             config: Einstellungen
             set_config: Einstellungen ändern
             check_config: Einstellungen überprüfen
-            install: Pystreamy instalieren
-            uninstall: Pystreamy deinstalieren
-            log: Pystreamy Log Sehen
+            install: ghostreamy instalieren
+            uninstall: ghostreamy deinstalieren
+            log: ghostreamy Log Sehen
         records:
             title: Aufnahmemanagement
             list: Aufnahmeliste
@@ -228,11 +228,11 @@ de:
         oscam_tunner: "Derzeit ist kein tunner aktiv"
         oscam_version: "%{version} version"
         oscam_version_error: "Es gibt eine Oscam-Binärdatei, aber ich kann die Version nicht überprüfen"
-        pystreamy_restart: "Daemon pystreamy wird neugestartet"
-        pystreamy_start: "Daemon pystreamy wird gestartet"
-        pystreamy_started: "Pystreamy startet"
-        pystreamy_stop: "Daemon pystreamy wird gestoppt"
-        pystreamy_stopped: "Pystreamy ist gestoppt"
+        ghostreamy_restart: "Daemon ghostreamy wird neugestartet"
+        ghostreamy_start: "Daemon ghostreamy wird gestartet"
+        ghostreamy_started: "ghostreamy startet"
+        ghostreamy_stop: "Daemon ghostreamy wird gestoppt"
+        ghostreamy_stopped: "ghostreamy ist gestoppt"
         recording_delete_success: "Aufnahme erfolgreich gelöscht"
         recording_indexnotexist : "Dieser Index existiert für keine Aufzeichnung. Konsultieren Sie die Liste"
         recording_notexist: "Es gibt keine Aufnahme in %{location}"

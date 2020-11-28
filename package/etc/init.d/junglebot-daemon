@@ -6,6 +6,8 @@
 # Short-Description: Daemon junglebot
 # Description: Script para arrancar el bot de jungle-team
 ### END INIT INFO
+# Source function library.
+. /etc/init.d/functions
 
 DAEMON=/usr/bin/junglebot/bot.py
 NAME=junglebot
@@ -36,7 +38,7 @@ case "$1" in
         echo "done."
         ;;
     status)
-        PROCESO=`(ps -ef 2> /dev/null || ps) | grep ${DAEMON} | grep -v grep | wc -l`
+        PROCESO=`status /usr/bin/python ${DAEMON} | grep running | wc -l`
         if [ "$PROCESO" -gt 0 ]
         then
            echo "Bot $NAME esta funcionando correctamente"

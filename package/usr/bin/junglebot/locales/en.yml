@@ -103,18 +103,18 @@ en:
             check_duckdns_ip: Check duckdns ip
             check_open_port: Check open port
             zerotier: Zerotier status
-        pystreamy:
-            title: Pystreamy management
-            status: Pystreamy status
-            stop: Stop pystreamy
-            start: Start pystreamy
-            restart: Reboot pystreamy
+        ghostreamy:
+            title: ghostreamy management
+            status: ghostreamy status
+            stop: Stop ghostreamy
+            start: Start ghostreamy
+            restart: Reboot ghostreamy
             config: Configuration
             set_config: Change configuration
             check_config: Check configuration
-            install: Install pystreamy
-            uninstall: Uninstall pystreamy
-            log: Show pystreamy log
+            install: Install ghostreamy
+            uninstall: Uninstall ghostreamy
+            log: Show ghostreamy log
         records:
             title: Recordings management
             list: Recordings list
@@ -228,11 +228,11 @@ en:
         oscam_tunner: "There is no active tunner at this time"
         oscam_version: "version %{version}"
         oscam_version_error: "There is oscam binary but I can't check the version"
-        pystreamy_restart: "The pystreamy daemon restarts"
-        pystreamy_start: "The pystreamy daemon starts"
-        pystreamy_started: "pystreamy is started"
-        pystreamy_stop: "Pystreamy daemon stops"
-        pystreamy_stopped: "pystreamy is stopped"
+        ghostreamy_restart: "The ghostreamy daemon restarts"
+        ghostreamy_start: "The ghostreamy daemon starts"
+        ghostreamy_started: "ghostreamy is started"
+        ghostreamy_stop: "ghostreamy daemon stops"
+        ghostreamy_stopped: "ghostreamy is stopped"
         recording_delete_success: "Recording erase successful"
         recording_indexnotexist : "That index does not exist for any recording, consult the list"
         recording_notexist: "There is no recording in %{location}"

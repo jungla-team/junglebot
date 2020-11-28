@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.13"   
+VERSION="2.5.14"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -360,7 +360,7 @@ def check_version():
         new_version = True
         new_version_bot = getoutput("opkg list-upgradable | grep 'enigma2-plugin-extensions-junglebot '").split(' ')[4]
         logger.info('Existe nueva versión de Junglebot {}'.format(new_version_bot))
-        bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.new_version', version=VERSION))
+        bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.new_version', version=new_version_bot))
     
 def ga(action, label):
     try:
@@ -381,91 +381,49 @@ def machine_id():
 
 # COMMANDS
 
-# PYSTREAMY
-def pystreamy_stop():
-    return execute_os_commands("/etc/init.d/pystreamy stop", i18n.t('msg.pystreamy_stop'))
+# GHOSTREAMY
+def ghostreamy_stop():
+    daemon_ghostreamy = "/etc/init.d/ghostreamy"
+    if os.path.exists(daemon_ghostreamy):
+        return execute_os_commands("/etc/init.d/ghostreamy stop", i18n.t('msg.ghostreamy_stop'))
 
-def pystreamy_start():
-    return execute_os_commands("/etc/init.d/pystreamy start", i18n.t('msg.pystreamy_start'))
+def ghostreamy_start():
+    daemon_ghostreamy = "/etc/init.d/ghostreamy"
+    if os.path.exists(daemon_ghostreamy):
+        return execute_os_commands("/etc/init.d/ghostreamy start", i18n.t('msg.ghostreamy_start'))
 
-def pystreamy_restart():
-    return execute_os_commands("/etc/init.d/pystreamy restart", i18n.t('msg.pystreamy_restart'))
+def ghostreamy_restart():
+    daemon_ghostreamy = "/etc/init.d/ghostreamy"
+    if os.path.exists(daemon_ghostreamy):
+        return execute_os_commands("/etc/init.d/ghostreamy restart", i18n.t('msg.ghostreamy_restart'))
 
+def ghostreamy_status():
+    daemon_ghostreamy = "/etc/init.d/ghostreamy"
+    if os.path.exists(daemon_ghostreamy):
+        running = int(getoutput("/etc/init.d/ghostreamy status | grep running | wc -l"))
+        if running > 0:
+            return i18n.t('msg.ghostreamy_started')
+        else:
+            return i18n.t('msg.ghostreamy_stopped')
+
+def ghostreamy_log():
+    get_file("/var/log/ghostreamy.log")
+    
 @with_confirmation
-def pystreamy_install():
+def ghostreamy_install():
     command = "opkg update"
     execute_os_commands(command)
-    hay_pystreamy = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-pystreamy | wc -l"))
-    if hay_pystreamy > 0:
-        commands = "opkg upgrade enigma2-plugin-extensions-pystreamy"
+    ghostreamy_installed = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-ghostreamy | wc -l"))
+    if ghostreamy_installed > 0:
+        commands = "opkg upgrade enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
     else:
-        commands = """
-                    opkg remove pystreamy
-                    opkg install enigma2-plugin-extensions-pystreamy
-                    """
+        commands = "opkg install enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
     return execute_os_commands(commands)
-
-def pystreamy_status(quiet = False):
-    # HACK ps comamnd arguments
-    command = "ps -l"
-    output = execute_os_commands(command)
-    command = "ps -ef"
-    output = output + execute_os_commands(command)
-    running = False
-    for line in output.split('\n'):
-        if line.find("/usr/sbin/pystreamy.py") >= 0:
-            running = True
-            break
-    if quiet:
-        return running
-    if running:
-        return i18n.t('msg.pystreamy_started')
-    else:
-        return i18n.t('msg.pystreamy_stopped')
 
 @with_confirmation
-def pystreamy_uninstall():
-    commands = """
-            opkg remove --force-remove enigma2-plugin-extensions-pystreamy
-            echo 'Deleted file /etc/enigma2/pystreamy.conf'
-            rm /etc/enigma2/pystreamy.conf
-            """ 
+def ghostreamy_uninstall():
+    commands = "opkg remove --force-remove enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
     return execute_os_commands(commands)
-    
-def pystreamy_check_config(file_path):
-    config = read_config_file(file_path)
-    params = { key: value for (key, value) in config }
-    output = []
-    deco_ip = params.get('deco_ip')
-    real_deco_ip = obtener_ip_deco()
-    output.append(i18n.t('msg.check_ip_deco'))
-    if deco_ip != real_deco_ip:
-        output.append(i18n.t('msg.check_ip_deco_error', deco_ip=deco_ip, real_ip=real_deco_ip))
-    else:
-        output.append(i18n.t('msg.ok'))
-    scheme = params.get('ext_scheme')
-    if scheme and scheme.strip():
-        host = params.get('ext_host')
-        port = params.get('ext_port')
-        certfile = params.get('certfile')
-        output.append(i18n.t('msg.check_certs'))
-        output.append(letsencrypt_status(certfile))
-        output.append(i18n.t('msg.check_external_ip'))
-        output.append(info_check_duckdns_ip(host))
-        output.append(i18n.t('msg.check_external_port'))
-        output.append(info_check_open_port(host, port))
-        user = params.get('user')
-        password = params.get('password')
-        if user:
-            if not password:
-                output.append(i18n.t('msg.wrong_password'))
-    else:
-        output.append(i18n.t('msg.wrong_external_access'))
-
-    return "\n".join(output)
-
-def pystreamy_log():
-    get_file("/var/log/pystreamy.log")
     
 def config(file_path):
     return execute_os_commands("cat {}".format(file_path))
@@ -534,18 +492,20 @@ def controlacceso_backgroundvti(identificacion):
                     if ip_deco != ip_cliente and ip_cliente != "::1":
                         if ip_cliente and not ip_cliente in ip_autorizadas:
                             output.append(i18n.t('msg.control_access') + stream.strip())
-        ### Sacar streams pystreamy
-        hay_pystreamy = pystreamy_status(True)
-        if os.path.exists("/tmp/pystreamy.status") and hay_pystreamy:
-            for linea in open('/tmp/pystreamy.status'):
+        ### Sacar streams ghostreamy
+        file_status_ghostreamy = "/tmp/ghostreamy.status"
+        if os.path.exists(file_status_ghostreamy):
+            hay_ghostreamy = getoutput("cat {} | wc -l").format(file_status_ghostreamy)
+        else:
+            hay_ghostreamy = 0
+        if hay_ghostreamy > 0:
+            for linea in open(file_status_ghostreamy):
+                count_streams = count_streams + 1
                 user_stream = linea.split("##")[0]
                 ip_stream = linea.split("##")[1]
                 trans_stream = linea.split("##")[2]
                 canal_stream = linea.split("##")[3]
-                if len(trans_stream) > 0:
-                    trans_stream = ": transcoding"
-                if ip_stream and not ip_stream in ip_autorizadas:
-                    output.append(i18n.t('msg.control_access') + ip_stream + ": " + canal_stream + ": " + user_stream + trans_stream)
+                output.append(ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
         if output:
             logger.info(output)
             bot.send_message(identificacion, "\n".join(output))
@@ -582,18 +542,20 @@ def controlacceso_background(identificacion):
             if ip_deco != ip and ip != "::1":
                 if ip and not ip in ip_autorizadas:
                     output.append(i18n.t('msg.control_access') + linea['ip'].replace("::ffff:","") + ": " + linea['name'])
-        ### Sacar streams pystreamy
-        hay_pystreamy = pystreamy_status(True)
-        if os.path.exists("/tmp/pystreamy.status") and hay_pystreamy:
-            for linea in open('/tmp/pystreamy.status'):
+        ### Sacar streams ghostreamy
+        file_status_ghostreamy = "/tmp/ghostreamy.status"
+        if os.path.exists(file_status_ghostreamy):
+            hay_ghostreamy = getoutput("cat {} | wc -l").format(file_status_ghostreamy)
+        else:
+            hay_ghostreamy = 0
+        if hay_ghostreamy > 0:
+            for linea in open(file_status_ghostreamy):
+                count_streams = count_streams + 1
                 user_stream = linea.split("##")[0]
                 ip_stream = linea.split("##")[1]
                 trans_stream = linea.split("##")[2]
                 canal_stream = linea.split("##")[3]
-                if len(trans_stream) > 0:
-                    trans_stream = ": transcoding"
-                if ip_stream and not ip_stream in ip_autorizadas:
-                    output.append(i18n.t('msg.control_access') + ip_stream + ": " + canal_stream + ": " + user_stream + trans_stream)
+                output.append(ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
         if output:
             logger.info(output)
             bot.send_message(identificacion, "\n".join(output))
@@ -831,6 +793,13 @@ def system_info():
     output.append("  %s" % info_cpu())
     output.append("  %s" % i18n.t('msg.info_temp') + " " + str(info_temperatura()) + "°C")
     return "\n".join(output)
+
+def info_arquitecture():
+    es_arm = int(getoutput("uname -m | grep arm | wc -l"))
+    if es_arm > 0:
+        return "arm"
+    else:
+        return "mips"
 
 def info_ram():
     memAvailable = float(getoutput("free | grep Mem | awk '{ print $7 }'"))
@@ -1087,18 +1056,20 @@ def cotillearamigos():
                     ip_cliente = stream.split(":")[0].strip()
                     if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1" and stream.strip():
                          output.append(stream.strip())                    
-    ### Sacar streams pystreamy
-    hay_pystreamy = pystreamy_status(True)
-    if os.path.exists("/tmp/pystreamy.status") and hay_pystreamy:
-        for linea in open('/tmp/pystreamy.status'):
+    ### Sacar streams ghostreamy
+    file_status_ghostreamy = "/tmp/ghostreamy.status"
+    if os.path.exists(file_status_ghostreamy):
+        hay_ghostreamy = getoutput("cat {} | wc -l").format(file_status_ghostreamy)
+    else:
+        hay_ghostreamy = 0
+    if hay_ghostreamy > 0:
+        for linea in open(file_status_ghostreamy):
             count_streams = count_streams + 1
             user_stream = linea.split("##")[0]
             ip_stream = linea.split("##")[1]
             trans_stream = linea.split("##")[2]
             canal_stream = linea.split("##")[3]
-            if len(trans_stream) > 0:
-                trans_stream = ": transcoding"
-            output.append(ip_stream + ": " + canal_stream + ": " + user_stream + trans_stream)
+            output.append(ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
     if count_streams == 0:
         output.append(i18n.t('msg.streams_notexist'))
     return "\n".join(output)
@@ -1989,17 +1960,16 @@ menu_emu.add_option(MenuOption(name = "run_autooscam", description = i18n.t('men
 menu_emu.add_option(MenuOption(name = "force_autooscam", description = i18n.t('menu.emu.force_autooscam'), command = force_autooscam, params=params_confirmation))
 menu_emu.add_option(MenuOption(name = "change_active_emu", description = "Activar emu", command = set_active_emu, params=[[JB_BUTTONS, lambda: zip(emu_list(), emu_list())]]))
 
-menu_pystreamy = MenuOption(name = 'pystreamy', description = i18n.t('menu.pystreamy.title'), info = 'https://gitlab.com/amoyse/pystreamy/')
-menu_pystreamy.add_option(MenuOption(name = "status", description = i18n.t('menu.pystreamy.status'), command = pystreamy_status))
-menu_pystreamy.add_option(MenuOption(name = "stop", description = i18n.t('menu.pystreamy.stop'), command = pystreamy_stop))
-menu_pystreamy.add_option(MenuOption(name = "start", description = i18n.t('menu.pystreamy.start'), command = pystreamy_start))
-menu_pystreamy.add_option(MenuOption(name = "restart", description = i18n.t('menu.pystreamy.restart'), command = pystreamy_restart))
-menu_pystreamy.add_option(MenuOption(name = "config", description = i18n.t('menu.pystreamy.config'), command = lambda : config("/etc/enigma2/pystreamy.conf")))
-menu_pystreamy.add_option(MenuOption(name = "set_config", description = i18n.t('menu.pystreamy.set_config'), command = lambda x,y: set_value("/etc/enigma2/pystreamy.conf", x,y), params=['clave', 'valor']))
-menu_pystreamy.add_option(MenuOption(name = "check_config", description = i18n.t('menu.pystreamy.check_config'), command = lambda: pystreamy_check_config("/etc/enigma2/pystreamy.conf")))
-menu_pystreamy.add_option(MenuOption(name = "install", description = i18n.t('menu.pystreamy.install'), command = pystreamy_install, params = params_confirmation))
-menu_pystreamy.add_option(MenuOption(name = "uninstall", description = i18n.t('menu.pystreamy.uninstall'), command = pystreamy_uninstall, params = params_confirmation))
-menu_pystreamy.add_option(MenuOption(name = "ver_log", description = i18n.t('menu.pystreamy.log'), command = pystreamy_log))
+menu_ghostreamy = MenuOption(name = 'ghostreamy', description = i18n.t('menu.ghostreamy.title'))
+menu_ghostreamy.add_option(MenuOption(name = "status", description = i18n.t('menu.ghostreamy.status'), command = ghostreamy_status))
+menu_ghostreamy.add_option(MenuOption(name = "stop", description = i18n.t('menu.ghostreamy.stop'), command = ghostreamy_stop))
+menu_ghostreamy.add_option(MenuOption(name = "start", description = i18n.t('menu.ghostreamy.start'), command = ghostreamy_start))
+menu_ghostreamy.add_option(MenuOption(name = "restart", description = i18n.t('menu.ghostreamy.restart'), command = ghostreamy_restart))
+menu_ghostreamy.add_option(MenuOption(name = "config", description = i18n.t('menu.ghostreamy.config'), command = lambda : config("/etc/enigma2/ghostreamy.env")))
+menu_ghostreamy.add_option(MenuOption(name = "set_config", description = i18n.t('menu.ghostreamy.set_config'), command = lambda x,y: set_value("/etc/enigma2/ghostreamy.env", x,y), params=['clave', 'valor']))
+menu_ghostreamy.add_option(MenuOption(name = "install", description = i18n.t('menu.ghostreamy.install'), command = ghostreamy_install, params = params_confirmation))
+menu_ghostreamy.add_option(MenuOption(name = "uninstall", description = i18n.t('menu.ghostreamy.uninstall'), command = ghostreamy_uninstall, params = params_confirmation))
+menu_ghostreamy.add_option(MenuOption(name = "ver_log", description = i18n.t('menu.ghostreamy.log'), command = ghostreamy_log))
 
 menu_letsencrypt = MenuOption(name = 'letsencrypt', description = i18n.t('menu.letsencrypt.title'), info = 'https://jungle-team.com/crear-certificados-duckdns-firmados-lets-encrypt/')
 menu_letsencrypt.add_option(MenuOption(name = "crear", description = i18n.t('menu.letsencrypt.create'), command = letsencrypt_create, params =['host', 'token']))
@@ -2060,7 +2030,7 @@ menu_guiasrapidas.add_option(MenuOption(name = "guia_rapida_pure2", description 
 
 menu_ayuda = MenuOption(name = 'ayuda', description = i18n.t('menu.help.title'))
 
-g_menu = [menu_ayuda, menu_info, menu_network, menu_guiasrapidas, menu_settings, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_command, menu_junglescript, menu_letsencrypt, menu_pystreamy]   
+g_menu = [menu_ayuda, menu_info, menu_network, menu_guiasrapidas, menu_settings, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_command, menu_junglescript, menu_letsencrypt, menu_ghostreamy]   
 g_current_menu_option = None
 
 if __name__ == "__main__":
