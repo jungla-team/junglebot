@@ -238,7 +238,7 @@ es:
         recording_notexist: "No hay ninguna grabación en %{location}"
         recording_schedule_notexist: "No existe ninguna grabación programada"
         restarting: "Reiniciando"
-        satbox_standy: "Receptor en reposo"
+        satbox_standby: "Receptor en reposo"
         satbox_started: "Receptor encendido"
         send_msg_error: "🚫 Error enviando mensaje"
         send_msg_success: "Mensaje enviado correctamente"

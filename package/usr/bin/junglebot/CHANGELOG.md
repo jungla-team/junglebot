@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.5.15] - 30/11/2020
+- Correción de errores
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-2515-11-30
+
 ## [2.5.14] - 28/11/2020
 - Añadido soporte para ghostreamy
 - Quitado soporte para pystreamy

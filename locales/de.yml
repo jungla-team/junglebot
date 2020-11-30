@@ -238,7 +238,7 @@ de:
         recording_notexist: "Es gibt keine Aufnahme in %{location}"
         recording_schedule_notexist: "Es ist keine Aufnahme geplant"
         restarting: "Neustarten"
-        satbox_standy: "Rezeptor im Ruhe-modus"
+        satbox_standby: "Rezeptor im Ruhe-modus"
         satbox_started: "Rezeptor an"
         send_msg_error: "🚫 Fehler beim Senden der Nachricht"
         send_msg_success: "Nachricht erfolgreich gesendet"

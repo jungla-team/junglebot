@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.14"   
+VERSION="2.5.15"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -383,28 +383,31 @@ def machine_id():
 
 # GHOSTREAMY
 def ghostreamy_stop():
-    daemon_ghostreamy = "/etc/init.d/ghostreamy"
-    if os.path.exists(daemon_ghostreamy):
-        return execute_os_commands("/etc/init.d/ghostreamy stop", i18n.t('msg.ghostreamy_stop'))
+    return execute_os_commands("/etc/init.d/ghostreamy stop", i18n.t('msg.ghostreamy_stop'))
 
 def ghostreamy_start():
-    daemon_ghostreamy = "/etc/init.d/ghostreamy"
-    if os.path.exists(daemon_ghostreamy):
-        return execute_os_commands("/etc/init.d/ghostreamy start", i18n.t('msg.ghostreamy_start'))
+    return execute_os_commands("/etc/init.d/ghostreamy start", i18n.t('msg.ghostreamy_start'))
 
 def ghostreamy_restart():
-    daemon_ghostreamy = "/etc/init.d/ghostreamy"
-    if os.path.exists(daemon_ghostreamy):
-        return execute_os_commands("/etc/init.d/ghostreamy restart", i18n.t('msg.ghostreamy_restart'))
+    return execute_os_commands("/etc/init.d/ghostreamy restart", i18n.t('msg.ghostreamy_restart'))
 
-def ghostreamy_status():
-    daemon_ghostreamy = "/etc/init.d/ghostreamy"
-    if os.path.exists(daemon_ghostreamy):
-        running = int(getoutput("/etc/init.d/ghostreamy status | grep running | wc -l"))
-        if running > 0:
-            return i18n.t('msg.ghostreamy_started')
-        else:
-            return i18n.t('msg.ghostreamy_stopped')
+def ghostreamy_status(quiet = False):
+    # HACK ps comamnd arguments
+    command = "ps -l"
+    output = execute_os_commands(command)
+    command = "ps -ef"
+    output = output + execute_os_commands(command)
+    running = False
+    for line in output.split('\n'):
+        if line.find("/usr/bin/ghostreamy") >= 0:
+            running = True
+            break
+    if quiet:
+        return running
+    if running:
+        return i18n.t('msg.ghostreamy_started')
+    else:
+        return i18n.t('msg.ghostreamy_stopped')
 
 def ghostreamy_log():
     get_file("/var/log/ghostreamy.log")
@@ -413,8 +416,8 @@ def ghostreamy_log():
 def ghostreamy_install():
     command = "opkg update"
     execute_os_commands(command)
-    ghostreamy_installed = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-ghostreamy | wc -l"))
-    if ghostreamy_installed > 0:
+    hay_ghostreamy = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-ghostreamy | wc -l"))
+    if hay_ghostreamy > 0:
         commands = "opkg upgrade enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
     else:
         commands = "opkg install enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
@@ -422,7 +425,7 @@ def ghostreamy_install():
 
 @with_confirmation
 def ghostreamy_uninstall():
-    commands = "opkg remove --force-remove enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
+    commands = "opkg remove --force-remove enigma2-plugin-extensions-ghostreamy{}".format(info_arquitecture())
     return execute_os_commands(commands)
     
 def config(file_path):
@@ -493,13 +496,9 @@ def controlacceso_backgroundvti(identificacion):
                         if ip_cliente and not ip_cliente in ip_autorizadas:
                             output.append(i18n.t('msg.control_access') + stream.strip())
         ### Sacar streams ghostreamy
-        file_status_ghostreamy = "/tmp/ghostreamy.status"
-        if os.path.exists(file_status_ghostreamy):
-            hay_ghostreamy = getoutput("cat {} | wc -l").format(file_status_ghostreamy)
-        else:
-            hay_ghostreamy = 0
-        if hay_ghostreamy > 0:
-            for linea in open(file_status_ghostreamy):
+        hay_ghostreamy = ghostreamy_status(True)
+        if os.path.exists("/tmp/ghostreamy.status") and hay_ghostreamy:
+            for linea in open('/tmp/ghostreamy.status'):
                 count_streams = count_streams + 1
                 user_stream = linea.split("##")[0]
                 ip_stream = linea.split("##")[1]
@@ -543,13 +542,9 @@ def controlacceso_background(identificacion):
                 if ip and not ip in ip_autorizadas:
                     output.append(i18n.t('msg.control_access') + linea['ip'].replace("::ffff:","") + ": " + linea['name'])
         ### Sacar streams ghostreamy
-        file_status_ghostreamy = "/tmp/ghostreamy.status"
-        if os.path.exists(file_status_ghostreamy):
-            hay_ghostreamy = getoutput("cat {} | wc -l").format(file_status_ghostreamy)
-        else:
-            hay_ghostreamy = 0
-        if hay_ghostreamy > 0:
-            for linea in open(file_status_ghostreamy):
+        hay_ghostreamy = ghostreamy_status(True)
+        if os.path.exists("/tmp/ghostreamy.status") and hay_ghostreamy:
+            for linea in open('/tmp/ghostreamy.status'):
                 count_streams = count_streams + 1
                 user_stream = linea.split("##")[0]
                 ip_stream = linea.split("##")[1]
@@ -796,7 +791,7 @@ def system_info():
 
 def info_arquitecture():
     es_arm = int(getoutput("uname -m | grep arm | wc -l"))
-    if es_arm > 0:
+    if es_arm == 1:
         return "arm"
     else:
         return "mips"
@@ -1057,13 +1052,9 @@ def cotillearamigos():
                     if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1" and stream.strip():
                          output.append(stream.strip())                    
     ### Sacar streams ghostreamy
-    file_status_ghostreamy = "/tmp/ghostreamy.status"
-    if os.path.exists(file_status_ghostreamy):
-        hay_ghostreamy = getoutput("cat {} | wc -l").format(file_status_ghostreamy)
-    else:
-        hay_ghostreamy = 0
-    if hay_ghostreamy > 0:
-        for linea in open(file_status_ghostreamy):
+    hay_ghostreamy = ghostreamy_status(True)
+    if os.path.exists("/tmp/ghostreamy.status") and hay_ghostreamy:
+        for linea in open('/tmp/ghostreamy.status'):
             count_streams = count_streams + 1
             user_stream = linea.split("##")[0]
             ip_stream = linea.split("##")[1]
@@ -1570,7 +1561,7 @@ def junglebot_purge_log():
 
 def junglebot_changelog():
     commands = """
-            curl http://tropical.jungle-team.online/oasis/oealliance/usr/bin/junglebot/CHANGELOG.md > /tmp/CHANGELOG.md
+            curl http://tropical.jungle-team.online/oasis/junglebot/usr/bin/junglebot/CHANGELOG.md > /tmp/CHANGELOG.md
             """
     execute_os_commands(commands)
     return getoutput("cat /tmp/CHANGELOG.md")
@@ -1814,7 +1805,7 @@ def controlssh():
     output = []
     for linea in conexiones:
         if linea:
-            output.append(i18n.t('msg.ssh_con', info=linea))
+            output.append(i18n.t('msg.ssh_conn', info=linea))
     if output:
         return "\n".join(output)
     else:
@@ -1960,7 +1951,7 @@ menu_emu.add_option(MenuOption(name = "run_autooscam", description = i18n.t('men
 menu_emu.add_option(MenuOption(name = "force_autooscam", description = i18n.t('menu.emu.force_autooscam'), command = force_autooscam, params=params_confirmation))
 menu_emu.add_option(MenuOption(name = "change_active_emu", description = "Activar emu", command = set_active_emu, params=[[JB_BUTTONS, lambda: zip(emu_list(), emu_list())]]))
 
-menu_ghostreamy = MenuOption(name = 'ghostreamy', description = i18n.t('menu.ghostreamy.title'))
+menu_ghostreamy = MenuOption(name = 'ghostreamy', description = i18n.t('menu.ghostreamy.title'), info = 'https://gitlab.com/amoyse/ghostreamy/')
 menu_ghostreamy.add_option(MenuOption(name = "status", description = i18n.t('menu.ghostreamy.status'), command = ghostreamy_status))
 menu_ghostreamy.add_option(MenuOption(name = "stop", description = i18n.t('menu.ghostreamy.stop'), command = ghostreamy_stop))
 menu_ghostreamy.add_option(MenuOption(name = "start", description = i18n.t('menu.ghostreamy.start'), command = ghostreamy_start))
