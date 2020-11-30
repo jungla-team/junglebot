@@ -1,9 +1,9 @@
 # Changelog
 
-## [2.5.13] - 27/11/2020
-- A�adida soporte para ghostreamy
+## [2.5.14] - 28/11/2020
+- Añadido soporte para ghostreamy
 - Quitado soporte para pystreamy
-- Para m�s info consultar: https://telegra.ph/Nueva-version-junglebot-2514-11-27
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-2514-11-27
 
 ## [2.5.13] - 11/11/2020
 - Adaptación dl bot para instalación a través de un unico ipk tanto para imágenes oealliance como para VTi
@@ -52,7 +52,7 @@
 
 ## [2.5.4] - 08/10/2020
 
-- Añadido parámetro AUTOFLASH para que envíe aviso si se supera el 90% de ocupación en la FLASH
+- Añadido parámetro AUTOFLASH para que envÃ­e aviso si se supera el 90% de ocupación en la FLASH
 - Corrección de errores
 - Para más info consultar: https://telegra.ph/Nueva-version-junglebot-254-10-08
 
@@ -64,8 +64,8 @@
 ## [2.5.2] - 05/10/2020 
 
 - Añadidos botones en opciones de elección tipo qué amigo quiero borrar de mi lista
-- Añadidos parametros AUTORAM para que envíe aviso si se supera el 80% de consumo de memoria RAM
-- Añadidos parametros AUTOTEMP para que envíe aviso si se superan los 90 grados de temperatura del micro
+- Añadidos parametros AUTORAM para que envÃ­e aviso si se supera el 80% de consumo de memoria RAM
+- Añadidos parametros AUTOTEMP para que envÃ­e aviso si se superan los 90 grados de temperatura del micro
 - Reducción de opciones en /emu y listado de emus con la que está activa marcada con asterisco
 - En test de velocidad la posibilidad de elegir contra qué servidor lanzar la prueba a través de botones
 - Mejora en cómo obtener la información de la RAM en /info_sistema
@@ -77,7 +77,7 @@
 - Añadida temperatura para todos los receptores e imágenes
 - Añadida geolocalización de IPs
 - Añadida opción para bloquear, desbloquear ip y ver ips bloqueadas
-- Cambiar la opción de speedtest para que envíe el png
+- Cambiar la opción de speedtest para que envÃ­e el png
 - Fixes varios
 
 ## [2.5.0] - 25/09/2020
@@ -89,7 +89,7 @@
 
 ## [2.4.1] - 02/09/2020
 
-- Añadidos parámetros para evitar las caídas del bot con las pérdidas de conectividad de red
+- Añadidos parámetros para evitar las caÃ­das del bot con las pérdidas de conectividad de red
 
 ## [2.4.0] - 27/08/2020
 
@@ -98,7 +98,7 @@
 
 ## [2.3.14] - 22/08/2020
 
-- Upgrade librería pyTelegramBotAPI a la versión 3.7.2 (errores caídas bot)
+- Upgrade librerÃ­a pyTelegramBotAPI a la versión 3.7.2 (errores caÃ­das bot)
 - Añadida opción para ver la versión de la emu oscam
 - Añadida opción para ver la versión de la emu cccam
 - Fix en el top 10 de procesos por cpu
@@ -114,7 +114,7 @@
 - Fix para ver la fecha de actualización de los picons
 
 ## [2.3.11] - 07/08/2020
-- Cambiada forma de añadir líneas cccam
+- Cambiada forma de añadir lÃ­neas cccam
 - Añadidas opciones para consultar la fecha de actualización de la lista y de los picons
 - Añadida opción para añadir/borrar favoritos a fav_bouquets
 - Aviso si hay nueva versión del bot publicada en cada inicio
@@ -140,7 +140,7 @@
 
 - Añadida opción para cambio de canal desde /junglebot
 - Añadidos links a pystreamy, junglescript, junglebot, oscamconclave y a paypal para donaciones (en /ayuda)
-- Actualización de la librería pyTelegramBotAPI a la versión 3.7.1
+- Actualización de la librerÃ­a pyTelegramBotAPI a la versión 3.7.1
 
 ## [2.3.6] - 14/06/2020
 
@@ -149,7 +149,7 @@
 
 ## [2.3.5] - 11/06/2020
 
-- Corregida instalación vía ipk en VTI
+- Corregida instalación vÃ­a ipk en VTI
 - Corregido aviso AUTOSTREAM
 
 ## [2.3.4] - 07/06/2020
@@ -159,19 +159,19 @@
 
 ## [2.3.3] - 06/06/2020
 
-- Añadida fecha para cada línea insertada en el log
+- Añadida fecha para cada lÃ­nea insertada en el log
 - Añadida opción de purgar el log de propio bot
 
 ## [2.3.2] - 01/06/2020
 
 - Corregida la desinstalación de junglescript para que borre correctamente el fichero de configuración
-- Añadido el reinicio de oscam cuando se añade una línea nueva y así aparezca en el estado
+- Añadido el reinicio de oscam cuando se añade una lÃ­nea nueva y asÃ­ aparezca en el estado
 - Añadida la excepción de conexiones locales 127.0.0.1 para /stream_ver
 
 ## [2.3.1] - 29/05/2020
 
 - Arreglados temas de oscam si estaba el daemon parado
-- Cambiado el comando screenshot para que funcione en todos los dispositivos (incluído Octagon)
+- Cambiado el comando screenshot para que funcione en todos los dispositivos (incluÃ­do Octagon)
 
 ## [2.3.0] - 26/05/2020
 
@@ -185,7 +185,7 @@
 
 - Lista de comandos poniendo "/"
 - Añadidos botones de confirmación si/no
-- Nuevo menú para lanzar scripts de las guías rápidas desde el propio bot
+- Nuevo menú para lanzar scripts de las guÃ­as rápidas desde el propio bot
 - Nueva opción para el reinicio de interfaz cuando se actualizar el epg
 - Añadida opción de borrar EPG
 
@@ -205,7 +205,7 @@
 - Nuevo menú /conexiones para los avisos FTP y SSH (variables AUTOSSH y AUTOFTP en parametros por defecto las mete a 0 el propio bot)
 - Añadida la opción para la actualización forzada de la lista de canales desde /junglescript
 - Arreglado aviso de oscam_info para que diga que no se están usando tunners
-- Arreglado el tema de las líneas de oscam
+- Arreglado el tema de las lÃ­neas de oscam
 - Se ha añadido la confirmación a más opciones
 - Añadida opción para ver los usuarios conectados a oscam
 - Añadido comando para ver el changelog
