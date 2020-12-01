@@ -89,12 +89,6 @@ en:
             picon_list: Show picons date
             add_bouquet: Add fav bouquet
             del_bouquet: Remove fav bouquet
-        letsencrypt:
-            title: Letsencrypt certificate management for duckdns
-            create: Generate certificates
-            status: Certificates status
-            check_ip: Check duckdns ip
-            check_port: Check open port
         network:
             title: Network status
             status: Status
@@ -112,7 +106,7 @@ en:
             config: Configuration
             set_config: Change configuration
             check_config: Check configuration
-            install: Install ghostreamy
+            install: Install/Update ghostreamy
             uninstall: Uninstall ghostreamy
             log: Show ghostreamy log
         records:
@@ -196,6 +190,11 @@ en:
         ftp_conn_notfound: "No FTP connections established"
         geo_block_ip: "The entered ip has been locked"
         geo_unblock_ip: "The entered ip has been unlocked"
+        ghostreamy_restart: "The ghostreamy daemon restarts"
+        ghostreamy_start: "The ghostreamy daemon starts"
+        ghostreamy_started: "ghostreamy is started"
+        ghostreamy_stop: "ghostreamy daemon stops"
+        ghostreamy_stopped: "ghostreamy is stopped"
         text_help: "JungleBot <i> %{version} </i>\ncan help you manage your Enigma2 %{brand} receiver through Telegram. If you are new to its use, visit <a href=%{telegram_url}>telegram group</a>\n\n <b> list available commands:\n\n</b>"
         info_connections: "Connections established on your receiver"
         info_cpu: "CPU usage"
@@ -228,11 +227,6 @@ en:
         oscam_tunner: "There is no active tunner at this time"
         oscam_version: "version %{version}"
         oscam_version_error: "There is oscam binary but I can't check the version"
-        ghostreamy_restart: "The ghostreamy daemon restarts"
-        ghostreamy_start: "The ghostreamy daemon starts"
-        ghostreamy_started: "ghostreamy is started"
-        ghostreamy_stop: "ghostreamy daemon stops"
-        ghostreamy_stopped: "ghostreamy is stopped"
         recording_delete_success: "Recording erase successful"
         recording_indexnotexist : "That index does not exist for any recording, consult the list"
         recording_notexist: "There is no recording in %{location}"

@@ -89,12 +89,6 @@ es:
             picon_list: Ver fecha picons
             add_bouquet: Añadir bouquet fav
             del_bouquet: Borrar bouquet fav
-        letsencrypt:
-            title: Gestión de certificados letsencrypt para duckdns
-            create: Crear certificados
-            status: Estado de certificados
-            check_ip: Comprobar duckdns ip
-            check_port: Comprobar puerto abierto
         network:
             title: Información Red
             status: Estado
@@ -112,7 +106,7 @@ es:
             config: Configuración
             set_config: Cambiar configuración
             check_config: Comprobar configuracion
-            install: Instalar ghostreamy
+            install: Instalar/Actualizar ghostreamy
             uninstall: Desinstalar ghostreamy
             log: Ver log ghostreamy
         records:
@@ -196,6 +190,11 @@ es:
         ftp_conn_notfound: "No hay conexiones FTP establecidas"
         geo_block_ip: "Se ha bloqueado la ip introducida"
         geo_unblock_ip: "Se ha desbloqueado la ip introducida"
+        ghostreamy_restart: "Se reinicia el daemon ghostreamy"
+        ghostreamy_start: "Se arranca el daemon ghostreamy"
+        ghostreamy_started: "ghostreamy esta arrancado"
+        ghostreamy_stop: "Se para el daemon ghostreamy"
+        ghostreamy_stopped: "ghostreamy esta parado"
         text_help: "JungleBot <i> %{version} </i>\nPuedo ayudarte a administrar tu receptor Enigma2 %{brand} a traves de Telegram. Si eres nuevo en su uso visita <a href=%{telegram_url}>grupo telegram</a>\n\n <b>lista comandos disponibles:\n\n</b>"
         info_connections: "Las conexiones establecidas en su receptor"
         info_cpu: "Uso CPU"
@@ -228,11 +227,6 @@ es:
         oscam_tunner: "No hay ningún tunner activo en este momento"
         oscam_version: "%{version} version"
         oscam_version_error: "Existe binario de oscam pero no puedo chequear la version"
-        ghostreamy_restart: "Se reinicia el daemon ghostreamy"
-        ghostreamy_start: "Se arranca el daemon ghostreamy"
-        ghostreamy_started: "ghostreamy esta arrancado"
-        ghostreamy_stop: "Se para el daemon ghostreamy"
-        ghostreamy_stopped: "ghostreamy esta parado"
         recording_delete_success: "Borrado de grabación correcto"
         recording_indexnotexist : "Ese indice no existe para ninguna grabación, consulta el listado"
         recording_notexist: "No hay ninguna grabación en %{location}"

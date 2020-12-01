@@ -89,12 +89,6 @@ de:
             picon_list: Siehe Datum der Picons
             add_bouquet: Bouquet zu favoriten hinzufügen
             del_bouquet: Bouquet von favoriten löschen
-        letsencrypt:
-            title: Letsencrypt-Zertifikatverwaltung für duckdns
-            create: Zertifikate erstellen
-            status: Zertifikatstatus
-            check_ip: Duckdns-IP überprüfen
-            check_port: Offenen Port überprüfen
         network:
             title: Netzwerkinformationen
             status: Status
@@ -112,7 +106,7 @@ de:
             config: Einstellungen
             set_config: Einstellungen ändern
             check_config: Einstellungen überprüfen
-            install: ghostreamy instalieren
+            install: ghostreamy instalieren/aktualisieren
             uninstall: ghostreamy deinstalieren
             log: ghostreamy Log Sehen
         records:
@@ -196,6 +190,11 @@ de:
         ftp_conn_notfound: "Es wurden keine FTP-Verbindungen hergestellt"
         geo_block_ip: "Die eingegebene IP wurde gesperrt"
         geo_unblock_ip: "Die eingegebene IP wurde entsperrt"
+        ghostreamy_restart: "Daemon ghostreamy wird neugestartet"
+        ghostreamy_start: "Daemon ghostreamy wird gestartet"
+        ghostreamy_started: "ghostreamy startet"
+        ghostreamy_stop: "Daemon ghostreamy wird gestoppt"
+        ghostreamy_stopped: "ghostreamy ist gestoppt"
         text_help: "JungleBot <i> %{version} </i>\nIch kann dir bei der Verwaltung Ihres Enigma2-Empfängers helfen %{brand} durch Telegramm. Wenn du neu in diener Verwendung bist, besuche die folgende <a href=%{telegram_url}> Telegramm Gruppe</a>\n\n <b>Liste der verfügbaren Befehle:\n\n</b>"
         info_connections: "Hergestellte Verbindungen an deinem rezeptor"
         info_cpu: "CPU auslastung"
@@ -228,11 +227,6 @@ de:
         oscam_tunner: "Derzeit ist kein tunner aktiv"
         oscam_version: "%{version} version"
         oscam_version_error: "Es gibt eine Oscam-Binärdatei, aber ich kann die Version nicht überprüfen"
-        ghostreamy_restart: "Daemon ghostreamy wird neugestartet"
-        ghostreamy_start: "Daemon ghostreamy wird gestartet"
-        ghostreamy_started: "ghostreamy startet"
-        ghostreamy_stop: "Daemon ghostreamy wird gestoppt"
-        ghostreamy_stopped: "ghostreamy ist gestoppt"
         recording_delete_success: "Aufnahme erfolgreich gelöscht"
         recording_indexnotexist : "Dieser Index existiert für keine Aufzeichnung. Konsultieren Sie die Liste"
         recording_notexist: "Es gibt keine Aufnahme in %{location}"

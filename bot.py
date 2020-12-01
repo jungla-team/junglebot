@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.15"   
+VERSION="2.5.16"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -464,20 +464,6 @@ def get_file(filepath):
     else:
         bot.send_message(G_CONFIG['chat_id'], i18n.t("msg.file_notfound", file=filepath))
     return ''
-
-# LETSENCRYPT
-def letsencrypt_status(cert_file):
-    return "Checking certificate {}\n{}".format(cert_file, execute_os_commands("openssl x509 -in {} -startdate -enddate -subject -noout".format(cert_file)))
-
-def letsencrypt_create(host, token):
-    commands = """
-        cd /tmp
-        curl -O http://tropical.jungle-team.online/utilidades/cert_duckdns.sh
-        mv cert_duckdns.sh /usr/sbin
-        chmod 777 /usr/sbin/cert_duckdns.sh
-        /usr/sbin/cert_duckdns.sh -host {host} -token {token}
-        """.format(host = host, token = token)
-    return execute_os_commands(commands)  
 
 def controlacceso_backgroundvti(identificacion):
     while True:
@@ -1951,7 +1937,7 @@ menu_emu.add_option(MenuOption(name = "run_autooscam", description = i18n.t('men
 menu_emu.add_option(MenuOption(name = "force_autooscam", description = i18n.t('menu.emu.force_autooscam'), command = force_autooscam, params=params_confirmation))
 menu_emu.add_option(MenuOption(name = "change_active_emu", description = "Activar emu", command = set_active_emu, params=[[JB_BUTTONS, lambda: zip(emu_list(), emu_list())]]))
 
-menu_ghostreamy = MenuOption(name = 'ghostreamy', description = i18n.t('menu.ghostreamy.title'), info = 'https://gitlab.com/amoyse/ghostreamy/')
+menu_ghostreamy = MenuOption(name = 'ghostreamy', description = i18n.t('menu.ghostreamy.title'))
 menu_ghostreamy.add_option(MenuOption(name = "status", description = i18n.t('menu.ghostreamy.status'), command = ghostreamy_status))
 menu_ghostreamy.add_option(MenuOption(name = "stop", description = i18n.t('menu.ghostreamy.stop'), command = ghostreamy_stop))
 menu_ghostreamy.add_option(MenuOption(name = "start", description = i18n.t('menu.ghostreamy.start'), command = ghostreamy_start))
@@ -1961,12 +1947,6 @@ menu_ghostreamy.add_option(MenuOption(name = "set_config", description = i18n.t(
 menu_ghostreamy.add_option(MenuOption(name = "install", description = i18n.t('menu.ghostreamy.install'), command = ghostreamy_install, params = params_confirmation))
 menu_ghostreamy.add_option(MenuOption(name = "uninstall", description = i18n.t('menu.ghostreamy.uninstall'), command = ghostreamy_uninstall, params = params_confirmation))
 menu_ghostreamy.add_option(MenuOption(name = "ver_log", description = i18n.t('menu.ghostreamy.log'), command = ghostreamy_log))
-
-menu_letsencrypt = MenuOption(name = 'letsencrypt', description = i18n.t('menu.letsencrypt.title'), info = 'https://jungle-team.com/crear-certificados-duckdns-firmados-lets-encrypt/')
-menu_letsencrypt.add_option(MenuOption(name = "crear", description = i18n.t('menu.letsencrypt.create'), command = letsencrypt_create, params =['host', 'token']))
-menu_letsencrypt.add_option(MenuOption(name = "estado", description = i18n.t('menu.letsencrypt.status'), command = lambda: letsencrypt_status('/etc/enigma2/cert.pem')))
-menu_letsencrypt.add_option(MenuOption(name = "check_duckdns_ip", description = i18n.t('menu.letsencrypt.check_ip'), command = info_check_duckdns_ip, params =["host"]))
-menu_letsencrypt.add_option(MenuOption(name = "check_open_port", description = i18n.t('menu.letsencrypt.check_port'), command = info_check_open_port, params =["host", "port"]))
 
 menu_settings = MenuOption(name = 'junglebot', description = i18n.t('menu.junglebot.title'), info = 'https://jungle-team.com/junglebotv2-telegram-enigma2/')
 menu_settings.add_option(MenuOption(name = "send_message", description = i18n.t('menu.junglebot.send_message'), command = deco_send_message, params=['mensaje']))
@@ -2021,7 +2001,7 @@ menu_guiasrapidas.add_option(MenuOption(name = "guia_rapida_pure2", description 
 
 menu_ayuda = MenuOption(name = 'ayuda', description = i18n.t('menu.help.title'))
 
-g_menu = [menu_ayuda, menu_info, menu_network, menu_guiasrapidas, menu_settings, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_command, menu_junglescript, menu_letsencrypt, menu_ghostreamy]   
+g_menu = [menu_ayuda, menu_info, menu_network, menu_guiasrapidas, menu_settings, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_command, menu_junglescript, menu_ghostreamy]   
 g_current_menu_option = None
 
 if __name__ == "__main__":
