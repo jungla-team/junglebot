@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.5.17] - 03/12/2020
+- Corregidas opciones para ghostreamy 
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-2517-12-03
+
 ## [2.5.16] - 01/12/2020
 - Añadido mensaje para instalar y actualizar ghostreamy
 - Se ha quitado el menú y opciones de letsencrypt

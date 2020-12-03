@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.16"   
+VERSION="2.5.17"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -425,7 +425,7 @@ def ghostreamy_install():
 
 @with_confirmation
 def ghostreamy_uninstall():
-    commands = "opkg remove --force-remove enigma2-plugin-extensions-ghostreamy{}".format(info_arquitecture())
+    commands = "opkg remove --force-remove enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
     return execute_os_commands(commands)
     
 def config(file_path):
