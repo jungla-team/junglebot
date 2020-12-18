@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.17"   
+VERSION="2.5.18"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -391,23 +391,15 @@ def ghostreamy_start():
 def ghostreamy_restart():
     return execute_os_commands("/etc/init.d/ghostreamy restart", i18n.t('msg.ghostreamy_restart'))
 
-def ghostreamy_status(quiet = False):
-    # HACK ps comamnd arguments
-    command = "ps -l"
-    output = execute_os_commands(command)
-    command = "ps -ef"
-    output = output + execute_os_commands(command)
-    running = False
-    for line in output.split('\n'):
-        if line.find("/usr/bin/ghostreamy") >= 0:
-            running = True
-            break
-    if quiet:
-        return running
-    if running:
+def ghostreamy_status():
+    running = hay_ghostreamy()
+    if running > 0:
         return i18n.t('msg.ghostreamy_started')
     else:
         return i18n.t('msg.ghostreamy_stopped')
+
+def hay_ghostreamy():
+    return int(getoutput("/etc/init.d/ghostreamy status | grep running | wc -l"))
 
 def ghostreamy_log():
     get_file("/var/log/ghostreamy.log")
@@ -416,8 +408,8 @@ def ghostreamy_log():
 def ghostreamy_install():
     command = "opkg update"
     execute_os_commands(command)
-    hay_ghostreamy = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-ghostreamy | wc -l"))
-    if hay_ghostreamy > 0:
+    num_ghostreamy = hay_ghostreamy()
+    if num_ghostreamy > 0:
         commands = "opkg upgrade enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
     else:
         commands = "opkg install enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
@@ -465,35 +457,34 @@ def get_file(filepath):
         bot.send_message(G_CONFIG['chat_id'], i18n.t("msg.file_notfound", file=filepath))
     return ''
 
-def controlacceso_backgroundvti(identificacion):
+def controlstream_backgroundvti():
     while True:
         ip_autorizadas = ips_autorizadas()
         output = []
-        j = webif_api("statusinfo?") 
+        j = webif_api("statusinfo?")
         ip_deco = obtener_ip_deco()
-        lista_streamings = j['Streaming_list']
-        if lista_streamings.strip():
-            lista_streamings = lista_streamings.strip()
-            streamings = lista_streamings.split("\n")
-            for stream in streamings:
-                if stream.strip():            
-                    ip_cliente = stream.split(":")[0].strip()
-                    if ip_deco != ip_cliente and ip_cliente != "::1":
-                        if ip_cliente and not ip_cliente in ip_autorizadas:
+        if "Streaming_list" in j:
+            lista_streamings = j['Streaming_list']
+            if lista_streamings.strip():
+                streamings = lista_streamings.split("\n")
+                for stream in streamings:
+                    if stream.strip():            
+                        ip_cliente = stream.split(":")[0].strip()
+                        if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1" and stream.strip() and ip_cliente and not ip_cliente in ip_autorizadas:
                             output.append(i18n.t('msg.control_access') + stream.strip())
         ### Sacar streams ghostreamy
-        hay_ghostreamy = ghostreamy_status(True)
-        if os.path.exists("/tmp/ghostreamy.status") and hay_ghostreamy:
+        num_ghostreamy = hay_ghostreamy()
+        if os.path.exists("/tmp/ghostreamy.status") and num_ghostreamy > 0:
             for linea in open('/tmp/ghostreamy.status'):
-                count_streams = count_streams + 1
                 user_stream = linea.split("##")[0]
                 ip_stream = linea.split("##")[1]
                 trans_stream = linea.split("##")[2]
                 canal_stream = linea.split("##")[3]
-                output.append(ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
+                if ip_stream not in ip_autorizadas:
+                    output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
         if output:
-            logger.info(output)
-            bot.send_message(identificacion, "\n".join(output))
+            logger.info("\n".join(output))
+            bot.send_message(G_CONFIG['chat_id'], "\n".join(output))
         time.sleep(G_CONFIG['timerbot'])
 
 def ips_autorizadas():
@@ -514,32 +505,32 @@ def ips_autorizadas():
     f.close()
     return autorizadas
     
-def controlacceso_background(identificacion):
+def controlstream_background():
     while True:
         ip_autorizadas = ips_autorizadas()
         output = []
-        ### Sacar streams
+        #### Sacar streams
         j = webif_api("about?")
         lineas = j['info']['streams']  
         ip_deco = obtener_ip_deco()
         for linea in lineas:	
-            ip = linea['ip'].replace("::ffff:","")
+            ip = linea['ip'].replace("::ffff:", "")
             if ip_deco != ip and ip != "::1":
                 if ip and not ip in ip_autorizadas:
-                    output.append(i18n.t('msg.control_access') + linea['ip'].replace("::ffff:","") + ": " + linea['name'])
+                    output.append(i18n.t('msg.control_access') + linea['ip'].replace("::ffff:", "") + ": " + linea['name'])
         ### Sacar streams ghostreamy
-        hay_ghostreamy = ghostreamy_status(True)
-        if os.path.exists("/tmp/ghostreamy.status") and hay_ghostreamy:
+        num_ghostreamy = hay_ghostreamy()
+        if os.path.exists("/tmp/ghostreamy.status") and num_ghostreamy > 0:
             for linea in open('/tmp/ghostreamy.status'):
-                count_streams = count_streams + 1
                 user_stream = linea.split("##")[0]
                 ip_stream = linea.split("##")[1]
                 trans_stream = linea.split("##")[2]
                 canal_stream = linea.split("##")[3]
-                output.append(ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
+                if ip_stream not in ip_autorizadas:
+                    output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
         if output:
-            logger.info(output)
-            bot.send_message(identificacion, "\n".join(output))
+            logger.info("\n".join(output))
+            bot.send_message(G_CONFIG['chat_id'], "\n".join(output))
         time.sleep(G_CONFIG['timerbot'])
 
 def controlssh_background():
@@ -675,6 +666,19 @@ def send_large_message(chat_id, output, message = None):
     except Exception as e:
         logger.exception(e)
         return i18n.t("msg.unknown_error", error=str(e))
+
+def start_autostream():
+    global g_autostream_thread
+    if G_CONFIG['autostream'] == '1' and not g_autostream_thread:
+        distro = enigma_distro()
+        if distro == VTI:
+            time.sleep(G_CONFIG['timerbot'])
+            g_autostream_thread = threading.Thread(target=controlstream_backgroundvti)
+        else:
+            g_autostream_thread = threading.Thread(target=controlstream_background)
+        g_autostream_thread.start()
+        logger.info("Autostream iniciado")
+        return i18n.t("msg.autostream_started")
 
 def start_autossh():
     global g_autossh_thread
@@ -824,7 +828,7 @@ def info_tarjetared():
     
 def list_speedtest():
     distro = enigma_distro()
-    if (distro == "VTi"):
+    if (distro == VTI):
         lista = getoutput("/opt/bin/speedtest-cli --list")
     else:
         lista = getoutput("/usr/bin/speedtest-cli --list")
@@ -846,7 +850,7 @@ def info_speedtest_options():
 def info_speedtest(hostspeed):
     distro = enigma_distro()
     try:
-        if (distro == "VTi"):
+        if (distro == VTI):
             velocidad = getoutput("/opt/bin/speedtest-cli --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'")
         else:
             velocidad = getoutput("/usr/bin/speedtest-cli --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'")
@@ -944,7 +948,7 @@ def info_check_duckdns_ip(host):
     
 def info_check_open_port(host,port):
     args = { 'host': host, 'port': port }
-    is_open = int(requests.get(url = 'http://tropical.jungle-team.online:8000/info_check_open_port', params = args).text)
+    is_open = int(requests.get(url = 'https://check-port.duckdns.org/info_check_open_port', params = args).text)
     if is_open == 0:
         return i18n.t('msg.info_port_open', host=host, port=port)
     else:
@@ -1032,14 +1036,15 @@ def cotillearamigos():
             lista_streamings = j['Streaming_list']
             if lista_streamings.strip():
                 streamings = lista_streamings.split("\n")
+                logger.info(streamings)
                 for stream in streamings:  
                     count_streams = count_streams + 1
                     ip_cliente = stream.split(":")[0].strip()
                     if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1" and stream.strip():
                          output.append(stream.strip())                    
     ### Sacar streams ghostreamy
-    hay_ghostreamy = ghostreamy_status(True)
-    if os.path.exists("/tmp/ghostreamy.status") and hay_ghostreamy:
+    num_ghostreamy = ghostreamy_status()
+    if os.path.exists("/tmp/ghostreamy.status") and num_ghostreamy > 0:
         for linea in open('/tmp/ghostreamy.status'):
             count_streams = count_streams + 1
             user_stream = linea.split("##")[0]
@@ -1087,20 +1092,6 @@ def stream_delamigo(amigo):
 def stream_autocheck():
     G_CONFIG['autostream'] = '1'
     return start_autostream()
-	
-def start_autostream():
-    global g_autostream_thread
-    if G_CONFIG['autostream'] == '1' and not g_autostream_thread:
-        junglebot_restart()
-        distro = enigma_distro()
-        if distro == VTI:
-            g_autostream_thread = threading.Thread(target=controlacceso_backgroundvti, args=(G_CONFIG['chat_id'],))
-            g_autostream_thread.start()
-            logger.info("Autostream iniciado")
-        else:
-            g_autostream_thread = threading.Thread(target=controlacceso_background, args=(G_CONFIG['chat_id'],))
-            g_autostream_thread.start()
-            logger.info("Autostream iniciado")
 
 # CCCAM
 def addlinea_cccam(cline):
@@ -1457,6 +1448,12 @@ def junglescript_fecha_listacanales():
        fecha_listacanales = getoutput("cat " + listacanales_act)
     return fecha_listacanales       
 
+def junglescript_version():
+    junglescript_file = "/usr/bin/enigma2_pre_start.sh"
+    if os.path.exists(junglescript_file): 
+       junglescript_version = getoutput("grep -i VERSION= " + junglescript_file)
+    return junglescript_version   
+
 def buscar_fich_act_picons():
     ruta_picons = "/media/hdd/picon"
     fichero_act_picons = ruta_picons + "/actualizacion"
@@ -1518,7 +1515,8 @@ def junglescript_delbouquet(bouquet):
             if line.strip("\n") != bouquet:
                 f.write(line)
     return fav_bouquet()
-    
+
+
 #JUNGLEBOT
 @with_confirmation 
 def junglebot_update():
@@ -1818,33 +1816,6 @@ def conn_autoftp():
 def conn_autossh():
     G_CONFIG['autossh'] = '1'
     return start_autossh()
-
-# GUIAS RAPIDAS
-
-@with_confirmation
-def guiarapida_openatv():
-    commands = "wget -O - -q http://tropical.jungle-team.online/script/jungle_team_openatv_utils | bash -h"
-    return execute_os_commands(commands)
-
-@with_confirmation    
-def guiarapida_openpli():
-    commands = "opkg update; opkg install bash; wget -O - -q http://tropical.jungle-team.online/script/jungle_team_openpli_utils | bash -h"
-    return execute_os_commands(commands)
-
-@with_confirmation    
-def guiarapida_vti():
-    commands = "wget -O - -q http://tropical.jungle-team.online/script/jungle_team_VTI_utils | bash -h"
-    return execute_os_commands(commands)
-
-@with_confirmation
-def guiarapida_blackhole():
-    commands = "wget -O - -q http://tropical.jungle-team.online/script/jungle_team_blackhole_utils | bash -h"
-    return execute_os_commands(commands)
-    
-@with_confirmation    
-def guiarapida_pure2():
-    commands = "wget -O - -q http://tropical.jungle-team.online/script/jungle_team_Pure2_utils | bash -h"
-    return execute_os_commands(commands)
     
 def deco_send_message(message):
     resp = webif_api("message?type=1&text={}".format(bytearray(message, 'utf8')))
@@ -1962,6 +1933,7 @@ menu_settings.add_option(MenuOption(name = "changelog", description = i18n.t('me
 menu_junglescript = MenuOption(name = 'junglescript', description = i18n.t('menu.junglescript.title'), info  ='https://jungle-team.com/junglescript-lista-canales-y-picon-enigma2-movistar/')
 menu_junglescript.add_option(MenuOption(name = "config", description = i18n.t('menu.junglescript.config'), command = lambda : config("/usr/bin/enigma2_pre_start.conf")))
 menu_junglescript.add_option(MenuOption(name = "set_config", description = i18n.t('menu.junglescript.set_config'), command = lambda x, y: set_value("/usr/bin/enigma2_pre_start.conf", x,y), params =['clave', 'valor']))
+menu_junglescript.add_option(MenuOption(name = "show_version", description = i18n.t('menu.junglescript.version'), command = junglescript_version))
 menu_junglescript.add_option(MenuOption(name = "install", description = i18n.t('menu.junglescript.install'), command = junglescript_install, params=params_confirmation))
 menu_junglescript.add_option(MenuOption(name = "uninstall", description = i18n.t('menu.junglescript.uninstall'), command = junglescript_uninstall, params=params_confirmation))
 menu_junglescript.add_option(MenuOption(name = "run", description = i18n.t('menu.junglescript.run'), command = junglescript_run, params=params_confirmation))
@@ -1992,16 +1964,9 @@ menu_epg.add_option(MenuOption(name = "reiniciar_interfaz", description = i18n.t
 menu_epg.add_option(MenuOption(name = "desinstalar_epgimport", description = i18n.t('menu.epg.uninstall_epgimport'), command = remove_epgimport, params=params_confirmation))
 menu_epg.add_option(MenuOption(name = "desinstalar_crossepg", description = i18n.t('menu.epg.uninstall_crossepg'), command = remove_crossepg, params=params_confirmation))
 
-menu_guiasrapidas = MenuOption(name = 'guiasrapidas', description = i18n.t('menu.guides.title'))
-menu_guiasrapidas.add_option(MenuOption(name = "guia_rapida_openatv", description = i18n.t('menu.guides.openatv'), command = guiarapida_openatv, params=params_confirmation))
-menu_guiasrapidas.add_option(MenuOption(name = "guia_rapida_openpli", description = i18n.t('menu.guides.openpli'), command = guiarapida_openpli, params=params_confirmation))
-menu_guiasrapidas.add_option(MenuOption(name = "guia_rapida_vti", description = i18n.t('menu.guides.vti'), command = guiarapida_vti, params=params_confirmation))
-menu_guiasrapidas.add_option(MenuOption(name = "guia_rapida_blackhole", description = i18n.t('menu.guides.blackhole'), command = guiarapida_blackhole, params=params_confirmation))
-menu_guiasrapidas.add_option(MenuOption(name = "guia_rapida_pure2", description = i18n.t('menu.guides.pure2'), command = guiarapida_pure2, params=params_confirmation))
-
 menu_ayuda = MenuOption(name = 'ayuda', description = i18n.t('menu.help.title'))
 
-g_menu = [menu_ayuda, menu_info, menu_network, menu_guiasrapidas, menu_settings, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_command, menu_junglescript, menu_ghostreamy]   
+g_menu = [menu_ayuda, menu_info, menu_network, menu_settings, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_command, menu_junglescript, menu_ghostreamy]   
 g_current_menu_option = None
 
 if __name__ == "__main__":
@@ -2022,3 +1987,4 @@ if __name__ == "__main__":
     except Exception as e:
         logger.exception(e)
     bot.infinity_polling(none_stop=True)
+

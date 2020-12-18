@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.5.18] - 17/12/2020
+
+- Mejoras en el AUTOSTREAM para VTi
+- Añadida opción para visualizar versión de junglescript /junglescript_show_version
+- Cambio url para el servicio de chequeo de puertos remotos
+- Se han quitado las guías rápidas, ya que ahora son interactivas y hay que hacerlo por terminal
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-2518-12-17
+
 ## [2.5.17] - 03/12/2020
 - Corregidas opciones para ghostreamy 
 - Para más info consultar: https://telegra.ph/Nueva-version-junglebot-2517-12-03

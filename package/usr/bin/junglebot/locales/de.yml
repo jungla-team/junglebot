@@ -49,13 +49,6 @@ de:
             restart_gui: Interface neustarten
             uninstall_epgimport: EPGImport Desinstalieren
             uninstall_crossepg: CrossEPG Desinstalieren
-        guides:
-            title: Menü zum Starten von Kurzanleitungen
-            openatv: Starten Sie den OpenATV-Leitfaden
-            openpli: Starten Sie den OpenPLI-Leitfaden
-            vti: Starten Sie den VTI-Leitfaden
-            blackhole: Starten Sie die Blackhole-Anleitung
-            pure2: Starten Sie die Pure2-Anleitung
         help:
             title: Hilfemenü mit Liste der verfügbaren Menüs
         info:
@@ -89,6 +82,7 @@ de:
             picon_list: Siehe Datum der Picons
             add_bouquet: Bouquet zu favoriten hinzufügen
             del_bouquet: Bouquet von favoriten löschen
+            version: Siehe Skriptversion
         network:
             title: Netzwerkinformationen
             status: Status
@@ -132,6 +126,7 @@ de:
         autoftp_started: "Autoftp wird gestartet"
         autoram_started: "Autoram wird gestartet"
         autossh_started: "Autossh wird gestartet"
+        autostream_started: "Autostream wird gestartet"
         autotemp_started: "Autotemp wird gestartet"
         cccam_not_installed: "Die CCcam Emulator ist nicht instaliert"
         cccam_stopped: "Cccam gestoppt"

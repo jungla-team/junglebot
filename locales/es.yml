@@ -49,13 +49,6 @@ es:
             restart_gui: Reiniciar interfaz
             uninstall_epgimport: Desinstalar EPGImport
             uninstall_crossepg: Desinstalar CrossEPG
-        guides:
-            title: Menú para lanzamiento de las guías rápidas
-            openatv: Lanzar guía OpenATV
-            openpli: Lanzar guía OpenPLI
-            vti: Lanzar guía VTI
-            blackhole: Lanzar guía BlackHole
-            pure2: Lanzar guía Pure2
         help:
             title: Menú ayuda con listado de menús disponibles
         info:
@@ -89,6 +82,7 @@ es:
             picon_list: Ver fecha picons
             add_bouquet: Añadir bouquet fav
             del_bouquet: Borrar bouquet fav
+            version: Ver version script
         network:
             title: Información Red
             status: Estado
@@ -132,6 +126,7 @@ es:
         autoftp_started: "Autoftp iniciado"
         autoram_started: "Autoram iniciado"
         autossh_started: "Autossh iniciado"
+        autostream_started: "Autostream iniciado"
         autotemp_started: "Autotemp iniciado"
         cccam_not_installed: "⚠️ La emu CCcam no esta instalada"
         cccam_stopped: "Cccam parado"

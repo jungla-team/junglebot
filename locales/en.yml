@@ -49,13 +49,6 @@ en:
             restart_gui: Reboot enigma2 interface
             uninstall_epgimport: Uninstall EPGImport
             uninstall_crossepg: Uninstall CrossEPG
-        guides:
-            title: Menu for launching quick guides
-            openatv: Launch OpenATV guide
-            openpli: Launch OpenPLI guide
-            vti: Launch VTi guide
-            blackhole: Launch BlackHole guide 
-            pure2: Launch Pure2 guide 
         help:
             title: Help menu with list of available menus
         info:
@@ -89,6 +82,7 @@ en:
             picon_list: Show picons date
             add_bouquet: Add fav bouquet
             del_bouquet: Remove fav bouquet
+            version: Show script version 
         network:
             title: Network status
             status: Status
@@ -132,6 +126,7 @@ en:
         autoftp_started: "Autoftp started"
         autoram_started: "Autoram started"
         autossh_started: "Autossh started"
+        autostream_started: "Autostream started"
         autotemp_started: "Autotemp started"
         cccam_not_installed: "⚠️ The emu CCcam is not installed"
         cccam_stopped: "Cccam stopped"
