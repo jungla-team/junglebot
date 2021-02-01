@@ -1,6 +1,17 @@
 # Changelog
 
-## [2.5.18] - 18/12/2020
+## [2.5.20] - 31/01/2021
+
+- Mejora en la captura de pantalla para que salgan las imágenes con más calidad en Telegram (como archivo en vez de foto)
+- Añadidas opciones de añadir y borrar entrada en el fichero save_bouquets bajo la opción /junglescript
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-2520-01-31
+
+## [2.5.19] - 08/01/2021
+
+- Corrección de errores
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-2519-01-08
+
+## [2.5.18] - 17/12/2020
 
 - Mejoras en el AUTOSTREAM para VTi
 - Añadida opción para visualizar versión de junglescript /junglescript_show_version

@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.18"   
+VERSION="2.5.20"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -399,7 +399,7 @@ def ghostreamy_status():
         return i18n.t('msg.ghostreamy_stopped')
 
 def hay_ghostreamy():
-    return int(getoutput("/etc/init.d/ghostreamy status | grep running | wc -l"))
+    return getoutput("/etc/init.d/ghostreamy status | grep running | wc -l")
 
 def ghostreamy_log():
     get_file("/var/log/ghostreamy.log")
@@ -995,7 +995,8 @@ def command_freeram():
 def command_screenshot():
     captura = execute_os_commands('wget 127.0.0.1/grab -O /tmp/capturacanal.png && sleep 10')
     bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.command_screenshot') + '\n' + captura)
-    bot.send_photo(G_CONFIG['chat_id'], photo=open('/tmp/capturacanal.png', 'rb'))
+    doc = open('/tmp/capturacanal.png', 'rb')
+    bot.send_document(G_CONFIG['chat_id'], doc)
     return ''
     
 def command_reposo():
@@ -1491,9 +1492,10 @@ def fav_bouquet():
     if len(bouquets) > 0:
         return '\n'.join(bouquets)
     else:
-        return i18n.t('msg.file_notfound', file=fichero)
-        
-def junglescript_addbouquet(bouquet):
+        if not os.path.exists(fichero):
+            return i18n.t('msg.file_notfound', file=fichero)
+
+def junglescript_addfavbouquet(bouquet):
     with open ('/etc/enigma2/fav_bouquets','a') as f:
         f.write(bouquet + "\n")
     return fav_bouquet()
@@ -1506,16 +1508,55 @@ def junglescript_fav_bouquets():
     else:
         return []
         
-def junglescript_delbouquet(bouquet):
-    lines = None
-    with open('/etc/enigma2/fav_bouquets', 'r') as file:
-        lines = file.readlines()
-    with open ('/etc/enigma2/fav_bouquets', 'w') as f:
-        for line in lines:
-            if line.strip("\n") != bouquet:
-                f.write(line)
-    return fav_bouquet()
+def junglescript_delfavbouquet(bouquet):
+    fichero = "/etc/enigma2/fav_bouquets"
+    if os.path.exists(fichero):
+        lines = None
+        with open(fichero, 'r') as file:
+            lines = file.readlines()
+        with open (fichero, 'w') as f:
+            for line in lines:
+                if line.strip("\n") != bouquet:
+                    f.write(line)
+        return fav_bouquet()
+    else:
+        return i18n.t('msg.file_notfound', file=fichero)
 
+def save_bouquet():
+    fichero = "/etc/enigma2/save_bouquets"
+    bouquets = junglescript_save_bouquets()
+    if len(bouquets) > 0:
+        return '\n'.join(bouquets)
+    else:
+        if not os.path.exists(fichero):
+            return i18n.t('msg.file_notfound', file=fichero)
+        
+def junglescript_addsavebouquet(bouquet):
+    with open ('/etc/enigma2/save_bouquets','a') as f:
+        f.write(bouquet + "\n")
+    return save_bouquet()
+
+def junglescript_save_bouquets():
+    fichero = "/etc/enigma2/save_bouquets"
+    items = execute_os_commands("cat " + fichero).split('\n')
+    if len(items) > 0:
+        return items
+    else:
+        return []
+        
+def junglescript_delsavebouquet(bouquet):
+    fichero = '/etc/enigma2/save_bouquets'
+    if os.path.exists(fichero):
+        lines = None
+        with open(fichero, 'r') as file:
+            lines = file.readlines()
+        with open (fichero, 'w') as f:
+            for line in lines:
+                if line.strip("\n") != bouquet:
+                    f.write(line)
+        return save_bouquet()
+    else:
+        return i18n.t('msg.file_notfound', file=fichero)
 
 #JUNGLEBOT
 @with_confirmation 
@@ -1942,8 +1983,10 @@ menu_junglescript.add_option(MenuOption(name = "force_picons", description = i18
 menu_junglescript.add_option(MenuOption(name = "log", description = i18n.t('menu.junglescript.log'), command = junglescript_log))
 menu_junglescript.add_option(MenuOption(name = "ver_fecha_lista", description = i18n.t('menu.junglescript.channel_list'), command = junglescript_fecha_listacanales))
 menu_junglescript.add_option(MenuOption(name = "ver_fecha_picons", description = i18n.t('menu.junglescript.picon_list'), command = junglescript_fecha_picons))
-menu_junglescript.add_option(MenuOption(name = "addbouquet", description = i18n.t('menu.junglescript.add_bouquet'), command = junglescript_addbouquet, params=['bouquet']))
-menu_junglescript.add_option(MenuOption(name = "delbouquet", description = i18n.t('menu.junglescript.del_bouquet'), command = junglescript_delbouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_fav_bouquets(), junglescript_fav_bouquets())]]))
+menu_junglescript.add_option(MenuOption(name = "addbouquetfav", description = i18n.t('menu.junglescript.add_bouquet'), command = junglescript_addfavbouquet, params=['bouquet']))
+menu_junglescript.add_option(MenuOption(name = "delbouquetfav", description = i18n.t('menu.junglescript.del_bouquet'), command = junglescript_delfavbouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_fav_bouquets(), junglescript_fav_bouquets())]]))
+menu_junglescript.add_option(MenuOption(name = "addbouquetsave", description = "Añadir bouquet save", command = junglescript_addsavebouquet, params=['bouquet']))
+menu_junglescript.add_option(MenuOption(name = "delbouquetsave", description = "Borrar bouquet save", command = junglescript_delsavebouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_save_bouquets(), junglescript_save_bouquets())]]))
 
 menu_grabaciones = MenuOption(name = 'grabaciones', description = i18n.t('menu.records.title'))
 menu_grabaciones.add_option(MenuOption(name = "listado_timers", description = i18n.t('menu.records.list'), command = list_recording_timers))
