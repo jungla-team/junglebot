@@ -1,5 +1,5 @@
 Package: enigma2-plugin-extensions-junglebot
-Version: 2.5.20
+Version: 2.5.21
 Architecture: all
 Depends: curl,python-requests,python-threading,python-pyopenssl,python-logging,python-pkgutil,python-compiler,python-xmlrpc,python-compile,procps
 Recommends: python-pip,python-importlib

@@ -83,6 +83,9 @@ en:
             add_bouquet: Add fav bouquet
             del_bouquet: Remove fav bouquet
             version: Show script version 
+            add_save_bouquet: Add bouquet save
+            del_save_bouquet: Remove bouquet save
+            del_hidemarked_vti: Remove hidemarked vti
         network:
             title: Network status
             status: Status

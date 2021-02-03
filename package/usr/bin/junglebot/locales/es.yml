@@ -83,6 +83,9 @@ es:
             add_bouquet: Añadir bouquet fav
             del_bouquet: Borrar bouquet fav
             version: Ver version script
+            add_save_bouquet: Añadir bouquet save
+            del_save_bouquet: Borrar bouquet save
+            del_hidemarked_vti: Quitar hidemarked vti
         network:
             title: Información Red
             status: Estado

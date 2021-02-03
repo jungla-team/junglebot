@@ -83,6 +83,9 @@ de:
             add_bouquet: Bouquet zu favoriten hinzufügen
             del_bouquet: Bouquet von favoriten löschen
             version: Siehe Skriptversion
+            add_save_bouquet: Add bouquet save
+            del_save_bouquet: Remove bouquet save
+            del_hidemarked_vti: Remove hidemarked vti
         network:
             title: Netzwerkinformationen
             status: Status

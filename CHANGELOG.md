@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.5.21] - 02/02/2021
+
+- Opción para quitar hide marked en vti /junglescript_del_hidemarked_vti
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-2521-02-02
+
 ## [2.5.20] - 31/01/2021
 
 - Mejora en la captura de pantalla para que salgan las imágenes con más calidad en Telegram (como archivo en vez de foto)

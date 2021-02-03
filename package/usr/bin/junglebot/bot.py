@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.20"   
+VERSION="2.5.21"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -1558,6 +1558,12 @@ def junglescript_delsavebouquet(bouquet):
     else:
         return i18n.t('msg.file_notfound', file=fichero)
 
+def junglescript_delhidemarked_vti():
+    distro = enigma_distro()
+    if distro == VTI:
+        commands = "find /etc/enigma2/ -name '*.tv' | xargs sed -i '/#SERVICE 1:832:d:0:0:0:0:0:0:0:/d'"
+        return execute_os_commands(commands)
+
 #JUNGLEBOT
 @with_confirmation 
 def junglebot_update():
@@ -1985,8 +1991,9 @@ menu_junglescript.add_option(MenuOption(name = "ver_fecha_lista", description = 
 menu_junglescript.add_option(MenuOption(name = "ver_fecha_picons", description = i18n.t('menu.junglescript.picon_list'), command = junglescript_fecha_picons))
 menu_junglescript.add_option(MenuOption(name = "addbouquetfav", description = i18n.t('menu.junglescript.add_bouquet'), command = junglescript_addfavbouquet, params=['bouquet']))
 menu_junglescript.add_option(MenuOption(name = "delbouquetfav", description = i18n.t('menu.junglescript.del_bouquet'), command = junglescript_delfavbouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_fav_bouquets(), junglescript_fav_bouquets())]]))
-menu_junglescript.add_option(MenuOption(name = "addbouquetsave", description = "Añadir bouquet save", command = junglescript_addsavebouquet, params=['bouquet']))
-menu_junglescript.add_option(MenuOption(name = "delbouquetsave", description = "Borrar bouquet save", command = junglescript_delsavebouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_save_bouquets(), junglescript_save_bouquets())]]))
+menu_junglescript.add_option(MenuOption(name = "addbouquetsave", description = i18n.t('menu.junglescript.add_save_bouquet'), command = junglescript_addsavebouquet, params=['bouquet']))
+menu_junglescript.add_option(MenuOption(name = "delbouquetsave", description = i18n.t('menu.junglescript.del_save_bouquet'), command = junglescript_delsavebouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_save_bouquets(), junglescript_save_bouquets())]]))
+menu_junglescript.add_option(MenuOption(name = "del_hidemarked_vti", description = i18n.t('menu.junglescript.del_hidemarked_vti'), command = junglescript_delhidemarked_vti))
 
 menu_grabaciones = MenuOption(name = 'grabaciones', description = i18n.t('menu.records.title'))
 menu_grabaciones.add_option(MenuOption(name = "listado_timers", description = i18n.t('menu.records.list'), command = list_recording_timers))
