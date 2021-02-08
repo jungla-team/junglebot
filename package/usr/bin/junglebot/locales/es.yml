@@ -21,7 +21,7 @@ es:
             set_config: Cambiar parámetros
             add_friend: Autorizar amigo
             del_friend: Elimina amigo
-            friends: Lista IPs de amigos
+            friends: Lista de amigos
             ssh: Ver conexiones SSH
             ftp: Ver conexiones FTP
             autossh: Control ssh no autorizados
@@ -29,8 +29,8 @@ es:
         emu:
             title: Emuladora CCCAM / OSCAM
             status: Estado
-            addlinecccam: Añadir línea Cccam
-            addlineoscam: Añadir línea Oscam
+            addlinecccam: Añadir línea cccam
+            addlineoscam: Añadir línea oscam
             start: Iniciar Emuladora
             stop: Parar Emuladora
             restart: Reiniciar Emuladora
@@ -40,6 +40,10 @@ es:
             update_autooscam: Actualizar script autooscam.sh
             run_autooscam: Actualizar oscam conclave
             force_autooscam: Forzar actualización oscam conclave
+            show_installed_emus: Ver emus instaladas
+            activate_emu: Activar emu
+            dellineoscam: Borrar línea oscam
+            dellinecccam: Borrar línea cccam
         epg:
             title: Gestión de EPG
             path_epg: Ver ruta epg.dat
@@ -94,6 +98,10 @@ es:
             check_duckdns_ip: Comprobar duckdns ip
             check_open_port: Comprobar puerto abierto
             zerotier: Estado Zerotier
+            geolocate: Geolocalizar IP
+            block_ip: Bloquear IP
+            unblock_ip: Desbloquear IP
+            show_blocked_ips: Mostrar ips bloqueadas
         ghostreamy:
             title: Gestión de ghostreamy
             status: Estado ghostreamy
@@ -119,7 +127,7 @@ es:
         stream:
             title: Gestión de streams
             show: Que ven tu amigos
-            friends: IPs de amigos
+            friends: Lista de amigos
             add_friend: Autorizar amigo para stream
             delete_friend: Elimina amigo para stream
             autocheck: Control streams no autorizados
@@ -173,6 +181,7 @@ es:
         emu_notification: "No existe la emuladora indicada o no tiene emuladora activa"
         emu_not_found: "No encuentro la emuladora actualmente activa"
         emu_not_installed: "No encuentro emuladoras instaladas"
+        emu_not_lines: "No hay lineas en fichero"
         emu_stopped: "Emuladora parada"
         epgimport_installed: "EPGImport instalado"
         epgimport_uninstalled: "Desintalación de EPGImport realizada"
@@ -221,6 +230,8 @@ es:
         oscam_conn_error: "No puedo conectar con oscam"
         oscam_conclave_error: "No está bien instalado oscam conclave"
         oscam_conclave_installed: "Ya se encuentra instalada la emuladora de oscam conclave"
+        oscam_delete_line_ok: "Línea %{linea} borrada con exito"
+        oscam_delete_line_error: "Ha habido un error y no puedo borrar la línea %{linea}"
         oscam_stopped: "Oscam parado"
         oscam_tunner: "No hay ningún tunner activo en este momento"
         oscam_version: "%{version} version"

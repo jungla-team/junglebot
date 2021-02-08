@@ -21,7 +21,7 @@ de:
             set_config: Parameter ändern
             add_friend: Freund Autorisieren
             del_friend: Freund entfernen
-            friends: IP-Liste deiner Freunde
+            friends: Liste deiner Freunde
             ssh: SSH-Verbindungen anzeigen
             ftp: FTP-Verbindungen anzeigen
             autossh: Nicht autorisierte SSH-Kontrolle
@@ -29,8 +29,8 @@ de:
         emu:
             title: Emulator CCCAM / OSCAM
             status: Status
-            addlinecccam: Cccam-Zeile hinzufügen
-            addlineoscam: Oscam-Zeile hinzufügen
+            addlinecccam: cccam-Zeile hinzufügen
+            addlineoscam: oscam-Zeile hinzufügen
             start: Emulator starten
             stop: Emulator stoppen
             restart: Emulator neustarten
@@ -40,6 +40,10 @@ de:
             update_autooscam: Autooscam.sh script aktualisieren
             run_autooscam: Oscam Autoupdater aktualisieren
             force_autooscam: Oscam Autoupdater aktualisieren zwingen
+            show_installed_emus: Show installed emus
+            activate_emu: Activate emu
+            dellineoscam: Delete oscam line
+            dellinecccam: Delete cccam line
         epg:
             title: EPG-Management
             path_epg: Siehe epg.dat Pfad
@@ -94,6 +98,10 @@ de:
             check_duckdns_ip: Duckdns-IP überprüfen
             check_open_port: Offenen Port überprüfen
             zerotier: Zerotier Status
+            geolocate: Geolocate IP
+            block_ip: Block IP
+            unblock_ip: Unblock IP
+            show_blocked_ips: Show blocked ips
         ghostreamy:
             title: ghostreamy Management
             status: ghostreamy Status
@@ -119,7 +127,7 @@ de:
         stream:
             title: Stream-Management
             show: Was sehen deine Freunde?
-            friends: IPs deiner Freunde
+            friends: Deiner Freunde
             add_friend: Freund zum Streamen autorisieren
             delete_friend: Freund zum Streamen löschen
             autocheck: Nicht autorisierte Streams kontrollieren
@@ -173,6 +181,7 @@ de:
         emu_notification: "Der angegebene Emulator existiert nicht oder hat keinen aktiven Emulator"
         emu_not_found: "Ich kann den aktuell aktiven Emulator nicht finden."
         emu_not_installed: "Ich kann keine installierte Emulatoren finden"
+        emu_not_lines: "There arent lines in the file"
         emu_stopped: "Emulator gestoppt"
         epgimport_installed: "EPGImport instaliert"
         epgimport_uninstalled: "EPGImport Desintalation ausgeführt"
@@ -221,6 +230,8 @@ de:
         oscam_conn_error: "Ich kann mich mit oscam nicht verbinden"
         oscam_conclave_error: "Oscam Autoupdater ist nicht richtig instaliert"
         oscam_conclave_installed: "Der oscam Autoupdater emulator ist bereits installiert"
+        oscam_delete_line_ok: "Line %{linea} deleted successfully"
+        oscam_delete_line_error: "There was an error and the line %{linea} cannot be deleted"
         oscam_stopped: "Oscam gestoppt"
         oscam_tunner: "Derzeit ist kein tunner aktiv"
         oscam_version: "%{version} version"

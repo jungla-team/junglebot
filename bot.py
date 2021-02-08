@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.21"   
+VERSION="2.5.23"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -454,12 +454,13 @@ def get_file(filepath):
     if os.path.isfile(filepath):
         bot.send_document(G_CONFIG['chat_id'], open(filepath, 'r'))
     else:
-        bot.send_message(G_CONFIG['chat_id'], i18n.t("msg.file_notfound", file=filepath))
+        bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.file_notfound', file=filepath))
     return ''
 
 def controlstream_backgroundvti():
     while True:
         ip_autorizadas = ips_autorizadas()
+        amigo_autorizados = amigos_autorizados()
         output = []
         j = webif_api("statusinfo?")
         ip_deco = obtener_ip_deco()
@@ -480,7 +481,7 @@ def controlstream_backgroundvti():
                 ip_stream = linea.split("##")[1]
                 trans_stream = linea.split("##")[2]
                 canal_stream = linea.split("##")[3]
-                if ip_stream not in ip_autorizadas:
+                if ip_stream not in ip_autorizadas and user_stream not in amigo_autorizados:
                     output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
         if output:
             logger.info("\n".join(output))
@@ -504,10 +505,26 @@ def ips_autorizadas():
                     continue
     f.close()
     return autorizadas
-    
+
+def amigos_autorizados():
+    amigos = []
+    with open ("/usr/bin/junglebot/amigos.cfg", 'r') as f:
+        for linea in f:
+            linea = linea.rstrip('\n')
+            if len(linea) > 0:
+                try:
+                    es_ghost = linea.split(":")[0]
+                    if es_ghost == "ghostreamy":
+                        amigos.append(linea.split(":")[1])
+                except Exception as e:
+                    continue
+    f.close()
+    return amigos
+
 def controlstream_background():
     while True:
         ip_autorizadas = ips_autorizadas()
+        amigo_autorizados = amigos_autorizados()
         output = []
         #### Sacar streams
         j = webif_api("about?")
@@ -526,7 +543,7 @@ def controlstream_background():
                 ip_stream = linea.split("##")[1]
                 trans_stream = linea.split("##")[2]
                 canal_stream = linea.split("##")[3]
-                if ip_stream not in ip_autorizadas:
+                if ip_stream not in ip_autorizadas and user_stream not in amigo_autorizados:
                     output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
         if output:
             logger.info("\n".join(output))
@@ -851,9 +868,11 @@ def info_speedtest(hostspeed):
     distro = enigma_distro()
     try:
         if (distro == VTI):
-            velocidad = getoutput("/opt/bin/speedtest-cli --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'")
+            bin_velocidad = "/opt/bin/speedtest-cli"
         else:
-            velocidad = getoutput("/usr/bin/speedtest-cli --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'")
+            bin_velocidad = "/usr/bin/speedtest-cli"
+        command = bin_velocidad + " --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'"
+        velocidad = getoutput(command)
         bot.send_photo(G_CONFIG['chat_id'], photo=velocidad)
     except:
         return i18n.t('msg.info_speedtest_error')
@@ -1114,7 +1133,7 @@ def addlinea_cccam(cline):
         f.write(data)
     return cccam_cfg + "\n" + data
 
-def addlinea_oscam(protocol, cline):
+def addlinea_oscam(protocol, label, cline):
     response = oscam_get('status.html')
     if not response:
         return i18n.t('msg.oscam_conn_error')
@@ -1126,7 +1145,7 @@ def addlinea_oscam(protocol, cline):
         return i18n.t('msg.cline_bad_format')
     with open (oscam_cfg,'a') as file:
         file.write("\n" + "[reader]" + "\n"
-                "label                         = " + params[1] + "_" + params[3] + "\n"
+                "label                         = " + label.replace(" ", "") + "\n"
                 "protocol                      = " + protocol + "\n"
                 "device                        = " + params[1] + "," + params[2] + "\n"
                 "user                          = " + params[3] + "\n"
@@ -1185,7 +1204,6 @@ def oscam_config_dir():
         oscamdir = oscamdir[1].strip() if 1 < len(oscamdir) else ''
     else:
         logger.info("No se encuentra el directorio de configuracion de OSCAM")
-
     return oscamdir
 
 def emu_init_command():
@@ -1197,7 +1215,7 @@ def emu_init_command():
         return vti_script
     elif os.path.exists(openspa_script) and distro == "openspa":
         return openspa_script
-    elif os.path.exists(all_script) and (distro == "openatv" or distro == "openpli"):
+    elif os.path.exists(all_script) and (distro == "openatv" or distro == "openpli" or distro == "teamblue"):
         return all_script
     else:
         return None
@@ -1393,7 +1411,87 @@ def set_active_emu(emuladora):
     else:
         result = i18n.t('msg.emu_notification')   
     return "{}\n{}".format(result, list_installed_emus())
-  
+
+def deletelineaoscam(linea):
+    fich_temp_lineas = "/tmp/temp_lineas"
+    oscam_cfg = oscam_config_dir() + "/oscam.server"
+    if not os.path.exists(oscam_cfg):
+        return i18n.t('msg.file_notfound', file=oscam_cfg).split("_")
+    linea_inicio = word_line_in_file(linea, oscam_cfg) - 1
+    commands = "sed '{}q;d' {} | grep 'reader]' | wc -l".format(linea_inicio, oscam_cfg)
+    is_reader = int(getoutput(commands))
+    if is_reader > 0:
+        command = "grep -n 'reader]' {} > {}".format(oscam_cfg, fich_temp_lineas) 
+        execute_os_commands(command)
+        lineas = 1
+        with open(fich_temp_lineas) as f:
+            for line in f:
+                linea_fic = int(line.split(":")[0])
+                if linea_inicio == linea_fic:
+                    linea_encon = lineas
+                    break
+                else:
+                    lineas = lineas + 1
+        command = "cat {} | wc -l".format(fich_temp_lineas)
+        lineas_tot = int(getoutput(command))
+        linea_sig = linea_encon + 1
+        if linea_sig > lineas_tot:
+            linea_final = "$"
+        else:
+            command = "sed '{}q;d' {} | cut -d':' -f1".format(linea_sig, fich_temp_lineas)
+            linea_final = int(getoutput(command)) - 1
+        command = "sed -i '{},{}d' {}".format(linea_inicio, linea_final, oscam_cfg)
+        execute_os_commands(command)
+        bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.oscam_delete_line_ok', linea=linea))
+        oscam_restart()
+        return oscam_status()
+    else:
+        bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.oscam_delete_line_error', linea=linea))
+
+def list_readers_oscam():
+    oscam_cfg = oscam_config_dir() + "/oscam.server"
+    if not os.path.exists(oscam_cfg):
+        return i18n.t('msg.file_notfound', file=oscam_cfg) 
+    lista = getoutput("grep 'label' " + oscam_cfg + "| cut -d'=' -f2").split()
+    return lista
+
+def word_line_in_file(buscar, fichero):
+    with open(fichero, "r") as file1:
+        num_line = 0
+        for line in file1:
+            num_line += 1
+            line = line.rstrip()
+            line_split = line.split(" ")
+            if buscar in line_split:
+                return num_line
+
+def dellinea_cccam(linea):
+    cccam_cfg = "/etc/CCcam.cfg"
+    if not os.path.isfile(cccam_cfg):
+        return i18n.t('msg.file_notfound', file=cccam_cfg).split("_")
+    num_linea = linea.split("[")[1].split("]")[0]
+    command = "sed -i '{}d' {}".format(num_linea, cccam_cfg)
+    execute_os_commands(command)
+    command = "cat {}".format(cccam_cfg)
+    return execute_os_commands(command)
+
+def list_lines_cccam():
+    cccam_cfg = '/etc/CCcam.cfg'
+    if not os.path.exists(cccam_cfg):
+        return i18n.t('msg.file_notfound', file=cccam_cfg).split("_")
+    else:
+        lista = []
+        with open(cccam_cfg, "r") as file1:
+            lineas_tot = len(file1.readlines())
+            if lineas_tot > 0:
+                num_linea = 0
+                for line in file1:
+                    num_linea += 1
+                    lista.append("[" + str(num_linea) + "] " + line.split(" ")[0] + " " + line.split(" ")[1] + " " + line.split(" ")[2] + " " + line.split(" ")[3])
+                return lista
+            else:
+                return i18n.t('msg.emu_not_lines', file=cccam_cfg).split("_")
+
 # JUNGLESCRIPT
 @with_confirmation
 def junglescript_install():
@@ -1901,11 +1999,10 @@ menu_network.add_option(MenuOption(name = "speedtest", description = i18n.t('men
 menu_network.add_option(MenuOption(name = "check_duckdns_ip", description = i18n.t('menu.network.check_duckdns_ip'), command = info_check_duckdns_ip, params =["host"]))
 menu_network.add_option(MenuOption(name = "check_open_port", description = i18n.t('menu.network.check_open_port'), command = info_check_open_port, params =["host", "port"]))
 menu_network.add_option(MenuOption(name = "zerotier", description = i18n.t('menu.network.zerotier'), command = estado_zerotier))
-menu_network.add_option(MenuOption(name = "geolocalizar_ip", description = "Geolocalizar IP", command = geolocalizar_ip, params=['geolocalizar']))
-menu_network.add_option(MenuOption(name = "bloquear_ip", description = "Bloquear IP", command = bloquear_ip, params=['bloquear']))
-menu_network.add_option(MenuOption(name = "desbloquear_ip", description = "Desbloquear IP", command = desbloquear_ip, params=[[JB_BUTTONS, lambda: zip(rejected_ips(), rejected_ips())]]))
-menu_network.add_option(MenuOption(name = "ver_ip_bloqueadas", description = "Mostrar ip Bloqueadas", command = mostrar_ip))
-
+menu_network.add_option(MenuOption(name = "geolocalizar_ip", description = i18n.t('menu.network.geolocate'), command = geolocalizar_ip, params=['geolocalizar']))
+menu_network.add_option(MenuOption(name = "bloquear_ip", description = i18n.t('menu.network.block_ip'), command = bloquear_ip, params=['bloquear']))
+menu_network.add_option(MenuOption(name = "desbloquear_ip", description = i18n.t('menu.network.unblock_ip'), command = desbloquear_ip, params=[[JB_BUTTONS, lambda: zip(rejected_ips(), rejected_ips())]]))
+menu_network.add_option(MenuOption(name = "ver_ip_bloqueadas", description = i18n.t('menu.network.show_blocked_ips'), command = mostrar_ip))
 
 menu_command = MenuOption(name = 'command', description = i18n.t('menu.command.title'))
 menu_command.add_option(MenuOption(name = "status", description = i18n.t('menu.command.status'), command = estado_receptor))
@@ -1925,7 +2022,7 @@ menu_command.add_option(MenuOption(name = "runcommand", description = i18n.t('me
 menu_stream = MenuOption(name = 'stream', description = i18n.t('menu.stream.title'))
 menu_stream.add_option(MenuOption(name = "ver", description = i18n.t('menu.stream.show'), command = cotillearamigos))
 menu_stream.add_option(MenuOption(name = "amigos", description = i18n.t('menu.stream.friends'), command = amigos))
-menu_stream.add_option(MenuOption(name = "addamigo", description = i18n.t('menu.stream.add_friend'), command = stream_addamigo, params=['ip amigo']))
+menu_stream.add_option(MenuOption(name = "addamigo", description = i18n.t('menu.stream.add_friend'), command = stream_addamigo, params=['ip / ghostreamy:usuario']))
 menu_stream.add_option(MenuOption(name = "delamigo", description = i18n.t('menu.stream.delete_friend'), command = stream_delamigo, params=[[JB_BUTTONS, lambda: zip(stream_amigos(), stream_amigos())]]))
 menu_stream.add_option(MenuOption(name = "autocheck", description = i18n.t('menu.stream.autocheck'), command = stream_autocheck, params=params_confirmation))
 menu_stream.add_option(MenuOption(name = "stopstream", description = i18n.t('menu.stream.stop_streamproxy'), command = command_stopstream))
@@ -1943,9 +2040,11 @@ menu_conexiones.add_option(MenuOption(name = "autoftp", description = i18n.t('me
 
 menu_emu = MenuOption(name='emu', description= i18n.t('menu.emu.title'), info = 'https://jungle-team.com/conclave-oscam-autoupdate/')
 menu_emu.add_option(MenuOption(name = "status", description = i18n.t('menu.emu.status'), command = emucam_status))
-menu_emu.add_option(MenuOption(name = "list_emus", description = "Ver emus instaladas", command = list_installed_emus))
-menu_emu.add_option(MenuOption(name = "addlineacccam", description = i18n.t('menu.emu.addlinecccam'), command = addlinea_cccam, params=['clinea (C: servidor puerto usuario password)']))
-menu_emu.add_option(MenuOption(name = "addlineoscam", description = i18n.t('menu.emu.addlineoscam'), command = addlinea_oscam, params=['protocolo', 'clinea (C: servidor puerto usuario password)']))
+menu_emu.add_option(MenuOption(name = "list_emus", description = i18n.t('menu.emu.show_installed_emus'), command = list_installed_emus))
+menu_emu.add_option(MenuOption(name="addlineacccam", description=i18n.t('menu.emu.addlinecccam'), command=addlinea_cccam, params=['clinea (C: servidor puerto usuario password)']))
+menu_emu.add_option(MenuOption(name = "dellineacccam", description = i18n.t('menu.emu.dellinecccam'), command = dellinea_cccam, params=[[JB_BUTTONS, lambda: zip(list_lines_cccam(), list_lines_cccam())]]))
+menu_emu.add_option(MenuOption(name = "addlineoscam", description = i18n.t('menu.emu.addlineoscam'), command = addlinea_oscam, params=['protocolo', 'label', 'clinea (C: servidor puerto usuario password)']))
+menu_emu.add_option(MenuOption(name = "dellineoscam", description = i18n.t('menu.emu.dellineoscam'), command = deletelineaoscam, params=[[JB_BUTTONS, lambda: zip(list_readers_oscam(), list_readers_oscam())]]))
 menu_emu.add_option(MenuOption(name = "start", description = i18n.t('menu.emu.start'), command = oscam_start))
 menu_emu.add_option(MenuOption(name = "stop", description = i18n.t('menu.emu.stop'), command = oscam_stop))
 menu_emu.add_option(MenuOption(name = "restart", description = i18n.t('menu.emu.restart'), command = oscam_restart))
@@ -1953,7 +2052,7 @@ menu_emu.add_option(MenuOption(name = "install_oscam_conclave", description = i1
 menu_emu.add_option(MenuOption(name = "update_autooscam", description = i18n.t('menu.emu.update_autooscam'), command = update_autooscam, params=params_confirmation))
 menu_emu.add_option(MenuOption(name = "run_autooscam", description = i18n.t('menu.emu.run_autooscam'), command = run_autooscam, params=params_confirmation))
 menu_emu.add_option(MenuOption(name = "force_autooscam", description = i18n.t('menu.emu.force_autooscam'), command = force_autooscam, params=params_confirmation))
-menu_emu.add_option(MenuOption(name = "change_active_emu", description = "Activar emu", command = set_active_emu, params=[[JB_BUTTONS, lambda: zip(emu_list(), emu_list())]]))
+menu_emu.add_option(MenuOption(name = "change_active_emu", description = i18n.t('menu.emu.activate_emu'), command = set_active_emu, params=[[JB_BUTTONS, lambda: zip(emu_list(), emu_list())]]))
 
 menu_ghostreamy = MenuOption(name = 'ghostreamy', description = i18n.t('menu.ghostreamy.title'))
 menu_ghostreamy.add_option(MenuOption(name = "status", description = i18n.t('menu.ghostreamy.status'), command = ghostreamy_status))

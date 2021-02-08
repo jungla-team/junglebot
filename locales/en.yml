@@ -21,7 +21,7 @@ en:
             set_config: Change parameters
             add_friend: Authorize friend
             del_friend: Remove friend
-            friends: Friends IP list
+            friends: Friends list
             ssh: Show SSH connections
             ftp: Show FTP connection
             autossh: Unauthorized ssh control
@@ -29,8 +29,8 @@ en:
         emu:
             title: Emu CCCAM / OSCAM
             status: Status
-            addlinecccam: Add Cccam line
-            addlineoscam: Añadir Oscam line
+            addlinecccam: Add cccam line
+            addlineoscam: Añadir oscam line
             start: Start Emu
             stop: Stop Emu
             restart: Reboot Emu
@@ -40,6 +40,10 @@ en:
             update_autooscam: Update autooscam.sh script
             run_autooscam: Update oscam conclave
             force_autooscam: Force oscam conclave update
+            show_installed_emus: Show installed emus
+            activate_emu: Activate emu
+            dellineoscam: Delete oscam line
+            dellinecccam: Delete cccam line
         epg:
             title: EPG Management
             path_epg: Show epg.dat path
@@ -94,6 +98,10 @@ en:
             check_duckdns_ip: Check duckdns ip
             check_open_port: Check open port
             zerotier: Zerotier status
+            geolocate: Geolocate IP
+            block_ip: Block IP
+            unblock_ip: Unblock IP
+            show_blocked_ips: Show blocked ips
         ghostreamy:
             title: ghostreamy management
             status: ghostreamy status
@@ -119,7 +127,7 @@ en:
         stream:
             title: Streams management
             show: Current streamings
-            friends: Friends IP
+            friends: Friends list
             add_friend: Authorize friend to stream
             delete_friend: Delete friend to stream
             autocheck: Control unauthorized streams
@@ -173,6 +181,7 @@ en:
         emu_notification: "The indicated emu does not exist or does not have an active emu"
         emu_not_found: "I can't find the currently active emu"
         emu_not_installed: "There isn't installed emulator"
+        emu_not_lines: "There arent lines in the file"
         emu_stopped: "Emu stopped"
         epgimport_installed: "EPGImport installed"
         epgimport_uninstalled: "EPGImport uninstall done"
@@ -221,6 +230,8 @@ en:
         oscam_conn_error: "I can't connect with oscam"
         oscam_conclave_error: "Oscam conclave is not properly installed"
         oscam_conclave_installed: "The oscam conclave emul is already installed"
+        oscam_delete_line_ok: "Line %{linea} deleted successfully"
+        oscam_delete_line_error: "There was an error and the line %{linea} cannot be deleted"
         oscam_stopped: "Oscam stopped"
         oscam_tunner: "There is no active tunner at this time"
         oscam_version: "version %{version}"

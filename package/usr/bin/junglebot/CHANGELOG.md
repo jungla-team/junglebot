@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.5.23] - 08/02/2021
+
+- A la hora de añadir una línea oscam se puede definir también el label (lo pedirá por parámetro)
+- Corrección mensaje si no existe fichero /etc/Cccam.cfg
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-2523-02-08
+
+## [2.5.22] - 07/02/2021
+
+- Opción añadida para poder añadir como amigo en amigos.cfg un usuario de ghostreamy (ghostreamy:usuario)
+- Opción añadida para poder borrar líneas oscam /emu_dellineoscam
+- Opción añadida para poder borrar líneas cccam /emu_dellineacccam
+- Para más info consultar: https://telegra.ph/Nueva-version-junglebot-2522-02-07
+
 ## [2.5.21] - 02/02/2021
 
 - Opción para quitar hide marked en vti /junglescript_del_hidemarked_vti
