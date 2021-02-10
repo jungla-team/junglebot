@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.23"   
+VERSION="2.5.24"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -399,7 +399,13 @@ def ghostreamy_status():
         return i18n.t('msg.ghostreamy_stopped')
 
 def hay_ghostreamy():
-    return getoutput("/etc/init.d/ghostreamy status | grep running | wc -l")
+    if os.path.isfile("/etc/init.d/ghostreamy"):
+        return int(getoutput("/etc/init.d/ghostreamy status | grep running | wc -l"))
+    else:
+        return 0
+
+def hay_ghostreamy_instalado():
+    return int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-ghostreamy | wc -l"))
 
 def ghostreamy_log():
     get_file("/var/log/ghostreamy.log")
@@ -408,18 +414,30 @@ def ghostreamy_log():
 def ghostreamy_install():
     command = "opkg update"
     execute_os_commands(command)
-    num_ghostreamy = hay_ghostreamy()
+    num_ghostreamy = hay_ghostreamy_instalado()
     if num_ghostreamy > 0:
-        commands = "opkg upgrade enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
+        commands = "opkg upgrade"
     else:
-        commands = "opkg install enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
+        commands = "opkg install"
+    commands = "{} enigma2-plugin-extensions-ghostreamy-{}".format(commands, info_arquitecture())
     return execute_os_commands(commands)
 
 @with_confirmation
 def ghostreamy_uninstall():
     commands = "opkg remove --force-remove enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
     return execute_os_commands(commands)
-    
+
+def ghostreamy_version():
+    fichero_log = "/var/log/ghostreamy.log"
+    if os.path.isfile(fichero_log):
+        commands = "grep -i 'Version:' /var/log/ghostreamy.log | tail -1"
+        linea_version = execute_os_commands(commands).split(" ")
+        for word in linea_version:
+            if "Version:" in word: 
+                return word.split(":")[1]
+    else:
+        return i18n.t('msg.file_notfound', file=fichero_log)
+
 def config(file_path):
     return execute_os_commands("cat {}".format(file_path))
 
@@ -1451,7 +1469,7 @@ def deletelineaoscam(linea):
 def list_readers_oscam():
     oscam_cfg = oscam_config_dir() + "/oscam.server"
     if not os.path.exists(oscam_cfg):
-        return i18n.t('msg.file_notfound', file=oscam_cfg) 
+        return i18n.t('msg.file_notfound', file=oscam_cfg).split("_") 
     lista = getoutput("grep 'label' " + oscam_cfg + "| cut -d'=' -f2").split()
     return lista
 
@@ -2064,6 +2082,7 @@ menu_ghostreamy.add_option(MenuOption(name = "set_config", description = i18n.t(
 menu_ghostreamy.add_option(MenuOption(name = "install", description = i18n.t('menu.ghostreamy.install'), command = ghostreamy_install, params = params_confirmation))
 menu_ghostreamy.add_option(MenuOption(name = "uninstall", description = i18n.t('menu.ghostreamy.uninstall'), command = ghostreamy_uninstall, params = params_confirmation))
 menu_ghostreamy.add_option(MenuOption(name = "ver_log", description = i18n.t('menu.ghostreamy.log'), command = ghostreamy_log))
+menu_ghostreamy.add_option(MenuOption(name = "ver_version", description = i18n.t('menu.ghostreamy.version'), command = ghostreamy_version))
 
 menu_settings = MenuOption(name = 'junglebot', description = i18n.t('menu.junglebot.title'), info = 'https://jungle-team.com/junglebotv2-telegram-enigma2/')
 menu_settings.add_option(MenuOption(name = "send_message", description = i18n.t('menu.junglebot.send_message'), command = deco_send_message, params=['mensaje']))

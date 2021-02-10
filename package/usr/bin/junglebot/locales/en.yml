@@ -114,6 +114,7 @@ en:
             install: Install/Update ghostreamy
             uninstall: Uninstall ghostreamy
             log: Show ghostreamy log
+            version: Show ghostreamy version
         records:
             title: Recordings management
             list: Recordings list

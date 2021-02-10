@@ -114,6 +114,7 @@ de:
             install: ghostreamy instalieren/aktualisieren
             uninstall: ghostreamy deinstalieren
             log: ghostreamy Log Sehen
+            version: ghostreamy version Sehen
         records:
             title: Aufnahmemanagement
             list: Aufnahmeliste

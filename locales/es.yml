@@ -114,6 +114,7 @@ es:
             install: Instalar/Actualizar ghostreamy
             uninstall: Desinstalar ghostreamy
             log: Ver log ghostreamy
+            version: Ver versión ghostreamy
         records:
             title: Gestión de grabaciones
             list: Listado grabaciones

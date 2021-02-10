@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.24] - 10/02/2021
+
+- Mejoras bajo el menú /ghostreamy
+- Añadida opción de visualizar la versión instalada de ghostreamy /ghostreamy_ver_version
+- Corregida la salida de borrado de línea oscam si la emuladora está parada previamente
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-2524-02-10
+
 ## [2.5.23] - 08/02/2021
 
 - A la hora de añadir una línea oscam se puede definir también el label (lo pedirá por parámetro)
