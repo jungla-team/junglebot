@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.24"   
+VERSION="2.5.25"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -428,15 +428,8 @@ def ghostreamy_uninstall():
     return execute_os_commands(commands)
 
 def ghostreamy_version():
-    fichero_log = "/var/log/ghostreamy.log"
-    if os.path.isfile(fichero_log):
-        commands = "grep -i 'Version:' /var/log/ghostreamy.log | tail -1"
-        linea_version = execute_os_commands(commands).split(" ")
-        for word in linea_version:
-            if "Version:" in word: 
-                return word.split(":")[1]
-    else:
-        return i18n.t('msg.file_notfound', file=fichero_log)
+    commands = "opkg list-installed | grep ghostreamy | cut -d ' ' -f3"
+    return execute_os_commands(commands)
 
 def config(file_path):
     return execute_os_commands("cat {}".format(file_path))
@@ -1707,11 +1700,8 @@ def junglebot_purge_log():
     execute_os_commands(commands)
 
 def junglebot_changelog():
-    commands = """
-            curl http://tropical.jungle-team.online/oasis/junglebot/usr/bin/junglebot/CHANGELOG.md > /tmp/CHANGELOG.md
-            """
-    execute_os_commands(commands)
-    return getoutput("cat /tmp/CHANGELOG.md")
+    commands = "head -n 15 /usr/bin/junglebot/CHANGELOG.md"
+    return execute_os_commands(commands)
 
 # GRABACIONES
 def list_recordings():
