@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.5.26] - 12/02/2021
+
+- Arreglado bug a la hora de visualizar streams de ghostreamy con autostream
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-2526-02-11
+
 ## [2.5.25] - 10/02/2021
 
 - Arreglado bug a la hora de visualizar la versión instalada de ghostreamy /ghostreamy_ver_version

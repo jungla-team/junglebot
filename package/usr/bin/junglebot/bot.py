@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.25"   
+VERSION="2.5.26"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -485,14 +485,15 @@ def controlstream_backgroundvti():
                         if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1" and stream.strip() and ip_cliente and not ip_cliente in ip_autorizadas:
                             output.append(i18n.t('msg.control_access') + stream.strip())
         ### Sacar streams ghostreamy
-        num_ghostreamy = hay_ghostreamy()
-        if os.path.exists("/tmp/ghostreamy.status") and num_ghostreamy > 0:
+        if os.path.exists("/tmp/ghostreamy.status"):
             for linea in open('/tmp/ghostreamy.status'):
                 user_stream = linea.split("##")[0]
                 ip_stream = linea.split("##")[1]
                 trans_stream = linea.split("##")[2]
                 canal_stream = linea.split("##")[3]
-                if ip_stream not in ip_autorizadas and user_stream not in amigo_autorizados:
+                if ip_stream in ip_autorizadas or user_stream in amigo_autorizados:
+                    logger.info("Amigo autorizado para stream: " + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
+                else:
                     output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
         if output:
             logger.info("\n".join(output))
@@ -547,14 +548,15 @@ def controlstream_background():
                 if ip and not ip in ip_autorizadas:
                     output.append(i18n.t('msg.control_access') + linea['ip'].replace("::ffff:", "") + ": " + linea['name'])
         ### Sacar streams ghostreamy
-        num_ghostreamy = hay_ghostreamy()
-        if os.path.exists("/tmp/ghostreamy.status") and num_ghostreamy > 0:
+        if os.path.exists("/tmp/ghostreamy.status"):
             for linea in open('/tmp/ghostreamy.status'):
                 user_stream = linea.split("##")[0]
                 ip_stream = linea.split("##")[1]
                 trans_stream = linea.split("##")[2]
                 canal_stream = linea.split("##")[3]
-                if ip_stream not in ip_autorizadas and user_stream not in amigo_autorizados:
+                if ip_stream in ip_autorizadas or user_stream in amigo_autorizados:
+                    logger.info("Amigo autorizado para stream: " + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
+                else:
                     output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
         if output:
             logger.info("\n".join(output))
@@ -1074,8 +1076,7 @@ def cotillearamigos():
                     if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1" and stream.strip():
                          output.append(stream.strip())                    
     ### Sacar streams ghostreamy
-    num_ghostreamy = ghostreamy_status()
-    if os.path.exists("/tmp/ghostreamy.status") and num_ghostreamy > 0:
+    if os.path.exists("/tmp/ghostreamy.status"):
         for linea in open('/tmp/ghostreamy.status'):
             count_streams = count_streams + 1
             user_stream = linea.split("##")[0]
