@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.5.27] - 16/02/2021
+
+- Nueva opción para activar y desactivar líneas oscam bajo las opciones /emu_activatelineoscam y /emu_deactivatelineoscam
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-2527-02-16
+
 ## [2.5.26] - 12/02/2021
 
 - Arreglado bug a la hora de visualizar streams de ghostreamy con autostream

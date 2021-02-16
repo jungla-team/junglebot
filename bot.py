@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.26"   
+VERSION="2.5.27"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -1452,6 +1452,8 @@ def deletelineaoscam(linea):
         else:
             command = "sed '{}q;d' {} | cut -d':' -f1".format(linea_sig, fich_temp_lineas)
             linea_final = int(getoutput(command)) - 1
+        command = "rm -f " + fich_temp_lineas
+        execute_os_commands(command)
         command = "sed -i '{},{}d' {}".format(linea_inicio, linea_final, oscam_cfg)
         execute_os_commands(command)
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.oscam_delete_line_ok', linea=linea))
@@ -1503,6 +1505,113 @@ def list_lines_cccam():
                 return lista
             else:
                 return i18n.t('msg.emu_not_lines', file=cccam_cfg).split("_")
+
+def list_readers_state():
+    fich_temp_lines = "/tmp/temp_lines"
+    if os.path.exists(fich_temp_lines):
+        command = "rm -f " + fich_temp_lines
+        execute_os_commands(command)
+    fich_temp_readers = "/tmp/temp_readers"
+    if os.path.exists(fich_temp_readers):
+        command = "rm -f " + fich_temp_readers
+        execute_os_commands(command)
+    oscam_cfg = oscam_config_dir() + "/oscam.server"
+    if not os.path.exists(oscam_cfg):
+        return i18n.t('msg.file_notfound', file=oscam_cfg).split("_")
+    readers = getoutput("grep 'label' " + oscam_cfg + "| cut -d'=' -f2").split()
+    with open(fich_temp_readers, 'a') as f1:
+        for reader in readers:
+            linea_inicio = word_line_in_file(reader, oscam_cfg) - 1
+            commands = "sed '{}q;d' {} | grep 'reader]' | wc -l".format(linea_inicio, oscam_cfg)
+            is_reader = int(getoutput(commands))
+            if is_reader > 0:
+                command = "grep -n 'reader]' {} > {}".format(oscam_cfg, fich_temp_lines) 
+                execute_os_commands(command)
+                lineas = 1
+                with open(fich_temp_lines, 'r') as f2:
+                    for line in f2:
+                        linea_fic = int(line.split(":")[0])
+                        if linea_inicio == linea_fic:
+                            linea_encon = lineas
+                            break
+                        else:
+                            lineas = lineas + 1
+                command = "cat {} | wc -l".format(fich_temp_lines)
+                lineas_tot = int(getoutput(command))
+                linea_sig = linea_encon + 1
+                if linea_sig > lineas_tot:
+                    linea_final = "$"
+                else:
+                    command = "sed '{}q;d' {} | cut -d':' -f1".format(linea_sig, fich_temp_lines)
+                    linea_final = int(getoutput(command)) - 1
+                command = "sed -n '{},{}p' {} | grep enable | cut -d'=' -f2".format(linea_inicio, linea_final, oscam_cfg)
+                status_reader = getoutput(command).strip()
+                if not status_reader:
+                    status_reader = 1
+                f1.write(reader + ":" + str(status_reader) + "\n")
+    
+def enable_reader_oscam(reader):
+    oscam_cfg = oscam_config_dir() + "/oscam.server"
+    if not os.path.exists(oscam_cfg):
+        return i18n.t('msg.file_notfound', file=oscam_cfg).split("_")
+    fich_temp_lineas = "/tmp/temp_lineas"
+    linea_insert = word_line_in_file(reader, oscam_cfg) + 1
+    command = "sed -n '{}p' {} | grep enable | wc -l".format(linea_insert, oscam_cfg)
+    tiene_enable = int(getoutput(command))
+    if tiene_enable > 0:        
+        command = "sed -i '{} s/0/1/g' {}".format(linea_insert, oscam_cfg, oscam_cfg)
+        execute_os_commands(command)
+        oscam_restart()
+        return oscam_status()
+    else:
+        return i18n.t('msg.oscam_line_enable_error', linea=reader).split("_") 
+
+def disable_reader_oscam(reader):
+    oscam_cfg = oscam_config_dir() + "/oscam.server"
+    if not os.path.exists(oscam_cfg):
+        return i18n.t('msg.file_notfound', file=oscam_cfg).split("_")
+    linea_insert = word_line_in_file(reader, oscam_cfg) + 1
+    command = "sed -n '{}p' {} | grep enable | wc -l".format(linea_insert, oscam_cfg)
+    tiene_enable = int(getoutput(command))
+    if tiene_enable > 0:
+        command = "sed -i '{} s/1/0/g' {}".format(linea_insert, oscam_cfg)
+    else:
+        command= "sed -i '{}i {}' {}".format(linea_insert, "enable = 0", oscam_cfg)
+    execute_os_commands(command)
+    oscam_restart()
+    return oscam_status()
+
+def list_enabled_readers_oscam():
+    list_readers_state()
+    fich_temp_readers = "/tmp/temp_readers"
+    lista = []
+    if not os.path.exists(fich_temp_readers):
+        return i18n.t('msg.file_notfound', file=fich_temp_readers).split("_") 
+    f = open(fich_temp_readers, 'r')
+    for line in f:
+        status_reader = int(line.split(":")[1])
+        if status_reader == 1:
+            lista.append(line.split(":")[0])
+    if lista:
+        return lista
+    else:
+        return i18n.t('msg.oscam_not_readers_disabled').split("_")
+
+def list_disabled_readers_oscam():
+    list_readers_state()
+    fich_temp_readers = "/tmp/temp_readers"
+    lista = []
+    if not os.path.exists(fich_temp_readers):
+        return i18n.t('msg.file_notfound', file=fich_temp_readers).split("_") 
+    f = open(fich_temp_readers, 'r')
+    for line in f:
+        status_reader = int(line.split(":")[1])
+        if status_reader == 0:
+            lista.append(line.split(":")[0])
+    if lista:
+        return lista
+    else:
+        return i18n.t('msg.oscam_not_readers_enabled').split("_")
 
 # JUNGLESCRIPT
 @with_confirmation
@@ -2054,6 +2163,8 @@ menu_emu.add_option(MenuOption(name="addlineacccam", description=i18n.t('menu.em
 menu_emu.add_option(MenuOption(name = "dellineacccam", description = i18n.t('menu.emu.dellinecccam'), command = dellinea_cccam, params=[[JB_BUTTONS, lambda: zip(list_lines_cccam(), list_lines_cccam())]]))
 menu_emu.add_option(MenuOption(name = "addlineoscam", description = i18n.t('menu.emu.addlineoscam'), command = addlinea_oscam, params=['protocolo', 'label', 'clinea (C: servidor puerto usuario password)']))
 menu_emu.add_option(MenuOption(name = "dellineoscam", description = i18n.t('menu.emu.dellineoscam'), command = deletelineaoscam, params=[[JB_BUTTONS, lambda: zip(list_readers_oscam(), list_readers_oscam())]]))
+menu_emu.add_option(MenuOption(name = "activatelineoscam", description = i18n.t('menu.emu.enablelineoscam'), command = enable_reader_oscam, params=[[JB_BUTTONS, lambda: zip(list_disabled_readers_oscam(), list_disabled_readers_oscam())]]))
+menu_emu.add_option(MenuOption(name = "deactivatelineoscam", description = i18n.t('menu.emu.disablelineoscam'), command = disable_reader_oscam, params=[[JB_BUTTONS, lambda: zip(list_enabled_readers_oscam(), list_enabled_readers_oscam())]]))
 menu_emu.add_option(MenuOption(name = "start", description = i18n.t('menu.emu.start'), command = oscam_start))
 menu_emu.add_option(MenuOption(name = "stop", description = i18n.t('menu.emu.stop'), command = oscam_stop))
 menu_emu.add_option(MenuOption(name = "restart", description = i18n.t('menu.emu.restart'), command = oscam_restart))

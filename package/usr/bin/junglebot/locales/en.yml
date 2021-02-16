@@ -44,6 +44,8 @@ en:
             activate_emu: Activate emu
             dellineoscam: Delete oscam line
             dellinecccam: Delete cccam line
+            enablelineoscam: Enable oscam line
+            disablelineoscam: Disable oscam line
         epg:
             title: EPG Management
             path_epg: Show epg.dat path
@@ -233,6 +235,9 @@ en:
         oscam_conclave_installed: "The oscam conclave emul is already installed"
         oscam_delete_line_ok: "Line %{linea} deleted successfully"
         oscam_delete_line_error: "There was an error and the line %{linea} cannot be deleted"
+        oscam_line_enable_error: "There was an error and the line %{linea} cannot be enabled"
+        oscam_not_readers_disabled: "There aren't active readers for disable"
+        oscam_not_readers_enabled: "There aren't unactive readers for enable"
         oscam_stopped: "Oscam stopped"
         oscam_tunner: "There is no active tunner at this time"
         oscam_version: "version %{version}"
