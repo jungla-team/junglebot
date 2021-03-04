@@ -2,14 +2,8 @@ de:
     menu:
         command:
             title: Befehle
-            status: Rezeptor Status
-            reboot: Rezeptor Neustarten
-            standby: Zum Ruhe-modus
-            wakeup: Rezeptor einschalten
-            restartgui: Enigma2 neustarten
             stopstream: Streamproxy stoppen
             freeram: RAM reinigen
-            screenshot: Bildschirmfoto
             update: Sources aktualisieren
             upgrade: Pakete aktualisieren
             factory_reset: Werkeinstellung zurücksetzen
@@ -55,6 +49,19 @@ de:
             restart_gui: Interface neustarten
             uninstall_epgimport: EPGImport Desinstalieren
             uninstall_crossepg: CrossEPG Desinstalieren
+        ghostreamy:
+            title: ghostreamy Management
+            status: ghostreamy Status
+            stop: ghostreamy stoppen
+            start: ghostreamy starten
+            restart: ghostreamy neustarten
+            config: Einstellungen
+            set_config: Einstellungen ändern
+            check_config: Einstellungen überprüfen
+            install: ghostreamy instalieren/aktualisieren
+            uninstall: ghostreamy deinstalieren
+            log: ghostreamy Log Sehen
+            version: ghostreamy version Sehen
         help:
             title: Hilfemenü mit Liste der verfügbaren Menüs
         info:
@@ -65,8 +72,6 @@ de:
             top: Top 10 Prozesse mit CPU
         junglebot:
             title: Bot-Einstellungen
-            send_message: Nachricht senden
-            send_remote: Kanal wechseln
             config: Parameter
             set_config: Parameter ändern
             update: Bot aktualisieren
@@ -104,19 +109,6 @@ de:
             block_ip: Block IP
             unblock_ip: Unblock IP
             show_blocked_ips: Show blocked ips
-        ghostreamy:
-            title: ghostreamy Management
-            status: ghostreamy Status
-            stop: ghostreamy stoppen
-            start: ghostreamy starten
-            restart: ghostreamy neustarten
-            config: Einstellungen
-            set_config: Einstellungen ändern
-            check_config: Einstellungen überprüfen
-            install: ghostreamy instalieren/aktualisieren
-            uninstall: ghostreamy deinstalieren
-            log: ghostreamy Log Sehen
-            version: ghostreamy version Sehen
         records:
             title: Aufnahmemanagement
             list: Aufnahmeliste
@@ -127,6 +119,30 @@ de:
             delete_file: Datei löschen
             delete_all: Alle Dateien löschen
             path: aufnahmepfad
+        remotecontrol:
+            title: Fernbedienung
+            status: STATUS
+            reboot: REBOOT
+            standby_wakeup: ⭕️
+            restartgui: 🔄
+            screenshot: 📷
+            send_message: 💬
+            change_channel: CH+-
+            up: 🔼
+            down: 🔽
+            left: ◀️
+            right: ▶️
+            ok: 🆗
+            menu: MENU
+            exit: EXIT
+            red: 🔴
+            yellow: 🟡
+            blue: 🔵
+            green: 🟢
+            character: 🔠
+            volume_up: 🔈+
+            volume_down: 🔈-
+            mute: 🔇
         stream:
             title: Stream-Management
             show: Was sehen deine Freunde?
@@ -252,6 +268,7 @@ de:
         send_msg_error: "🚫 Fehler beim Senden der Nachricht"
         send_msg_success: "Nachricht erfolgreich gesendet"
         send_remote_error: "🚫 Error: Es sind nur Ziffern von 0 bis 9 zulässig"
+        send_remote_char_error: "🚫 Error: Only characters from A-Z are allowed"
         starting: "Startet"
         stoping: "Stoppt"
         streams_notexist: "Keine Streams in Bearbeitung"

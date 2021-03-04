@@ -2,14 +2,8 @@ es:
     menu:
         command:
             title: Comandos
-            status: Estado receptor
-            reboot: Reinicio receptor
-            standby: Ir a Reposo
-            wakeup: Despierta receptor
-            restartgui: Reiniciar enigma2
             stopstream: Parar streamproxy
             freeram: Liberar memoria
-            screenshot: Capturar pantalla
             update: Actualizar sources
             upgrade: Actualizar paquetes
             factory_reset: Restaurar valores fabrica
@@ -55,6 +49,19 @@ es:
             restart_gui: Reiniciar interfaz
             uninstall_epgimport: Desinstalar EPGImport
             uninstall_crossepg: Desinstalar CrossEPG
+        ghostreamy:
+            title: Gestión de ghostreamy
+            status: Estado ghostreamy
+            stop: Parar ghostreamy
+            start: Iniciar ghostreamy
+            restart: Reiniciar ghostreamy
+            config: Configuración
+            set_config: Cambiar configuración
+            check_config: Comprobar configuracion
+            install: Instalar/Actualizar ghostreamy
+            uninstall: Desinstalar ghostreamy
+            log: Ver log ghostreamy
+            version: Ver versión ghostreamy
         help:
             title: Menú ayuda con listado de menús disponibles
         info:
@@ -65,8 +72,6 @@ es:
             top: Top 10 procesos uso cpu
         junglebot:
             title: Ajustes del bot
-            send_message: Enviar mensaje
-            send_remote: Cambiar canal
             config: Parámetros
             set_config: Cambiar parámetros
             update: Actualizar bot
@@ -104,19 +109,6 @@ es:
             block_ip: Bloquear IP
             unblock_ip: Desbloquear IP
             show_blocked_ips: Mostrar ips bloqueadas
-        ghostreamy:
-            title: Gestión de ghostreamy
-            status: Estado ghostreamy
-            stop: Parar ghostreamy
-            start: Iniciar ghostreamy
-            restart: Reiniciar ghostreamy
-            config: Configuración
-            set_config: Cambiar configuración
-            check_config: Comprobar configuracion
-            install: Instalar/Actualizar ghostreamy
-            uninstall: Desinstalar ghostreamy
-            log: Ver log ghostreamy
-            version: Ver versión ghostreamy
         records:
             title: Gestión de grabaciones
             list: Listado grabaciones
@@ -127,6 +119,30 @@ es:
             delete_file: Borrar fichero
             delete_all: Borrar todos los ficheros
             path: Ruta grabaciones
+        remotecontrol:
+            title: Control remoto
+            status: STATUS
+            reboot: REBOOT
+            standby_wakeup: ⭕️
+            restartgui: 🔄
+            screenshot: 📷
+            send_message: 💬
+            change_channel: CH+-
+            up: 🔼
+            down: 🔽
+            left: ◀️
+            right: ▶️
+            ok: 🆗
+            menu: MENU
+            exit: EXIT
+            red: 🔴
+            yellow: 🟡
+            blue: 🔵
+            green: 🟢
+            character: 🔠
+            volume_up: 🔈+
+            volume_down: 🔈-
+            mute: 🔇
         stream:
             title: Gestión de streams
             show: Que ven tu amigos
@@ -252,6 +268,7 @@ es:
         send_msg_error: "🚫 Error enviando mensaje"
         send_msg_success: "Mensaje enviado correctamente"
         send_remote_error: "🚫 Error: Solo se admiten digitos del 0 a 9"
+        send_remote_char_error: "🚫 Error: Solo se admiten caracteres de la A-Z"
         starting: "Iniciando"
         stoping: "Parando"
         streams_notexist: "No hay streams en curso"

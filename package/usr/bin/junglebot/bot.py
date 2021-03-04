@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.27"   
+VERSION="2.5.29"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -352,9 +352,11 @@ def callback_menu(call):
             bot.send_message(identificacion, i18n.t('msg.unknown_error', error=str(e)))
 
 def check_version():
-    global new_version 
-    command = "opkg update"
-    execute_os_commands(command)
+    global new_version
+    if os.path.isfile("/run/opkg.lock"):
+        execute_os_commands("killall opkg")
+    execute_os_commands("opkg update")
+    time.sleep(5)
     hay_new_version_bot = int(getoutput("opkg list-upgradable | grep 'enigma2-plugin-extensions-junglebot ' | wc -l"))
     if hay_new_version_bot > 0:
         new_version = True
@@ -772,14 +774,6 @@ def info_channel():
         output.append(i18n.t('msg.not_signal'))
     return "\n".join(output)
 
-def estado_receptor():
-    response = webif_get("powerstate")
-    if  re.split('[\n\t]', response)[4] == 'true':
-        resultado = i18n.t('msg.satbox_standby')
-    else:
-        resultado = i18n.t('msg.satbox_started')
-    return resultado
-
 def enigma_distro():
     distro = getoutput("cat /etc/opkg/all-feed.conf | cut -d'-' -f1 | awk '{ print $2 }'")
     if distro:
@@ -985,17 +979,8 @@ def info_check_open_port(host,port):
         return i18n.t('msg.info_port_open', host=host, port=port)
     else:
         return i18n.t('msg.info_port_closed', host=host, port=port)
-        
-# COMMAND   
-@with_confirmation
-def command_reboot():
-    line = execute_os_commands("reboot")
-    return i18n.t('msg.command_reboot') + "\n" + line
 
-@with_confirmation
-def command_restartgui():
-    line = execute_os_commands("killall -9 enigma2")
-    return i18n.t('msg.command_restartgui') + "\n" + line
+# COMMAND   
 
 def command_update():
     line = execute_os_commands("opkg update")
@@ -1023,21 +1008,6 @@ def command_resetpass():
 def command_freeram():
     line = execute_os_commands("sync; echo 3 > /proc/sys/vm/drop_caches ")
     return i18n.t('msg.command_freeram') + "\n" + line
-
-def command_screenshot():
-    captura = execute_os_commands('wget 127.0.0.1/grab -O /tmp/capturacanal.png && sleep 10')
-    bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.command_screenshot') + '\n' + captura)
-    doc = open('/tmp/capturacanal.png', 'rb')
-    bot.send_document(G_CONFIG['chat_id'], doc)
-    return ''
-    
-def command_reposo():
-    line = webif_get("powerstate?newstate=0")
-    return i18n.t('msg.command_sleep') + "\n" + line
-    
-def command_despertar():
-    line = webif_get("remotecontrol?command=116")
-    return i18n.t('msg.command_wakeup') + "\n" + line
 
 def command_runcommand(command):
     salida = execute_os_commands(command)
@@ -1142,7 +1112,7 @@ def addlinea_cccam(cline):
                 clines.append(line)
     data = '\n'.join(clines)
     with open (cccam_cfg,'w') as f:
-        f.write(data)
+        f.write(data + "\n")
     return cccam_cfg + "\n" + data
 
 def addlinea_oscam(protocol, label, cline):
@@ -1494,9 +1464,12 @@ def list_lines_cccam():
     if not os.path.exists(cccam_cfg):
         return i18n.t('msg.file_notfound', file=cccam_cfg).split("_")
     else:
+        command = "sed -i '/^$/d' {}".format(cccam_cfg)
+        execute_os_commands(command)
         lista = []
         with open(cccam_cfg, "r") as file1:
-            lineas_tot = len(file1.readlines())
+            command = "cat {} | wc -l".format(cccam_cfg)
+            lineas_tot = int(getoutput(command))
             if lineas_tot > 0:
                 num_linea = 0
                 for line in file1:
@@ -2079,15 +2052,114 @@ def conn_autoftp():
 def conn_autossh():
     G_CONFIG['autossh'] = '1'
     return start_autossh()
-    
-def deco_send_message(message):
+
+# REMOTECONTROL
+
+class hash_table:
+    def __init__(self):
+	self.size = 113	
+	self.table = [None] * self.size
+
+    def __len__(self):
+	count = 0
+	for value in self.table:
+	    if value != None:
+		count += 1
+	return count
+
+    def Hash_func(self, value):
+        key = 0
+        for i in range(0,len(value)):
+            key += ord(value[i])
+        return key % self.size
+
+    def Insert(self, key, value):
+        hash = self.Hash_func(key)
+        if self.table[hash] is None:
+            self.table[hash] = value
+
+    def Search(self, key):
+        hash = self.Hash_func(key)
+        if self.table[hash] is None:
+            return None
+        else:
+            return self.table[hash]	
+
+KEYIDS = {
+	"KEY_NUM1": 2,
+	"KEY_NUM2": 3,
+	"KEY_NUM3": 4,
+	"KEY_NUM4": 5,
+	"KEY_NUM5": 6,
+	"KEY_NUM6": 7,
+	"KEY_NUM7": 8,
+	"KEY_NUM8": 9,
+	"KEY_NUM9": 10,
+	"KEY_NUM0": 11,
+	"KEY_UP": 103,
+	"KEY_LEFT": 105,
+	"KEY_RIGHT": 106,
+	"KEY_DOWN": 108,
+    "KEY_MUTE": 113,
+	"KEY_VOLUMEDOWN": 114,
+	"KEY_VOLUMEUP": 115,
+	"KEY_POWER": 116,
+    "KEY_MENU": 139,
+    "KEY_EXIT": 174,
+    "KEY_OK": 352,
+	"KEY_COLOR_RED": 398,
+	"KEY_COLOR_GREEN": 399,
+	"KEY_COLOR_YELLOW": 400,
+	"KEY_COLOR_BLUE": 401
+}
+
+tabla = hash_table()
+
+def remotecontrol_status():
+    response = webif_get("powerstate")
+    if  re.split('[\n\t]', response)[4] == 'true':
+        resultado = i18n.t('msg.satbox_standby')
+    else:
+        resultado = i18n.t('msg.satbox_started')
+    return resultado
+
+@with_confirmation
+def remotecontrol_reboot():
+    line = execute_os_commands("reboot")
+    return i18n.t('msg.command_reboot') + "\n" + line
+
+@with_confirmation
+def remotecontrol_restartgui():
+    line = execute_os_commands("killall -9 enigma2")
+    return i18n.t('msg.command_restartgui') + "\n" + line
+
+def remotecontrol_standby_wakeup():
+    response = webif_get("powerstate")
+    if  re.split('[\n\t]', response)[4] == 'true':
+        line = webif_get("powerstate?newstate=0")
+        resultado = i18n.t('msg.command_wakeup') + "\n" + line
+    else:
+        codigo = buscar_valor_tabla("POWER")
+        command = "remotecontrol?command={}".format(codigo)
+        line = webif_get(command)
+        resultado = i18n.t('msg.command_sleep') + "\n" + line
+    return resultado
+
+def remotecontrol_screenshot():
+    captura = execute_os_commands("wget 127.0.0.1/grab -O /tmp/capturacanal.png > /dev/null 2>&1")
+    doc = open('/tmp/capturacanal.png', 'rb')
+    bot.send_document(G_CONFIG['chat_id'], doc)
+    execute_os_commands("sleep 2 & rm -f /tmp/capturacanal.png")
+    return ''
+
+def remotecontrol_send_message(message):
     resp = webif_api("message?type=1&text={}".format(bytearray(message, 'utf8')))
     if resp.get('result', False):
         return i18n.t('msg.send_msg_success')
     else:
         return i18n.t('msg.send_msg_error') 
 
-def deco_send_remote(keys):
+def remotecontrol_change_channel(keys):
     # Only numbers
     key_codes = []
     for key in keys:
@@ -2102,6 +2174,89 @@ def deco_send_remote(keys):
         return "Ok '{}'".format(keys)
     else:
         return i18n.t('msg.send_remote_error') 
+
+def remotecontrol_send_up():
+    valor = buscar_valor_tabla("UP")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_down():
+    valor = buscar_valor_tabla("DOWN")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_left():
+    valor = buscar_valor_tabla("LEFT")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_right():
+    valor = buscar_valor_tabla("RIGHT")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_menu():
+    valor = buscar_valor_tabla("MENU")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_exit():
+    valor = buscar_valor_tabla("EXIT")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_ok():
+    valor = buscar_valor_tabla("OK")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_red():
+    valor = buscar_valor_tabla("COLOR_RED")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_green():
+    valor = buscar_valor_tabla("COLOR_GREEN")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_yellow():
+    valor = buscar_valor_tabla("COLOR_YELLOW")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_blue():
+    valor = buscar_valor_tabla("COLOR_BLUE")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_vol_up():
+    valor = buscar_valor_tabla("VOLUMEUP")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_vol_down():
+    valor = buscar_valor_tabla("VOLUMEDOWN")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_mute():
+    valor = buscar_valor_tabla("MUTE")
+    return remotecontrol_send_command(valor)
+
+def remotecontrol_send_command(codigo):
+    command = "remotecontrol?command={}".format(codigo)
+    line = webif_get(command)
+    return ""
+
+def remotecontrol_send_digit(digit):
+    if digit.isdigit() and len(digit) == 1:
+        digit = "NUM" + digit
+        value_digit = buscar_valor_tabla(digit)
+        command = "remotecontrol?command={}".format(value_digit)
+        line = webif_get(command)
+        return ""
+    else:
+        return i18n.t('msg.send_remote_error') 
+
+def cargar_tabla_hash():
+	if len(tabla) == 0:
+		for key, value in KEYIDS.items():
+			tabla.Insert(key, value)
+
+def buscar_valor_tabla(clave):
+    global tabla
+    cargar_tabla_hash()
+    clave = "KEY_{}".format(clave)
+    valor = tabla.Search(clave)
+    return valor
 
 # MAIN
 menu_info = MenuOption(name = 'info', description = i18n.t('menu.info.title'))
@@ -2123,14 +2278,8 @@ menu_network.add_option(MenuOption(name = "desbloquear_ip", description = i18n.t
 menu_network.add_option(MenuOption(name = "ver_ip_bloqueadas", description = i18n.t('menu.network.show_blocked_ips'), command = mostrar_ip))
 
 menu_command = MenuOption(name = 'command', description = i18n.t('menu.command.title'))
-menu_command.add_option(MenuOption(name = "status", description = i18n.t('menu.command.status'), command = estado_receptor))
-menu_command.add_option(MenuOption(name = "reboot", description = i18n.t('menu.command.reboot'), command = command_reboot, params=params_confirmation ))
-menu_command.add_option(MenuOption(name = "reposo", description = i18n.t('menu.command.standby'), command = command_reposo))
-menu_command.add_option(MenuOption(name = "despertar", description = i18n.t('menu.command.wakeup'), command = command_despertar))
-menu_command.add_option(MenuOption(name = "restartgui", description = i18n.t('menu.command.restartgui'), command = command_restartgui, params=params_confirmation))
 menu_command.add_option(MenuOption(name = "stopstream", description = i18n.t('menu.command.stopstream'), command = command_stopstream))
 menu_command.add_option(MenuOption(name = "freeram", description = i18n.t('menu.command.freeram'), command = command_freeram))
-menu_command.add_option(MenuOption(name = "screenshot", description = i18n.t('menu.command.screenshot'), command = command_screenshot))
 menu_command.add_option(MenuOption(name = "update", description = i18n.t('menu.command.update'), command = command_update))
 menu_command.add_option(MenuOption(name = "upgrade", description = i18n.t('menu.command.upgrade'), command = command_upgrade, params=params_confirmation))
 menu_command.add_option(MenuOption(name = "restaurar", description = i18n.t('menu.command.factory_reset'), command = command_restaurar, params=params_confirmation))
@@ -2186,16 +2335,14 @@ menu_ghostreamy.add_option(MenuOption(name = "uninstall", description = i18n.t('
 menu_ghostreamy.add_option(MenuOption(name = "ver_log", description = i18n.t('menu.ghostreamy.log'), command = ghostreamy_log))
 menu_ghostreamy.add_option(MenuOption(name = "ver_version", description = i18n.t('menu.ghostreamy.version'), command = ghostreamy_version))
 
-menu_settings = MenuOption(name = 'junglebot', description = i18n.t('menu.junglebot.title'), info = 'https://jungle-team.com/junglebotv2-telegram-enigma2/')
-menu_settings.add_option(MenuOption(name = "send_message", description = i18n.t('menu.junglebot.send_message'), command = deco_send_message, params=['mensaje']))
-menu_settings.add_option(MenuOption(name = "send_remote", description = i18n.t('menu.junglebot.send_remote'), command = deco_send_remote, params=['canal']))
-menu_settings.add_option(MenuOption(name = "config", description = i18n.t('menu.junglebot.config'), command = lambda : config("/usr/bin/junglebot/parametros.py")))
-menu_settings.add_option(MenuOption(name = "set_config_parameters", description = i18n.t('menu.junglebot.set_config'), command = set_value_parameters, params =['clave', 'valor']))
-menu_settings.add_option(MenuOption(name = "update", description = i18n.t('menu.junglebot.update'), command = junglebot_update, params=params_confirmation))
-menu_settings.add_option(MenuOption(name = "reboot", description = i18n.t('menu.junglebot.reboot'), command = junglebot_restart, params=params_confirmation))
-menu_settings.add_option(MenuOption(name = "log", description = i18n.t('menu.junglebot.log'), command = junglebot_log))
-menu_settings.add_option(MenuOption(name = "purgelog", description = i18n.t('menu.junglebot.purge_log'), command = junglebot_purge_log))
-menu_settings.add_option(MenuOption(name = "changelog", description = i18n.t('menu.junglebot.changelog'), command = junglebot_changelog))
+menu_junglebot = MenuOption(name = 'junglebot', description = i18n.t('menu.junglebot.title'), info = 'https://jungle-team.com/junglebotv2-telegram-enigma2/')
+menu_junglebot.add_option(MenuOption(name = "config", description = i18n.t('menu.junglebot.config'), command = lambda : config("/usr/bin/junglebot/parametros.py")))
+menu_junglebot.add_option(MenuOption(name = "set_config_parameters", description = i18n.t('menu.junglebot.set_config'), command = set_value_parameters, params =['clave', 'valor']))
+menu_junglebot.add_option(MenuOption(name = "update", description = i18n.t('menu.junglebot.update'), command = junglebot_update, params=params_confirmation))
+menu_junglebot.add_option(MenuOption(name = "reboot", description = i18n.t('menu.junglebot.reboot'), command = junglebot_restart, params=params_confirmation))
+menu_junglebot.add_option(MenuOption(name = "log", description = i18n.t('menu.junglebot.log'), command = junglebot_log))
+menu_junglebot.add_option(MenuOption(name = "purgelog", description = i18n.t('menu.junglebot.purge_log'), command = junglebot_purge_log))
+menu_junglebot.add_option(MenuOption(name = "changelog", description = i18n.t('menu.junglebot.changelog'), command = junglebot_changelog))
 
 menu_junglescript = MenuOption(name = 'junglescript', description = i18n.t('menu.junglescript.title'), info  ='https://jungle-team.com/junglescript-lista-canales-y-picon-enigma2-movistar/')
 menu_junglescript.add_option(MenuOption(name = "config", description = i18n.t('menu.junglescript.config'), command = lambda : config("/usr/bin/enigma2_pre_start.conf")))
@@ -2230,13 +2377,37 @@ menu_epg.add_option(MenuOption(name = "listar_ruta_epg", description = i18n.t('m
 menu_epg.add_option(MenuOption(name = "listar_fecha_epg", description = i18n.t('menu.epg.date_epg'), command = find_date_epg_dat))
 menu_epg.add_option(MenuOption(name = "update_epg", description = i18n.t('menu.epg.update_epg'), command = update_epg, params =["dias (3, 7, 15 o 30)"]))
 menu_epg.add_option(MenuOption(name = "borrar_epg", description = i18n.t('menu.epg.del_epg'), command = delete_epg_dat, params=params_confirmation))
-menu_epg.add_option(MenuOption(name = "reiniciar_interfaz", description = i18n.t('menu.epg.restart_gui'), command = command_restartgui, params=params_confirmation))
+menu_epg.add_option(MenuOption(name = "reiniciar_interfaz", description = i18n.t('menu.epg.restart_gui'), command = remotecontrol_restartgui, params=params_confirmation))
 menu_epg.add_option(MenuOption(name = "desinstalar_epgimport", description = i18n.t('menu.epg.uninstall_epgimport'), command = remove_epgimport, params=params_confirmation))
 menu_epg.add_option(MenuOption(name = "desinstalar_crossepg", description = i18n.t('menu.epg.uninstall_crossepg'), command = remove_crossepg, params=params_confirmation))
 
+menu_remotecontrol = MenuOption(name = 'remotecontrol', description = i18n.t('menu.remotecontrol.title'))
+menu_remotecontrol.add_option(MenuOption(name = "standby_wakeup", description = i18n.t('menu.remotecontrol.standby_wakeup'), command = remotecontrol_standby_wakeup))
+menu_remotecontrol.add_option(MenuOption(name = "status", description = i18n.t('menu.remotecontrol.status'), command = remotecontrol_status))
+menu_remotecontrol.add_option(MenuOption(name = "reboot", description = i18n.t('menu.remotecontrol.reboot'), command = remotecontrol_reboot, params=params_confirmation))
+menu_remotecontrol.add_option(MenuOption(name = "reboot_enigma2", description = i18n.t('menu.remotecontrol.restartgui'), command = remotecontrol_restartgui, params=params_confirmation))
+menu_remotecontrol.add_option(MenuOption(name = "screenshot", description = i18n.t('menu.remotecontrol.screenshot'), command = remotecontrol_screenshot))
+menu_remotecontrol.add_option(MenuOption(name = "send_message", description = i18n.t('menu.remotecontrol.send_message'), command = remotecontrol_send_message, params=['mensaje']))
+menu_remotecontrol.add_option(MenuOption(name = "send_menu", description = i18n.t('menu.remotecontrol.menu'), command = remotecontrol_send_menu))
+menu_remotecontrol.add_option(MenuOption(name = "send_exit", description = i18n.t('menu.remotecontrol.exit'), command = remotecontrol_send_exit))
+menu_remotecontrol.add_option(MenuOption(name = "send_up", description = i18n.t('menu.remotecontrol.up'), command = remotecontrol_send_up))
+menu_remotecontrol.add_option(MenuOption(name = "send_down", description = i18n.t('menu.remotecontrol.down'), command = remotecontrol_send_down))
+menu_remotecontrol.add_option(MenuOption(name = "send_left", description = i18n.t('menu.remotecontrol.left'), command = remotecontrol_send_left))
+menu_remotecontrol.add_option(MenuOption(name = "send_right", description = i18n.t('menu.remotecontrol.right'), command = remotecontrol_send_right))
+menu_remotecontrol.add_option(MenuOption(name = "send_ok", description = i18n.t('menu.remotecontrol.ok'), command = remotecontrol_send_ok))
+menu_remotecontrol.add_option(MenuOption(name = "send_digit", description = i18n.t('menu.remotecontrol.digit'), command = remotecontrol_send_digit, params=['digito']))
+menu_remotecontrol.add_option(MenuOption(name = "send_red", description = i18n.t('menu.remotecontrol.red'), command = remotecontrol_send_red))
+menu_remotecontrol.add_option(MenuOption(name = "send_green", description = i18n.t('menu.remotecontrol.green'), command = remotecontrol_send_green))
+menu_remotecontrol.add_option(MenuOption(name = "send_yellow", description = i18n.t('menu.remotecontrol.yellow'), command = remotecontrol_send_yellow))
+menu_remotecontrol.add_option(MenuOption(name = "send_blue", description = i18n.t('menu.remotecontrol.blue'), command = remotecontrol_send_blue))
+menu_remotecontrol.add_option(MenuOption(name = "change_channel", description = i18n.t('menu.remotecontrol.change_channel'), command = remotecontrol_change_channel, params=['canal']))
+menu_remotecontrol.add_option(MenuOption(name = "send_mute", description = i18n.t('menu.remotecontrol.mute'), command = remotecontrol_send_mute))
+menu_remotecontrol.add_option(MenuOption(name = "send_vol_up", description = i18n.t('menu.remotecontrol.volume_up'), command = remotecontrol_send_vol_up))
+menu_remotecontrol.add_option(MenuOption(name = "send_vol_down", description = i18n.t('menu.remotecontrol.volume_down'), command = remotecontrol_send_vol_down))
+
 menu_ayuda = MenuOption(name = 'ayuda', description = i18n.t('menu.help.title'))
 
-g_menu = [menu_ayuda, menu_info, menu_network, menu_settings, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_command, menu_junglescript, menu_ghostreamy]   
+g_menu = [menu_ayuda, menu_info, menu_network, menu_junglebot, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_remotecontrol, menu_command, menu_junglescript, menu_ghostreamy]   
 g_current_menu_option = None
 
 if __name__ == "__main__":

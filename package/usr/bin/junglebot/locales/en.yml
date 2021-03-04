@@ -2,14 +2,8 @@ en:
     menu:
         command:
             title: Commands
-            status: Receiver status
-            reboot: Receiver reboot
-            standby: Standby receiver
-            wakeup: Wake up receiver
-            restartgui: Reboot enigma2
             stopstream: Stop streamproxy
             freeram: Free memory
-            screenshot: Screenshot
             update: Update sources
             upgrade: Upgrade packages
             factory_reset: Restore to default values
@@ -55,6 +49,19 @@ en:
             restart_gui: Reboot enigma2 interface
             uninstall_epgimport: Uninstall EPGImport
             uninstall_crossepg: Uninstall CrossEPG
+        ghostreamy:
+            title: ghostreamy management
+            status: ghostreamy status
+            stop: Stop ghostreamy
+            start: Start ghostreamy
+            restart: Reboot ghostreamy
+            config: Configuration
+            set_config: Change configuration
+            check_config: Check configuration
+            install: Install/Update ghostreamy
+            uninstall: Uninstall ghostreamy
+            log: Show ghostreamy log
+            version: Show ghostreamy version
         help:
             title: Help menu with list of available menus
         info:
@@ -65,8 +72,6 @@ en:
             top: Top 10 processes using cpu
         junglebot:
             title: Bot settings
-            send_message: Send message
-            send_remote: Change channel
             config: Parameters
             set_config: Change parameters
             update: Update bot
@@ -104,19 +109,6 @@ en:
             block_ip: Block IP
             unblock_ip: Unblock IP
             show_blocked_ips: Show blocked ips
-        ghostreamy:
-            title: ghostreamy management
-            status: ghostreamy status
-            stop: Stop ghostreamy
-            start: Start ghostreamy
-            restart: Reboot ghostreamy
-            config: Configuration
-            set_config: Change configuration
-            check_config: Check configuration
-            install: Install/Update ghostreamy
-            uninstall: Uninstall ghostreamy
-            log: Show ghostreamy log
-            version: Show ghostreamy version
         records:
             title: Recordings management
             list: Recordings list
@@ -127,6 +119,30 @@ en:
             delete_file: Delete file
             delete_all: Delete all files
             path: Recordings path
+        remotecontrol:
+            title: Remote control
+            status: STATUS
+            reboot: REBOOT
+            standby_wakeup: ⭕️
+            restartgui: 🔄
+            screenshot: 📷
+            send_message: 💬
+            change_channel: CH+-
+            up: 🔼
+            down: 🔽
+            left: ◀️
+            right: ▶️
+            ok: 🆗
+            menu: MENU
+            exit: EXIT
+            red: 🔴
+            yellow: 🟡
+            blue: 🔵
+            green: 🟢
+            digit: 🔢 
+            volume_up: 🔈+
+            volume_down: 🔈-
+            mute: 🔇
         stream:
             title: Streams management
             show: Current streamings
@@ -252,6 +268,7 @@ en:
         send_msg_error: "🚫 Error sending message"
         send_msg_success: "Message sent successfully"
         send_remote_error: "🚫 Error: Only digits from 0 to 9 are allowed"
+        send_remote_char_error: "🚫 Error: Only characters from A-Z are allowed"
         starting: "Starting"
         stoping: "Stopping"
         streams_notexist: "No streams in progress"

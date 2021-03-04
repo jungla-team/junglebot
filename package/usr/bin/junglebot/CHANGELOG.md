@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.5.29] - 04/03/2021
+
+- Arreglado bug con el borrado de líneas cccam /emu_dellineacccam
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-2529-03-04
+
+## [2.5.28] - 25/02/2021
+
+- Arreglado bug con reinicio programado de alimentación para el arranque de los servicios AUTO
+- Redistribución menú /command y /junglebot
+- Añadido nuevo menú /remotecontrol con las opciones del mando
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-2528-02-22
+
 ## [2.5.27] - 16/02/2021
 
 - Nueva opción para activar y desactivar líneas oscam bajo las opciones /emu_activatelineoscam y /emu_deactivatelineoscam
