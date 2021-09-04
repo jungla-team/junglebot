@@ -3,5 +3,5 @@ netaddr==0.7.19
 requests==2.23.0
 pyga==2.6.1
 python-i18n==0.3.9
-PyYAML==5.3.1
-speedtest-cli==2.1.2
+PyYAML==5.4.1
+speedtest-cli==2.1.3

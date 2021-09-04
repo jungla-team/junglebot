@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.5.29"   
+VERSION="2.6.1"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -474,6 +474,7 @@ def controlstream_backgroundvti():
     while True:
         ip_autorizadas = ips_autorizadas()
         amigo_autorizados = amigos_autorizados()
+        intrusos = ips_intrusos()
         output = []
         j = webif_api("statusinfo?")
         ip_deco = obtener_ip_deco()
@@ -484,7 +485,9 @@ def controlstream_backgroundvti():
                 for stream in streamings:
                     if stream.strip():            
                         ip_cliente = stream.split(":")[0].strip()
-                        if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1" and stream.strip() and ip_cliente and not ip_cliente in ip_autorizadas:
+                        if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1" and stream.strip() and ip_cliente and not ip_cliente in ip_autorizadas and not ip_cliente in intrusos:
+                            addipintruso(ip_cliente)
+                            intrusos = ips_intrusos()
                             output.append(i18n.t('msg.control_access') + stream.strip())
         ### Sacar streams ghostreamy
         if os.path.exists("/tmp/ghostreamy.status"):
@@ -496,11 +499,74 @@ def controlstream_backgroundvti():
                 if ip_stream in ip_autorizadas or user_stream in amigo_autorizados:
                     logger.info("Amigo autorizado para stream: " + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
                 else:
-                    output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
+                    if not ip_cliente in intrusos:
+                        addipintruso(ip_cliente)
+                        intrusos = ips_intrusos()
+                        output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
         if output:
             logger.info("\n".join(output))
             bot.send_message(G_CONFIG['chat_id'], "\n".join(output))
         time.sleep(G_CONFIG['timerbot'])
+
+def inicializar_intrusos():
+    file_path = "/tmp/intrusos.txt"
+    if os.path.exists(file_path):
+        execute_os_commands("cat /dev/null > {}".format(file_path))
+        logger.info("Vaciando fichero de intrusos")
+    else:
+        execute_os_commands("touch {}".format(file_path))
+        logger.info("Creando fichero de intrusos")
+
+def ips_intrusos():
+    intrusos = IPSet()
+    with open ("/tmp/intrusos.txt", 'r') as f:
+        for linea in f:
+            linea = linea.rstrip('\n')
+            if len(linea) > 0:
+                try:
+                    if valid_ipv4(linea) or valid_glob(linea):
+                        intrusos.add(IPGlob(linea))
+                    else:
+                        ip = socket.gethostbyname(linea)
+                        if valid_ipv4(ip):
+                            intrusos.add(ip)                            
+                except Exception as e:
+                    continue
+    f.close()
+    return intrusos
+
+def addipintruso(intruso):
+    fichero = "/tmp/intrusos.txt"
+    with open (fichero,'a') as f:
+        f.write(intruso + "\n")
+        logger.info("Añadido intruso " + intruso)
+
+def stream_delintruso(intruso):
+    lines = None
+    fichero = "/tmp/intrusos.txt"
+    with open(fichero, 'r') as file:
+        lines = file.readlines()
+    with open (fichero, 'w') as f:
+        for line in lines:
+            if line.strip("\n") != intruso:
+                f.write(line)
+	junglebot_restart()
+    return intrusos()
+
+def stream_intrusos():
+    fichero = "/tmp/intrusos.txt"
+    if os.path.isfile(fichero):
+        return execute_os_commands("cat " + fichero).split('\n')
+    else:
+        return []
+
+def intrusos():
+    fichero = "/tmp/intrusos.txt"
+    items = stream_intrusos()
+    if len(items) > 0:
+        return '\n'.join(items)
+    else:
+        return i18n.t('msg.file_notfound', file=fichero)
 
 def ips_autorizadas():
     autorizadas = IPSet()
@@ -539,6 +605,7 @@ def controlstream_background():
     while True:
         ip_autorizadas = ips_autorizadas()
         amigo_autorizados = amigos_autorizados()
+        intrusos = ips_intrusos()
         output = []
         #### Sacar streams
         j = webif_api("about?")
@@ -547,7 +614,8 @@ def controlstream_background():
         for linea in lineas:	
             ip = linea['ip'].replace("::ffff:", "")
             if ip_deco != ip and ip != "::1":
-                if ip and not ip in ip_autorizadas:
+                if ip and not ip in ip_autorizadas and not ip in intrusos:
+                    addipintruso(ip)
                     output.append(i18n.t('msg.control_access') + linea['ip'].replace("::ffff:", "") + ": " + linea['name'])
         ### Sacar streams ghostreamy
         if os.path.exists("/tmp/ghostreamy.status"):
@@ -559,7 +627,10 @@ def controlstream_background():
                 if ip_stream in ip_autorizadas or user_stream in amigo_autorizados:
                     logger.info("Amigo autorizado para stream: " + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
                 else:
-                    output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
+                    if not ip_stream in intrusos:
+                        addipintruso(ip_stream)
+                        intrusos = ips_intrusos()
+                        output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
         if output:
             logger.info("\n".join(output))
             bot.send_message(G_CONFIG['chat_id'], "\n".join(output))
@@ -568,11 +639,14 @@ def controlstream_background():
 def controlssh_background():
     while True:
         ip_autorizadas = ips_autorizadas()
+        intrusos = ips_intrusos()
         conexiones = commands.getoutput("netstat -tan | grep \:'22 ' | grep ESTAB | awk '{print $5}' |sed -e 's/::ffff://'| cut -d: -f1 | sort")      
         conexiones = conexiones.split('\n')
         output = []
         for linea in conexiones:
-            if linea and not linea in ip_autorizadas:
+            if linea and not linea in ip_autorizadas and not linea in intrusos:
+                addipintruso(linea)
+                intrusos = ips_intrusos()
                 output.append(i18n.t('msg.control_ssh_unauthorized') + " = " + linea)
         if output:
             logger.info(output)
@@ -582,11 +656,14 @@ def controlssh_background():
 def controlftp_background():
     while True:
         ip_autorizadas = ips_autorizadas()
+        intrusos = ips_intrusos()
         conexiones = commands.getoutput("netstat -tan | grep \:'21 ' | grep ESTAB | awk '{print $5}' |sed -e 's/::ffff://'| cut -d: -f1 | sort") 
         conexiones = conexiones.split('\n')
         output = []
         for linea in conexiones:
-            if linea and not linea in ip_autorizadas:
+            if linea and not linea in ip_autorizadas and not linea in intrusos:
+                addipintruso(linea)
+                intrusos = ips_intrusos()
                 output.append(i18n.t('msg.control_ftp_unauthorized') + " = " + linea) 
         if output:
             logger.info(output)
@@ -844,18 +921,14 @@ def info_machineid():
     return i18n.t('msg.info_machineid') + ":\n" + machine_id()
 
 def info_ip():
-    return requests.get('https://ifconfig.me/').text
+    return getoutput("curl -s ifconfig.me")
 
 def info_tarjetared():
     line = getoutput("ethtool eth0").split("Speed: ")[1]
     return i18n.t('msg.info_networkcard') + ":\n" + line
     
 def list_speedtest():
-    distro = enigma_distro()
-    if (distro == VTI):
-        lista = getoutput("/opt/bin/speedtest-cli --list")
-    else:
-        lista = getoutput("/usr/bin/speedtest-cli --list")
+    lista = getoutput("/usr/bin/speedtest-cli --list")
     return lista
 
 def info_speedtest_options():
@@ -872,12 +945,8 @@ def info_speedtest_options():
     return result
 
 def info_speedtest(hostspeed):
-    distro = enigma_distro()
     try:
-        if (distro == VTI):
-            bin_velocidad = "/opt/bin/speedtest-cli"
-        else:
-            bin_velocidad = "/usr/bin/speedtest-cli"
+        bin_velocidad = "/usr/bin/speedtest-cli"
         command = bin_velocidad + " --share --simple " + " --server "+ hostspeed +  " | awk 'NR==4' | awk '{print $3}'"
         velocidad = getoutput(command)
         bot.send_photo(G_CONFIG['chat_id'], photo=velocidad)
@@ -944,24 +1013,6 @@ def info_temperatura():
     if temperatura:
         temperatura = int(filter(str.isdigit, temperatura))
     return temperatura                       
-
-def estado_zerotier():
-    var_zerotier = getoutput("which /usr/sbin/zerotier-cli")
-    output = []
-    if var_zerotier:
-        output.append(i18n.t('msg.info_zerotier'))
-        # estado zerotier
-        line = getoutput("/usr/sbin/zerotier-cli info")
-        bot.send_message(G_CONFIG['chat_id'], line)
-        # per zerotier
-        line = getoutput('/usr/sbin/zerotier-cli listpeers')
-        output.append("  [i] " + line)
-        # network zerotier
-        line = getoutput('/usr/sbin/zerotier-cli listnetworks')
-        output.append("  [i] " + line)
-    else:
-        output.append(i18n.t('msg.info_zerotier_notinstalled'))
-    return "\n".join(output)
 
 def info_check_duckdns_ip(host):
     public_ip = info_ip()
@@ -2257,6 +2308,110 @@ def buscar_valor_tabla(clave):
     clave = "KEY_{}".format(clave)
     valor = tabla.Search(clave)
     return valor
+# ZEROTIER
+
+def zerotier_status():
+    var_zerotier = getoutput("which /usr/sbin/zerotier-cli")
+    output = []
+    if var_zerotier:
+        output.append(i18n.t('msg.info_zerotier'))
+        # estado zerotier
+        line = getoutput("/usr/sbin/zerotier-cli info")
+        output.append(line)
+        # per zerotier
+        line = getoutput("/usr/sbin/zerotier-cli listpeers")
+        output.append("  [i] " + line)
+        # network zerotier
+        line = getoutput("/usr/sbin/zerotier-cli listnetworks")
+        output.append("  [i] " + line)
+    else:
+        output.append(i18n.t('msg.info_zerotier_notinstalled'))
+    return "\n".join(output)
+
+def zerotier_stop():
+    var_zerotier = getoutput("which /usr/sbin/zerotier-cli")
+    output = []
+    if var_zerotier:
+        command = "/etc/init.d/zerotier stop"
+        line = getoutput(command)
+        output.append(line)
+    else:
+        output.append(i18n.t('msg.info_zerotier_notinstalled'))
+    return "\n".join(output)
+
+def zerotier_start():
+    var_zerotier = getoutput("which /usr/sbin/zerotier-cli")
+    output = []
+    if var_zerotier:
+        command = "/etc/init.d/zerotier start"
+        line = getoutput(command)
+        output.append(line)
+    else:
+        output.append(i18n.t('msg.info_zerotier_notinstalled'))
+    return "\n".join(output)
+
+def zerotier_force_reload():
+    var_zerotier = getoutput("which /usr/sbin/zerotier-cli")
+    output = []
+    if var_zerotier:
+        command = "/etc/init.d/zerotier force-reload"
+        line = getoutput(command)
+        output.append(line)
+    else:
+        output.append(i18n.t('msg.info_zerotier_notinstalled'))
+    return "\n".join(output)
+
+def zerotier_join_network(netid):
+    var_zerotier = getoutput("which /usr/sbin/zerotier-cli")
+    output = []
+    if var_zerotier:
+        command = "/usr/sbin/zerotier-cli join {}".format(netid)
+        line = getoutput(command)
+        output.append(line)
+    else:
+        output.append(i18n.t('msg.info_zerotier_notinstalled'))
+    return "\n".join(output)
+
+def zerotier_leave_network(netid):
+    var_zerotier = getoutput("which /usr/sbin/zerotier-cli")
+    output = []
+    if var_zerotier:
+        command = "/usr/sbin/zerotier-cli leave {}".format(netid)
+        line = getoutput(command)
+        output.append(line)
+    else:
+        output.append(i18n.t('msg.info_zerotier_notinstalled'))
+    return "\n".join(output)
+
+def zerotier_install():
+    hay_zerotier = int(getoutput("opkg list-installed | grep zerotier | wc -l"))
+    distro = enigma_distro()
+    es_arm = info_arquitecture()
+    output = []
+    if hay_zerotier == 0:
+        if distro == VTI:
+            command = "opkg install zerotiervti"
+        else:
+            if es_arm == "arm":
+                command = "opkg install zerotierarm"
+            else:
+                command = "opkg install zerotier"
+        line = getoutput(command)
+        output.append(line)
+    else:
+        output.append(i18n.t('msg.info_zerotier_installed'))
+    return "\n".join(output)
+
+def zerotier_uninstall():
+    hay_zerotier = int(getoutput("opkg list-installed | grep zerotier | wc -l"))
+    output = []
+    if hay_zerotier > 0:
+        command = "opkg remove zerotier*"
+        line = getoutput(command)
+        output.append(line)
+    else:
+        output.append(i18n.t('msg.info_zerotier_notinstalled'))
+    return "\n".join(output)
 
 # MAIN
 menu_info = MenuOption(name = 'info', description = i18n.t('menu.info.title'))
@@ -2271,14 +2426,12 @@ menu_network.add_option(MenuOption(name = "conexiones", description = i18n.t('me
 menu_network.add_option(MenuOption(name = "speedtest", description = i18n.t('menu.network.speedtest'), command = info_speedtest, params=[[JB_BUTTONS, lambda: info_speedtest_options()]]))
 menu_network.add_option(MenuOption(name = "check_duckdns_ip", description = i18n.t('menu.network.check_duckdns_ip'), command = info_check_duckdns_ip, params =["host"]))
 menu_network.add_option(MenuOption(name = "check_open_port", description = i18n.t('menu.network.check_open_port'), command = info_check_open_port, params =["host", "port"]))
-menu_network.add_option(MenuOption(name = "zerotier", description = i18n.t('menu.network.zerotier'), command = estado_zerotier))
 menu_network.add_option(MenuOption(name = "geolocalizar_ip", description = i18n.t('menu.network.geolocate'), command = geolocalizar_ip, params=['geolocalizar']))
 menu_network.add_option(MenuOption(name = "bloquear_ip", description = i18n.t('menu.network.block_ip'), command = bloquear_ip, params=['bloquear']))
 menu_network.add_option(MenuOption(name = "desbloquear_ip", description = i18n.t('menu.network.unblock_ip'), command = desbloquear_ip, params=[[JB_BUTTONS, lambda: zip(rejected_ips(), rejected_ips())]]))
 menu_network.add_option(MenuOption(name = "ver_ip_bloqueadas", description = i18n.t('menu.network.show_blocked_ips'), command = mostrar_ip))
 
 menu_command = MenuOption(name = 'command', description = i18n.t('menu.command.title'))
-menu_command.add_option(MenuOption(name = "stopstream", description = i18n.t('menu.command.stopstream'), command = command_stopstream))
 menu_command.add_option(MenuOption(name = "freeram", description = i18n.t('menu.command.freeram'), command = command_freeram))
 menu_command.add_option(MenuOption(name = "update", description = i18n.t('menu.command.update'), command = command_update))
 menu_command.add_option(MenuOption(name = "upgrade", description = i18n.t('menu.command.upgrade'), command = command_upgrade, params=params_confirmation))
@@ -2293,6 +2446,8 @@ menu_stream.add_option(MenuOption(name = "addamigo", description = i18n.t('menu.
 menu_stream.add_option(MenuOption(name = "delamigo", description = i18n.t('menu.stream.delete_friend'), command = stream_delamigo, params=[[JB_BUTTONS, lambda: zip(stream_amigos(), stream_amigos())]]))
 menu_stream.add_option(MenuOption(name = "autocheck", description = i18n.t('menu.stream.autocheck'), command = stream_autocheck, params=params_confirmation))
 menu_stream.add_option(MenuOption(name = "stopstream", description = i18n.t('menu.stream.stop_streamproxy'), command = command_stopstream))
+menu_stream.add_option(MenuOption(name = "listar_instrusos", description = i18n.t('menu.stream.intruders_list'), command = intrusos))
+menu_stream.add_option(MenuOption(name = "delinstruso", description = i18n.t('menu.stream.delete_intruder'), command = stream_delintruso, params=[[JB_BUTTONS, lambda: zip(stream_intrusos(), stream_intrusos())]]))
 
 menu_conexiones = MenuOption(name = 'conexiones', description = i18n.t('menu.connections.title'))
 menu_conexiones.add_option(MenuOption(name = "config", description = i18n.t('menu.connections.config'), command = lambda : config("/usr/bin/junglebot/parametros.py")))
@@ -2304,6 +2459,8 @@ menu_conexiones.add_option(MenuOption(name = "ssh", description = i18n.t('menu.c
 menu_conexiones.add_option(MenuOption(name = "ftp", description = i18n.t('menu.connections.ftp'), command = controlftp))
 menu_conexiones.add_option(MenuOption(name = "autossh", description = i18n.t('menu.connections.autossh'), command = conn_autossh, params=params_confirmation))
 menu_conexiones.add_option(MenuOption(name = "autoftp", description = i18n.t('menu.connections.autoftp'), command = conn_autoftp, params=params_confirmation))
+menu_conexiones.add_option(MenuOption(name = "listar_instrusos", description = i18n.t('menu.stream.intruders_list'), command = intrusos))
+menu_conexiones.add_option(MenuOption(name = "delinstruso", description = i18n.t('menu.stream.delete_intruder'), command = stream_delintruso, params=[[JB_BUTTONS, lambda: zip(stream_intrusos(), stream_intrusos())]]))
 
 menu_emu = MenuOption(name='emu', description= i18n.t('menu.emu.title'), info = 'https://jungle-team.com/conclave-oscam-autoupdate/')
 menu_emu.add_option(MenuOption(name = "status", description = i18n.t('menu.emu.status'), command = emucam_status))
@@ -2405,9 +2562,19 @@ menu_remotecontrol.add_option(MenuOption(name = "send_mute", description = i18n.
 menu_remotecontrol.add_option(MenuOption(name = "send_vol_up", description = i18n.t('menu.remotecontrol.volume_up'), command = remotecontrol_send_vol_up))
 menu_remotecontrol.add_option(MenuOption(name = "send_vol_down", description = i18n.t('menu.remotecontrol.volume_down'), command = remotecontrol_send_vol_down))
 
+menu_zerotier = MenuOption(name = 'zerotier', description = i18n.t('menu.zerotier.title'))
+menu_zerotier.add_option(MenuOption(name = "zerotier_install", description = i18n.t('menu.zerotier.install'), command = zerotier_install))
+menu_zerotier.add_option(MenuOption(name = "zerotier_uninstall", description = i18n.t('menu.zerotier.uninstall'), command = zerotier_uninstall))
+menu_zerotier.add_option(MenuOption(name = "zerotier_status", description = i18n.t('menu.zerotier.status'), command = zerotier_status))
+menu_zerotier.add_option(MenuOption(name = "zerotier_start", description = i18n.t('menu.zerotier.start'), command = zerotier_start))
+menu_zerotier.add_option(MenuOption(name = "zerotier_stop", description = i18n.t('menu.zerotier.stop'), command = zerotier_stop))
+menu_zerotier.add_option(MenuOption(name = "zerotier_force_reload", description = i18n.t('menu.zerotier.force_reload'), command = zerotier_force_reload))
+menu_zerotier.add_option(MenuOption(name = "zerotier_join", description = i18n.t('menu.zerotier.join'), command = zerotier_join_network, params=['network id']))
+menu_zerotier.add_option(MenuOption(name = "zerotier_leave", description = i18n.t('menu.zerotier.leave'), command = zerotier_leave_network, params=['network id']))
+
 menu_ayuda = MenuOption(name = 'ayuda', description = i18n.t('menu.help.title'))
 
-g_menu = [menu_ayuda, menu_info, menu_network, menu_junglebot, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_remotecontrol, menu_command, menu_junglescript, menu_ghostreamy]   
+g_menu = [menu_ayuda, menu_info, menu_network, menu_zerotier, menu_junglebot, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_remotecontrol, menu_command, menu_junglescript, menu_ghostreamy]   
 g_current_menu_option = None
 
 if __name__ == "__main__":
@@ -2418,6 +2585,7 @@ if __name__ == "__main__":
         ga('version', VERSION)
         ga('locale', G_CONFIG['locale'])
         check_version()
+        inicializar_intrusos()
         start_autostream()
         start_autossh()
         start_autoftp()

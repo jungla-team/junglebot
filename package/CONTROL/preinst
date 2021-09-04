@@ -1,6 +1,9 @@
 #!/bin/sh 
 
-/etc/init.d/junglebot-daemon stop
+if [ -f /etc/init.d/junglebot-daemon ];
+then
+   /etc/init.d/junglebot-daemon stop
+fi
 
 DISTRO=$(cat /etc/opkg/all-feed.conf | cut -d'-' -f1 | awk '{ print $2 }')
 if [ "${DISTRO}" == "VTi" ] || [ "${DISTRO}" == "pure2" ];

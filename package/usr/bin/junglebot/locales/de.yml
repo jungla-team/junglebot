@@ -151,6 +151,18 @@ de:
             delete_friend: Freund zum Streamen löschen
             autocheck: Nicht autorisierte Streams kontrollieren
             stop_streamproxy: Streamproxy stoppen
+            intruders_list: Liste der Eindringlinge
+            delete_intruder: Eindringling löschen
+        zerotier:
+            title: Zerotier management
+            install: Install zerotier
+            uninstall: Uninstall zerotier
+            status: Status zerotier
+            stop: Stop zerotier
+            start: Start zerotier
+            join: Join network
+            leave: Leave network 
+            force_reload: Force reload
     msg:
         boot_info: "Bot wird gestartet "
         autoftp_started: "Autoftp wird gestartet"
@@ -237,6 +249,7 @@ de:
         info_top: "Die 10 Prozesse, die am meisten verbrauchen, sind"
         info_uptime: "Zeit An"
         info_zerotier: "[+] ZEROTIER INFORMATION"
+        info_zerotier_installed: "Zerotier ist instaliert"
         info_zerotier_notinstalled: "Zerotier ist nicht instaliert"
         init: "Willkommen bei Jungle Bot, um dem Rezeptor vom Telegramm aus zu steuern, Gebe /hilfe um verfügbare Befehle anzuzeigen"
         junglebot_update: "Ya tienes la última versión %{version} instalada"

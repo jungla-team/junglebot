@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.6.1]
+
+- Quitado aviso en bucle de streams intrusos. Avisa una única vez y se guarda dicho intruso en un fichero de intrusos
+- Gestión fichero intrusos (listar y borrar intrusos) en el menú /streams y /conexiones 
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-261-09-02
+
+## [2.5.33]
+
+- Bug fixes
+- Fix para usar el test de velocidad en VTi
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-2533-04-13
+
+## [2.5.32]
+
+- Fix para usar el test de velocidad speedtest-cli
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-2532-04-09
+
+## [2.5.31]
+
+- Añadido nuevo menú de gestión para /zerotier
+- Subida versión speedtest-cli resolviendo https://github.com/sivel/speedtest-cli/pull/769
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-2531-04-09
+
+## [2.5.30] - 27/03/2021
+
+- Fix en /red_status para que funcione el acceso a ifconfig.me
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-2530-03-27
+
 ## [2.5.29] - 04/03/2021
 
 - Arreglado bug con el borrado de líneas cccam /emu_dellineacccam
