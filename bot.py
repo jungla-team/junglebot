@@ -23,7 +23,7 @@ import logging
 import urllib
 import i18n
 
-VERSION="2.6.1"   
+VERSION="2.6.2"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -1017,7 +1017,7 @@ def info_temperatura():
 def info_check_duckdns_ip(host):
     public_ip = info_ip()
     args = { 'host': host }
-    host_ip = requests.get(url = 'http://tropical.jungle-team.online:8000/info_hostname', params = args).text.replace('"','')
+    host_ip = requests.get(url = 'https://check-port.duckdns.org/info_hostname', params = args, verify = False).text.replace('"','')
     if public_ip == host_ip:
         return i18n.t('msg.info_duckdns_ok', host=host, public_ip=public_ip)
     else:
@@ -1025,7 +1025,7 @@ def info_check_duckdns_ip(host):
     
 def info_check_open_port(host,port):
     args = { 'host': host, 'port': port }
-    is_open = int(requests.get(url = 'https://check-port.duckdns.org/info_check_open_port', params = args).text)
+    is_open = int(requests.get(url = 'https://check-port.duckdns.org/info_check_open_port', params = args, verify = False).text)
     if is_open == 0:
         return i18n.t('msg.info_port_open', host=host, port=port)
     else:

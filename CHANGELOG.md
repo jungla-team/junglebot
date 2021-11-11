@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.6.2]
+
+- Bug fixed en las opciones de red de comprobación de ip y en el chequeo de puerto abierto
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-262-11-11
+
 ## [2.6.1]
 
 - Quitado aviso en bucle de streams intrusos. Avisa una única vez y se guarda dicho intruso en un fichero de intrusos
