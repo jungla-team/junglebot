@@ -9,6 +9,8 @@ en:
             factory_reset: Restore to default values
             resetpass: Reset password root
             exec_command: Run command
+            get_file: Download file
+            backup_jungle_configs: Backup Jungle-Team configs
         connections:
             title: Connections management
             config: Parameters
@@ -222,8 +224,12 @@ en:
         epg_update_error: "The update could not be completed"
         epg_app_install: "You must install Crossepg or EPGImport first"
         epg_update_success: "%{info} days update done correctly"
+        dir_notexist: "⚠️ Don't exist directory"
+        dir_empty: "⚠️ The directory cannot be empty"
         file_erased: "The file %{file} has been deleted successfully"
+        file_empty: "⚠️ Empty file"
         file_notfound: "The file% {file} does not exist"
+        file_upload: "[*] Uploaded file:"
         ftp_conn: "ftp connection = %{info}" 
         ftp_conn_notfound: "No FTP connections established"
         geo_block_ip: "The entered ip has been locked"

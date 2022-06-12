@@ -9,6 +9,8 @@ es:
             factory_reset: Restaurar valores fabrica
             resetpass: Eliminar password root
             exec_command: Ejecutar comando
+            get_file: Descargar fichero
+            backup_jungle_configs: Backup Jungle-Team configs
         connections:
             title: Gestión de conexiones
             config: Parámetros
@@ -214,6 +216,8 @@ es:
         emu_not_installed: "No encuentro emuladoras instaladas"
         emu_not_lines: "No hay lineas en fichero"
         emu_stopped: "Emuladora parada"
+        dir_notexist: "⚠️ No existe el directorio"
+        dir_empty: "⚠️ El directorio no puede ser vacío"
         epgimport_installed: "EPGImport instalado"
         epgimport_uninstalled: "Desintalación de EPGImport realizada"
         epgimport_uninstall_error: "No tienes instalado EPGImport, así que imposible borrarlo"
@@ -223,7 +227,9 @@ es:
         epg_app_install: "Debes instalar primero Crossepg o EPGImport"
         epg_update_success: "Actualización de %{info} días realizada correctamente"
         file_erased: "El fichero %{file} se ha borrado correctamente"
+        file_empty: "⚠️ Fichero vacío"
         file_notfound: "No existe el fichero %{file}"
+        file_upload: "[*] Fichero subido:"
         ftp_conn: "Conexion ftp = %{info}" 
         ftp_conn_notfound: "No hay conexiones FTP establecidas"
         geo_block_ip: "Se ha bloqueado la ip introducida"

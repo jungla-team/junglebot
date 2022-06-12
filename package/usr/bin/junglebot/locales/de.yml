@@ -9,6 +9,8 @@ de:
             factory_reset: Werkeinstellung zurücksetzen
             resetpass: Root paswort löschen
             exec_command: Befehlen ausführen
+            get_file: Download-Datei
+            backup_jungle_configs: Backup der Jungle-Team-Konfigurationen
         connections:
             title: Verbindungsmanagement
             config: Parameter
@@ -222,8 +224,12 @@ de:
         epg_update_error: "Update konnte nicht abgeschlossen werden"
         epg_app_install: "Du musst zuerst Crossepg oder EPGImport installieren"
         epg_update_success: " %{info} Tage Aktualisierung erfolgreich ausgeführt"
+        dir_notexist: "⚠️ Verzeichnis existiert nicht"
+        dir_empty: "⚠️ Das Verzeichnis darf nicht leer sein"
         file_erased: "Die datei %{file} wurde elfolgreich gelöscht"
+        file_empty: "⚠️ Leere Akte"
         file_notfound: "Die datei %{file} existiert nicht"
+        file_upload: "[*] Hochgeladene Datei:"
         ftp_conn: "FTP-Verbindung = %{info}" 
         ftp_conn_notfound: "Es wurden keine FTP-Verbindungen hergestellt"
         geo_block_ip: "Die eingegebene IP wurde gesperrt"

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.3]
+
+- Añadida opción para enviar ficheros al deco simplemente arrastrando al bot el fichero que queramos subir. En el caption hay que indicar la ruta.
+- Añadida opción de descargar ficheros del deco /command_getfile (ej. tmp/oscam.log) - sin poner la primera barra para evitar que telegram lo interprete como si fuera un comando.
+- Añadido soporte para backup de las herramientas de Jungle-Team. Nos crea un zip y nos lo envía a nuestro bot de Telegram.
+- Para más info consultar: https://telegra.ph/Nueva-version-JungleBot-263-06-12
+
 ## [2.6.2]
 
 - Bug fixed en las opciones de red de comprobación de ip y en el chequeo de puerto abierto

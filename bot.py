@@ -22,8 +22,9 @@ from netaddr import *
 import logging
 import urllib
 import i18n
+from datetime import date
 
-VERSION="2.6.2"   
+VERSION="2.6.3"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 GA_ACCOUNT_ID = 'UA-178274579-1'
 VTI="VTi"
@@ -466,6 +467,40 @@ def set_value_parameters(param, new_value):
 def get_file(filepath):
     if os.path.isfile(filepath):
         bot.send_document(G_CONFIG['chat_id'], open(filepath, 'r'))
+    else:
+        bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.file_notfound', file=filepath))
+    return ''
+
+@bot.message_handler(content_types=['document', 'photo', 'audio', 'video', 'voice'])
+def file_upload(message):
+    try:
+        try:
+            save_dir = message.caption
+        except:
+            save_dir = os.getcwd()
+            s = i18n.t('msg.dir_notexist', file=save_dir)
+            bot.send_message(message.chat.id, str(s))
+        file_name = message.document.file_name
+        file_id = message.document.file_name
+        file_id_info = bot.get_file(message.document.file_id)
+        downloaded_file = bot.download_file(file_id_info.file_path)
+        src = file_name
+        with open(save_dir + "/" + src, 'wb') as new_file:
+            new_file.write(downloaded_file)
+        bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.file_upload') + " " + str(save_dir) + "/" + str(file_name))
+    except Exception as ex:
+        if message.caption:
+            bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.dir_notexist', file=message.caption))
+        else:
+            bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.dir_empty'))
+
+def file_download(filepath):
+    filepath = "/" + filepath
+    if os.path.isfile(filepath):
+        if os.path.getsize(filepath) > 0:
+            bot.send_document(G_CONFIG['chat_id'], open(filepath, 'r'))
+        else:
+            bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.file_empty'))
     else:
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.file_notfound', file=filepath))
     return ''
@@ -1067,6 +1102,17 @@ def command_runcommand(command):
     else:
         return i18n.t('msg.command_execute_success')
 
+def backup_jungle_configs():
+    today = date.today().strftime("%d%m%Y")
+    backup_file = "/tmp/backup_{}.zip".format(today)
+    comando1 = "zip -9r {} /usr/bin/enigma2_pre_start.conf /etc/tuxbox/config/oscam-* /etc/tuxbox/config/ncam /etc/CCcam.cfg /usr/bin/junglebot/parametros.py /usr/bin/junglebot/amigos.cfg /etc/enigma2/ghostreamy*".format(backup_file)
+    execute_os_commands(comando1)
+    backup_zip = open(backup_file, 'rb')
+    bot.send_document(G_CONFIG['chat_id'], backup_zip)
+    comando2 = "sleep 2 & rm -f {}".format(backup_file)
+    execute_os_commands(comando2)
+    return ''
+    
 # STREAM
 def cotillearamigos():
     count_streams = 0
@@ -2438,6 +2484,8 @@ menu_command.add_option(MenuOption(name = "upgrade", description = i18n.t('menu.
 menu_command.add_option(MenuOption(name = "restaurar", description = i18n.t('menu.command.factory_reset'), command = command_restaurar, params=params_confirmation))
 menu_command.add_option(MenuOption(name = "resetpass", description = i18n.t('menu.command.resetpass'), command = command_resetpass, params=params_confirmation))
 menu_command.add_option(MenuOption(name = "runcommand", description = i18n.t('menu.command.exec_command'), command = command_runcommand, params=['comando']))
+menu_command.add_option(MenuOption(name = "getfile", description = i18n.t('menu.command.get_file'), command = file_download, params=['path del fichero sin la primera barra de la ruta, ej: tmp/oscam.log']))
+menu_command.add_option(MenuOption(name = "backupjungleconfigs", description = i18n.t('menu.command.backup_jungle_configs'), command = backup_jungle_configs))
 
 menu_stream = MenuOption(name = 'stream', description = i18n.t('menu.stream.title'))
 menu_stream.add_option(MenuOption(name = "ver", description = i18n.t('menu.stream.show'), command = cotillearamigos))
