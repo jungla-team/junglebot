@@ -1,13 +1,8 @@
 #!/bin/sh 
 
-if [ -f /etc/init.d/junglebot-daemon ];
+if [ -f /etc/init.d/junglebot-daemon ]; 
 then
    /etc/init.d/junglebot-daemon stop
 fi
-
-DISTRO=$(cat /etc/opkg/all-feed.conf | cut -d'-' -f1 | awk '{ print $2 }')
-if [ "${DISTRO}" == "VTi" ] || [ "${DISTRO}" == "pure2" ];
-then
-    curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip.py
-    python /tmp/get-pip.py
-fi
+curl https://bootstrap.pypa.io/get-pip.py --output /tmp/get-pip.py
+python /tmp/get-pip.py

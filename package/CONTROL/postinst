@@ -7,6 +7,7 @@ fi
 
 pip install --upgrade setuptools
 pip install -r /usr/bin/junglebot/requirements.txt
+pip install pyTelegramBotAPI
 
 chmod 755 /usr/bin/junglebot/bot.py
 rm -f /etc/rc3.d/S98junglebot-daemon

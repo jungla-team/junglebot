@@ -1,16 +1,20 @@
 es:
     menu:
         command:
-            title: Comandos
+            title: Utilidades
             stopstream: Parar streamproxy
             freeram: Liberar memoria
             update: Actualizar sources
             upgrade: Actualizar paquetes
             factory_reset: Restaurar valores fabrica
             resetpass: Eliminar password root
-            exec_command: Ejecutar comando
+            exec_command: Consola Terminal
             get_file: Descargar fichero
-            backup_jungle_configs: Backup Jungle-Team configs
+            backup_jungle_configs: 💻  Backup Jungle-Team configs
+            change_password: Cambiar password del receptor
+            cron_tarea_programada: Programar tarea crond
+            descarga_m3u: Descargar m3u bouquet
+            list_bouquets: Listar bouquets
         connections:
             title: Gestión de conexiones
             config: Parámetros
@@ -52,7 +56,7 @@ es:
             uninstall_epgimport: Desinstalar EPGImport
             uninstall_crossepg: Desinstalar CrossEPG
         ghostreamy:
-            title: Gestión de ghostreamy
+            title: 👻  Gestión de ghostreamy
             status: Estado ghostreamy
             stop: Parar ghostreamy
             start: Iniciar ghostreamy
@@ -60,8 +64,6 @@ es:
             config: Configuración
             set_config: Cambiar configuración
             check_config: Comprobar configuracion
-            install: Instalar/Actualizar ghostreamy
-            uninstall: Desinstalar ghostreamy
             log: Ver log ghostreamy
             version: Ver versión ghostreamy
         help:
@@ -72,8 +74,64 @@ es:
             system: Informacion del sistema
             machineid: Id del receptor
             top: Top 10 procesos uso cpu
+            plugin_installed: Ver Plugin instalados
+            estado_receptor: Estado Receptor
+            crontab_info: Tareas Crontab
+            ram_info: Ram Disponible
+            cpu_uso: Uso de la CPU
+            emmc_uso: Memoria EMMc Disponible
+            puntos_montaje: Puntos de Montaje
+            bytes: Flujo de Red
+            conexiones: Conexiones Red activas
+            maxproceso: Proceso max consumo
+            interfazred: Interfaz Red Activa
+            dmesg: Mostrar dmesg
+        jungle:
+            title: Utilidades Jungle Team
+        redes:
+            title: Gestion redes
+        vpn:
+            title: utilidades VPN
+        bugsbunny:
+            title: 🥕  Utilidades Bugs bunny
+            feedjungle: Instalar repositorio Jungle
+            feedoe: Instalar repositorio OEAlliance
+            install_jungletools: Instalar/Actualizar Junglescript Tools
+            uninstall_jungletools: Desinstalar JungleScript Tools
+            install_junglescript: Instalar/Actualizar junglescript
+            uninstall_junglescript: Desistalar JungleScript
+            install_ghostreamy: Instalar/Actualizar ghostreamy
+            uninstall_ghostreamy: Desinstalar ghostreamy
+            install_epgimport: Instalar/Actualizar epgimport
+            uninstall_epgimport: Desinstalar epgimport
+            install_tdtchannels: Instalar/Actualizar tdtchannels
+            uninstall_tdtchannels: Desinstalar tdtchannels
+            install_oscamconclave: Instalar/Actualizar oscamconclave
+            uninstall_oscamconclave: Desinstalar oscamconclave
+            install_skinkoala: Instalar/Actualizar skin op-artkoala
+            uninstall_skinkoala: Desinstalar skin op-artkoala
+            install_jedimaker: Instalar/Actualizar jedimakerxtream
+            uninstall_jedimaker: Desinstalar jedimakerxtream
+            install_openvpn: Instalar/Actualizar openvpn
+            uninstall_openvpn: Desinstalar openvpn
+            install_zerotier: Instalar/Actualizar zerotier
+            uninstall_zerotier: Desistalar zerotier
+            install_tailscale: Instalar/Actualizar Tailscale
+            uninstall_tailscale: Desistalar Tailscale
+            install_jediepgxtream: Instalar/Actualizar jediepgxtream
+            uninstall_jediepgxtream: Desistalar jediepgxtream
+            install_footonsat: Instalar footonsat
+            uninstall_footonsat: Desistalar footonsat  
+        gestion:
+            title: Gestion receptor
+        tailscale:
+            title: Gestion Tailscale
+            up: Conectar Tailscale
+            down: Desconectar Tailscale
+            ip: Mostrar IP Tailscale
+            status: Estado Tailscale
         junglebot:
-            title: Ajustes del bot
+            title: 🤖  Gestion JungleBot
             config: Parámetros
             set_config: Cambiar parámetros
             update: Actualizar bot
@@ -82,11 +140,9 @@ es:
             purge_log: Vaciar log del bot
             changelog: Changelog
         junglescript:
-            title: Gestión JungleScript
+            title: 🐲  Gestión JungleScript
             config: Parámetros
             set_config: Cambiar parámetros
-            install: Instalar JungleScript
-            uninstall: Desinstalar JungleScript
             run: Ejecutar JungleScript
             force_channels: Forzar update lista canales
             force_picons: Forzar update picons
@@ -145,6 +201,7 @@ es:
             volume_up: 🔈+
             volume_down: 🔈-
             mute: 🔇
+            digit: 0-9
         stream:
             title: Gestión de streams
             show: Que ven tu amigos
@@ -157,8 +214,6 @@ es:
             delete_intruder: Borrar intruso
         zerotier:
             title: Gestión de zerotier
-            install: Instalar zerotier
-            uninstall: Desinstalar zerotier
             status: Estado zerotier
             stop: Parar zerotier
             start: Arrancar zerotier
@@ -234,12 +289,13 @@ es:
         ftp_conn_notfound: "No hay conexiones FTP establecidas"
         geo_block_ip: "Se ha bloqueado la ip introducida"
         geo_unblock_ip: "Se ha desbloqueado la ip introducida"
+        change_password_ok: "Se ha cambiado la password del receptor con exito"
         ghostreamy_restart: "Se reinicia el daemon ghostreamy"
         ghostreamy_start: "Se arranca el daemon ghostreamy"
         ghostreamy_started: "ghostreamy esta arrancado"
         ghostreamy_stop: "Se para el daemon ghostreamy"
         ghostreamy_stopped: "ghostreamy esta parado"
-        text_help: "JungleBot <i> %{version} </i>\nPuedo ayudarte a administrar tu receptor Enigma2 %{brand} a traves de Telegram. Si eres nuevo en su uso visita <a href=%{telegram_url}>grupo telegram</a>\n\n <b>lista comandos disponibles:\n\n</b>"
+        text_help: "JungleBot <i> %{version} </i>\nHola @%{username} puedo ayudarte a administrar tu receptor Enigma2 %{brand} a traves de Telegram. Si eres nuevo en su uso visita <a href=%{telegram_url}>grupo telegram</a>\n\n <b>lista comandos disponibles:\n\n</b>"
         info_connections: "Las conexiones establecidas en su receptor"
         info_cpu: "Uso CPU"
         info_duckdns_ok: "OK %{host} => %{public_ip}"
@@ -257,7 +313,15 @@ es:
         info_zerotier: "[+] INFORMACION ZEROTIER"
         info_zerotier_installed: "Zerotier ya está instalado"
         info_zerotier_notinstalled: "Zerotier no está instalado"
-        init: "Bienvenido a Junglebot para controlar nuestro receptor desde telegram, introduce /ayuda para ver comandos disponibles"
+        info_tailscale_notinstalled: "Tailscale no está instalado"
+        info_tailscale_up: "Tailscale se ha conectado"
+        info_tailscale_down: "Tailscale se ha desconectado"
+        info_tailscale_installed: "Tailscale ya esta instalado"
+        info_ip_tailscale: "La ip tailscale de tu dispositivo es:\n\n"
+        info_status_tailscale: "El estado actual de Tailscale es:\n\n"
+        info_crontab_tareas: "Se han encontrado las siguientes tareas crontab programadas:\n\n"
+        init: "Bienvenido @%{username} a Junglebot para controlar nuestro receptor desde telegram, introduce /ayuda para ver comandos disponibles"
+        info_plugin_installed: "Los siguientes plugins estan instalados en su receptor:\n\n"
         junglebot_update: "Ya tienes la última versión %{version} instalada"
         next_param: "Dame el valor de **%{param}**:"
         new_version: "Existe nueva versión de Junglebot %{version}"

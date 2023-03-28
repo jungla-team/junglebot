@@ -38,7 +38,7 @@ case "$1" in
         echo "done."
         ;;
     status)
-        PROCESO=`status /usr/bin/python ${DAEMON} | grep running | wc -l`
+        PROCESO=`status 'python ${DAEMON}' | grep running | wc -l`
         if [ "$PROCESO" -gt 0 ]
         then
            echo "Bot $NAME esta funcionando correctamente"

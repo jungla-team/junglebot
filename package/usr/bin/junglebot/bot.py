@@ -4,8 +4,8 @@ import sys
 import time
 import os
 from os import path
-import commands
-from commands import *
+import subprocess
+from subprocess import *
 import getopt
 import json
 import socket
@@ -16,18 +16,21 @@ import telebot
 from telebot import *
 import requests
 from requests.auth import HTTPDigestAuth
-from StringIO import StringIO
+from io import StringIO
 import re
 from netaddr import *
 import logging
 import urllib
 import i18n
 from datetime import date
+from crontab import CronTab
+import psutil
+import socket
+import shlex
 
-VERSION="2.6.3"   
+VERSION="4.1.1"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
-GA_ACCOUNT_ID = 'UA-178274579-1'
-VTI="VTi"
+openatv="openatv"
 new_version = False
 
 alias_permitidos = {}
@@ -289,14 +292,14 @@ def with_confirmation(func):
     return wrapper_with_confirmation
 
 # BOT handlers
-@bot.message_handler(commands=['inicio'])
+@bot.message_handler(commands=['start'])
 def command_inicio(m):
     if allowed(m):
         identificacion = m.chat.id
         alias_permitidos[identificacion] = 0
         time.sleep(1)
         bot.send_photo(identificacion, photo=open('/usr/bin/junglebot/images/logojungle.jpeg', 'rb'))
-        bot.send_message(identificacion, i18n.t('msg.init') + "\n")
+        bot.send_message(identificacion, i18n.t('msg.init', username=m.chat.username) + "\n")
 
 @bot.message_handler(commands=['ayuda', 'help'])
 def command_ayuda(m):
@@ -308,7 +311,7 @@ def command_ayuda(m):
         brand = info_brand()
         for menu in g_menu:
             help = help + "/{} {}\n".format(menu.name, menu.description)
-        bot.send_message(identificacion, i18n.t('msg.text_help', version=VERSION, brand=brand, telegram_url=telegram_url) + help, parse_mode='html')
+        bot.send_message(identificacion, i18n.t('msg.text_help', version=VERSION, username=m.chat.username, brand=brand, telegram_url=telegram_url) + help, parse_mode='html')
     
 @bot.message_handler(func=lambda call:True)
 def get_text_messages(message):
@@ -321,7 +324,6 @@ def get_text_messages(message):
                 print("Processing command {}".format(message.text))
                 command = message.text.strip()[1:]
                 menu_option = find_menu_option(command)
-                ga('command', command)
                 execute_command(identificacion, menu_option)
             else:
                 if g_current_menu_option:
@@ -351,7 +353,7 @@ def callback_menu(call):
                 execute_command(identificacion, menu_option)
         except Exception as e:
             bot.send_message(identificacion, i18n.t('msg.unknown_error', error=str(e)))
-
+            
 def check_version():
     global new_version
     if os.path.isfile("/run/opkg.lock"):
@@ -364,20 +366,6 @@ def check_version():
         new_version_bot = getoutput("opkg list-upgradable | grep 'enigma2-plugin-extensions-junglebot '").split(' ')[4]
         logger.info('Existe nueva versión de Junglebot {}'.format(new_version_bot))
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.new_version', version=new_version_bot))
-    
-def ga(action, label):
-    try:
-        if not G_CONFIG['ga']:
-            return
-        tracking_id = GA_ACCOUNT_ID
-        client_id = int(machine_id()[-6:], 16)
-        data = { 'v': 1, 'aip': 1, 'ua': "Mozilla/5.0",
-                'tid': tracking_id, 'cid': client_id, 
-                't': 'event', 'ec': 'bot', 'ea': action, 'el': label }
-        requests.post( url="https://www.google-analytics.com/collect", params=data)
-    except Exception as e:
-        logger.warning("GA: " + str(e))
-
 
 def machine_id():
     return getoutput("cat /etc/machine-id")
@@ -386,13 +374,13 @@ def machine_id():
 
 # GHOSTREAMY
 def ghostreamy_stop():
-    return execute_os_commands("/etc/init.d/ghostreamy stop", i18n.t('msg.ghostreamy_stop'))
+    return getoutput("/etc/init.d/ghostreamy stop")
 
 def ghostreamy_start():
-    return execute_os_commands("/etc/init.d/ghostreamy start", i18n.t('msg.ghostreamy_start'))
+    return getoutput("/etc/init.d/ghostreamy start")
 
 def ghostreamy_restart():
-    return execute_os_commands("/etc/init.d/ghostreamy restart", i18n.t('msg.ghostreamy_restart'))
+    return getoutput("/etc/init.d/ghostreamy restart")
 
 def ghostreamy_status():
     running = hay_ghostreamy()
@@ -407,35 +395,35 @@ def hay_ghostreamy():
     else:
         return 0
 
-def hay_ghostreamy_instalado():
-    return int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-ghostreamy | wc -l"))
-
 def ghostreamy_log():
     get_file("/var/log/ghostreamy.log")
     
-@with_confirmation
+ 
+@with_confirmation  
 def ghostreamy_install():
     command = "opkg update"
     execute_os_commands(command)
-    num_ghostreamy = hay_ghostreamy_instalado()
-    if num_ghostreamy > 0:
-        commands = "opkg upgrade"
+    hay_ghostreamy = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-ghostreamy | wc -l"))
+    if hay_ghostreamy > 0:
+        commands = "opkg upgrade enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
+        message = "ghostreamy esta instalado. Upgrading si procede..."
     else:
-        commands = "opkg install"
-    commands = "{} enigma2-plugin-extensions-ghostreamy-{}".format(commands, info_arquitecture())
-    return execute_os_commands(commands)
+        commands = "opkg install enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
+        message = "Instalando Ghostreamy..."
+    output = getoutput(commands)
+    return f"{message}\n{output}"
 
 @with_confirmation
 def ghostreamy_uninstall():
     commands = "opkg remove --force-remove enigma2-plugin-extensions-ghostreamy-{}".format(info_arquitecture())
-    return execute_os_commands(commands)
+    return getoutput(commands)
 
 def ghostreamy_version():
     commands = "opkg list-installed | grep ghostreamy | cut -d ' ' -f3"
-    return execute_os_commands(commands)
+    return getoutput(commands)
 
 def config(file_path):
-    return execute_os_commands("cat {}".format(file_path))
+    return getoutput("cat {}".format(file_path))
 
 def set_value(file_path, param, new_value):
     execute_os_commands("touch {}".format(file_path))
@@ -498,50 +486,12 @@ def file_download(filepath):
     filepath = "/" + filepath
     if os.path.isfile(filepath):
         if os.path.getsize(filepath) > 0:
-            bot.send_document(G_CONFIG['chat_id'], open(filepath, 'r'))
+            bot.send_document(G_CONFIG['chat_id'], open(filepath, 'rb'))
         else:
             bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.file_empty'))
     else:
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.file_notfound', file=filepath))
     return ''
-
-def controlstream_backgroundvti():
-    while True:
-        ip_autorizadas = ips_autorizadas()
-        amigo_autorizados = amigos_autorizados()
-        intrusos = ips_intrusos()
-        output = []
-        j = webif_api("statusinfo?")
-        ip_deco = obtener_ip_deco()
-        if "Streaming_list" in j:
-            lista_streamings = j['Streaming_list']
-            if lista_streamings.strip():
-                streamings = lista_streamings.split("\n")
-                for stream in streamings:
-                    if stream.strip():            
-                        ip_cliente = stream.split(":")[0].strip()
-                        if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1" and stream.strip() and ip_cliente and not ip_cliente in ip_autorizadas and not ip_cliente in intrusos:
-                            addipintruso(ip_cliente)
-                            intrusos = ips_intrusos()
-                            output.append(i18n.t('msg.control_access') + stream.strip())
-        ### Sacar streams ghostreamy
-        if os.path.exists("/tmp/ghostreamy.status"):
-            for linea in open('/tmp/ghostreamy.status'):
-                user_stream = linea.split("##")[0]
-                ip_stream = linea.split("##")[1]
-                trans_stream = linea.split("##")[2]
-                canal_stream = linea.split("##")[3]
-                if ip_stream in ip_autorizadas or user_stream in amigo_autorizados:
-                    logger.info("Amigo autorizado para stream: " + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
-                else:
-                    if not ip_cliente in intrusos:
-                        addipintruso(ip_cliente)
-                        intrusos = ips_intrusos()
-                        output.append(i18n.t('msg.control_access') + ip_stream + ": " + user_stream + ": " + canal_stream + ": " + trans_stream)
-        if output:
-            logger.info("\n".join(output))
-            bot.send_message(G_CONFIG['chat_id'], "\n".join(output))
-        time.sleep(G_CONFIG['timerbot'])
 
 def inicializar_intrusos():
     file_path = "/tmp/intrusos.txt"
@@ -585,13 +535,13 @@ def stream_delintruso(intruso):
         for line in lines:
             if line.strip("\n") != intruso:
                 f.write(line)
-	junglebot_restart()
+    junglebot_restart()
     return intrusos()
 
 def stream_intrusos():
     fichero = "/tmp/intrusos.txt"
     if os.path.isfile(fichero):
-        return execute_os_commands("cat " + fichero).split('\n')
+        return getoutput("cat " + fichero).split('\n')
     else:
         return []
 
@@ -675,7 +625,7 @@ def controlssh_background():
     while True:
         ip_autorizadas = ips_autorizadas()
         intrusos = ips_intrusos()
-        conexiones = commands.getoutput("netstat -tan | grep \:'22 ' | grep ESTAB | awk '{print $5}' |sed -e 's/::ffff://'| cut -d: -f1 | sort")      
+        conexiones = getoutput("netstat -tan | grep \:'22 ' | grep ESTAB | awk '{print $5}' |sed -e 's/::ffff://'| cut -d: -f1 | sort")      
         conexiones = conexiones.split('\n')
         output = []
         for linea in conexiones:
@@ -692,7 +642,7 @@ def controlftp_background():
     while True:
         ip_autorizadas = ips_autorizadas()
         intrusos = ips_intrusos()
-        conexiones = commands.getoutput("netstat -tan | grep \:'21 ' | grep ESTAB | awk '{print $5}' |sed -e 's/::ffff://'| cut -d: -f1 | sort") 
+        conexiones = getoutput("netstat -tan | grep \:'21 ' | grep ESTAB | awk '{print $5}' |sed -e 's/::ffff://'| cut -d: -f1 | sort") 
         conexiones = conexiones.split('\n')
         output = []
         for linea in conexiones:
@@ -815,11 +765,7 @@ def start_autostream():
     global g_autostream_thread
     if G_CONFIG['autostream'] == '1' and not g_autostream_thread:
         distro = enigma_distro()
-        if distro == VTI:
-            time.sleep(G_CONFIG['timerbot'])
-            g_autostream_thread = threading.Thread(target=controlstream_backgroundvti)
-        else:
-            g_autostream_thread = threading.Thread(target=controlstream_background)
+        g_autostream_thread = threading.Thread(target=controlstream_background)
         g_autostream_thread.start()
         logger.info("Autostream iniciado")
         return i18n.t("msg.autostream_started")
@@ -1000,53 +946,53 @@ def info_temperatura():
     temperatura = ""
     tempinfo = ""
     if path.exists('/proc/stb/sensors/temp0/value'):
-		f = open('/proc/stb/sensors/temp0/value', 'r')
-		tempinfo = f.read()
-		f.close()
+        f = open('/proc/stb/sensors/temp0/value', 'r')
+        tempinfo = f.read()
+        f.close()
     elif path.exists('/proc/stb/fp/temp_sensor'):
-		f = open('/proc/stb/fp/temp_sensor', 'r')
-		tempinfo = f.read()
-		f.close()
+        f = open('/proc/stb/fp/temp_sensor', 'r')
+        tempinfo = f.read()
+        f.close()
     elif path.exists('/proc/stb/sensors/temp/value'):
-		f = open('/proc/stb/sensors/temp/value', 'r')
-		tempinfo = f.read()
-		f.close()
+        f = open('/proc/stb/sensors/temp/value', 'r')
+        tempinfo = f.read()
+        f.close()
     if tempinfo and int(tempinfo.replace('\n', '')) > 0:
-		mark = str('\xc2\xb0')
-		temperatura = tempinfo.replace('\n', '').replace(' ','') + mark + "C\n"
+        temperatura = tempinfo.replace('\n', '').replace(' ', '')
 
     tempinfo = ""
     if path.exists('/proc/stb/fp/temp_sensor_avs'):
-		f = open('/proc/stb/fp/temp_sensor_avs', 'r')
-		tempinfo = f.read()
-		f.close()
+        f = open('/proc/stb/fp/temp_sensor_avs', 'r')
+        tempinfo = f.read()
+        f.close()
     elif path.exists('/proc/stb/power/avs'):
-		f = open('/proc/stb/power/avs', 'r')
-		tempinfo = f.read()
-		f.close()
+        f = open('/proc/stb/power/avs', 'r')
+        tempinfo = f.read()
+        f.close()
     elif path.exists('/sys/devices/virtual/thermal/thermal_zone0/temp'):
-		try:
-			f = open('/sys/devices/virtual/thermal/thermal_zone0/temp', 'r')
-			tempinfo = f.read()
-			tempinfo = tempinfo[:-4]
-			f.close()
-		except:
-			tempinfo = ""
+        try:
+            f = open('/sys/devices/virtual/thermal/thermal_zone0/temp', 'r')
+            tempinfo = f.read()
+            tempinfo = tempinfo[:-4]
+            f.close()
+        except:
+            tempinfo = ""
     elif path.exists('/proc/hisi/msp/pm_cpu'):
-		try:
-			for line in open('/proc/hisi/msp/pm_cpu').readlines():
-				line = [x.strip() for x in line.strip().split(":")]
-				if line[0] in ("Tsensor"):
-					temp = line[1].split("=")
-					temp = line[1].split(" ")
-					tempinfo = temp[2]
-		except:
-			tempinfo = ""
+        try:
+            for line in open('/proc/hisi/msp/pm_cpu').readlines():
+                line = [x.strip() for x in line.strip().split(":")]
+                if line[0] in ("Tsensor"):
+                    temp = line[1].split("=")
+                    temp = line[1].split(" ")
+                    tempinfo = temp[2]
+                    if getMachineBuild() in ('u41', 'u42', 'u43', 'u45'):
+                        tempinfo = str(int(tempinfo) - 15)
+        except:
+            tempinfo = ""
     if tempinfo and int(tempinfo.replace('\n', '')) > 0:
-		mark = str('\xc2\xb0')
-		temperatura = tempinfo.replace('\n', '').replace(' ','') + mark + "C\n"
-    if temperatura:
-        temperatura = int(filter(str.isdigit, temperatura))
+        temperatura = tempinfo.replace('\n', '').replace(' ', '')
+#    if temperatura:
+#        temperatura = int(filter(str.isdigit, temperatura))
     return temperatura                       
 
 def info_check_duckdns_ip(host):
@@ -1069,34 +1015,34 @@ def info_check_open_port(host,port):
 # COMMAND   
 
 def command_update():
-    line = execute_os_commands("opkg update")
+    line = getoutput("opkg update")
     return i18n.t('msg.command_update') + "\n\n" + line
 
 def command_stopstream():
-    line = execute_os_commands("killall -9 streamproxy")
+    line = getoutput("killall -9 streamproxy")
     return i18n.t('msg.command_stopstream') + " \n" + line
 
 @with_confirmation
 def command_upgrade():
-    line = execute_os_commands("opkg update && opkg upgrade && reboot")
+    line = getoutput("opkg update && opkg upgrade && reboot")
     return i18n.t('msg.command_upgrade') + "\n\n" + line
 
 @with_confirmation
 def command_restaurar():
-    line = execute_os_commands("rm -r /etc/enigma2 && reboot")
+    line = getoutput("rm -r /etc/enigma2 && reboot")
     return i18n.t('msg.command_restore') + "\n\n" + line
     
 @with_confirmation
 def command_resetpass():
-    line = execute_os_commands('/usr/bin/passwd -d root')
+    line = getoutput('/usr/bin/passwd -d root')
     return i18n.t('msg.command_resetpass') + "\n" + line
 
 def command_freeram():
-    line = execute_os_commands("sync; echo 3 > /proc/sys/vm/drop_caches ")
+    line = getoutput("sync; echo 3 > /proc/sys/vm/drop_caches ")
     return i18n.t('msg.command_freeram') + "\n" + line
 
 def command_runcommand(command):
-    salida = execute_os_commands(command)
+    salida = getoutput(command)
     if not salida.isspace():
         return salida
     else:
@@ -1105,7 +1051,7 @@ def command_runcommand(command):
 def backup_jungle_configs():
     today = date.today().strftime("%d%m%Y")
     backup_file = "/tmp/backup_{}.zip".format(today)
-    comando1 = "zip -9r {} /usr/bin/enigma2_pre_start.conf /etc/tuxbox/config/oscam-* /etc/tuxbox/config/ncam /etc/CCcam.cfg /usr/bin/junglebot/parametros.py /usr/bin/junglebot/amigos.cfg /etc/enigma2/ghostreamy*".format(backup_file)
+    comando1 = "zip -9r {} /usr/bin/enigma2_pre_start.conf /etc/tuxbox/config/oscam-* /etc/tuxbox/config/ncam /etc/CCcam.cfg /usr/bin/junglebot/parametros.py /usr/bin/junglebot/amigos.cfg /usr/bin/junglebot/ips_bloqueadas.txt /etc/enigma2/ghostreamy*".format(backup_file)
     execute_os_commands(comando1)
     backup_zip = open(backup_file, 'rb')
     bot.send_document(G_CONFIG['chat_id'], backup_zip)
@@ -1118,30 +1064,14 @@ def cotillearamigos():
     count_streams = 0
     output = []
     distro = enigma_distro()
-    ### Sacar streams todas las imagenes menos VTI
-    if distro != VTI:
-        j = webif_api("about?")
-        ip_deco = obtener_ip_deco()
-        if j['info']['streams']:
-            for s in j['info']['streams']:
-                count_streams = count_streams + 1
-                ip_cliente = s['ip'].replace("::ffff:","")
-                if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1":
-                    output.append(ip_cliente + ": " + s['name'])
-    ### Sacar streams para VTI
-    if distro == VTI:
-        j = webif_api("statusinfo?")
-        ip_deco = obtener_ip_deco()
-        if "Streaming_list" in j:
-            lista_streamings = j['Streaming_list']
-            if lista_streamings.strip():
-                streamings = lista_streamings.split("\n")
-                logger.info(streamings)
-                for stream in streamings:  
-                    count_streams = count_streams + 1
-                    ip_cliente = stream.split(":")[0].strip()
-                    if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1" and stream.strip():
-                         output.append(stream.strip())                    
+    j = webif_api("about?")
+    ip_deco = obtener_ip_deco()
+    if j['info']['streams']:
+        for s in j['info']['streams']:
+            count_streams = count_streams + 1
+            ip_cliente = s['ip'].replace("::ffff:","")
+            if ip_deco != ip_cliente and "127.0." not in ip_cliente and ip_cliente != "::1":
+                output.append(ip_cliente + ": " + s['name'])               
     ### Sacar streams ghostreamy
     if os.path.exists("/tmp/ghostreamy.status"):
         for linea in open('/tmp/ghostreamy.status'):
@@ -1158,7 +1088,8 @@ def cotillearamigos():
 def stream_amigos():
     fichero = "/usr/bin/junglebot/amigos.cfg"
     if os.path.isfile(fichero):
-        return execute_os_commands("cat " + fichero).split('\n')
+        file = open(fichero).read()
+        return file.splitlines()
     else:
         return []
 
@@ -1184,7 +1115,7 @@ def stream_delamigo(amigo):
         for line in lines:
             if line.strip("\n") != amigo:
                 f.write(line)
-	junglebot_restart()
+        junglebot_restart()
     return amigos()
 
 @with_confirmation
@@ -1287,12 +1218,9 @@ def oscam_config_dir():
 
 def emu_init_command():
     distro = enigma_distro()
-    vti_script = "/etc/init.d/current_cam.sh"
     openspa_script = getoutput("ls -t /usr/script/Oscam* | head -1")
     all_script = "/etc/init.d/softcam"
-    if os.path.exists(vti_script) and distro == VTI:
-        return vti_script
-    elif os.path.exists(openspa_script) and distro == "openspa":
+    if os.path.exists(openspa_script) and distro == "openspa":
         return openspa_script
     elif os.path.exists(all_script) and (distro == "openatv" or distro == "openpli" or distro == "teamblue"):
         return all_script
@@ -1306,7 +1234,7 @@ def oscam_info():
     archivo = "/tmp/ecm.info"
     output = i18n.t('msg.oscam_tunner')
     if os.path.isfile(archivo):
-        output = execute_os_commands("cat " + archivo)
+        output = getoutput("cat " + archivo)
     return "\n" + i18n.t('msg.emu_info_sharing') + ":\n" + output
 
 def cccam_status():
@@ -1326,7 +1254,7 @@ def cccam_status():
         archivo = "/tmp/ecm.info"
         if os.path.isfile(archivo):
             output.append("\n" + i18n.t('msg.emu_info_sharing') + ":\n")
-            output.append(execute_os_commands("cat " + archivo))
+            output.append(getoutput("cat " + archivo))
         return "\n".join(output)
     
 def emucam_status():
@@ -1375,7 +1303,7 @@ def oscam_status():
 def oscam_start():
     command = emu_init_command()
     if command:
-        line = execute_os_commands("{} start".format(command)) or i18n.t("msg.starting")
+        line = getoutput("{} start".format(command)) or i18n.t("msg.starting")
         time.sleep(5)
         line += "\n" + emucam_status()
     else:
@@ -1385,7 +1313,7 @@ def oscam_start():
 def oscam_stop():
     command = emu_init_command()
     if command:
-        line = execute_os_commands("{} stop".format(command)) or i18n.t("msg.stoping")
+        line = getoutput("{} stop".format(command)) or i18n.t("msg.stoping")
         time.sleep(5)
         line += "\n" + emucam_status()
     else:
@@ -1395,7 +1323,7 @@ def oscam_stop():
 def oscam_restart():
     command = emu_init_command()
     if command:
-        line = execute_os_commands("{} restart".format(command)) or i18n.t('msg.restarting')
+        line = getoutput("{} restart".format(command)) or i18n.t('msg.restarting')
         line += "\n" + emucam_status()
     else:
         line = i18n.t("msg.emu_not_active")
@@ -1407,7 +1335,7 @@ def install_oscam_conclave():
     file_update_oscam = "/etc/oscam.update"
     if not os.path.exists(file_autooscam) and not os.path.exists(file_update_oscam):
         commands = "opkg install enigma2-plugin-softcams-oscam-conclave"
-        return execute_os_commands(commands)
+        return getoutput(commands)
     else:
         return i18n.t('msg.oscam_conclave_installed')
 
@@ -1419,7 +1347,7 @@ def update_autooscam():
             wget -q http://tropical.jungle-team.online/oscam/autooscam.sh -O /usr/bin/autooscam.sh
             chmod +x /usr/bin/autooscam.sh
             """
-        return execute_os_commands(commands)
+        return getoutput(commands)
     else:
         return i18n.t("msg.file_notfound", file=file_autooscam)
         
@@ -1430,7 +1358,7 @@ def run_autooscam():
         commands = """
             /usr/bin/autooscam.sh
             """
-        return execute_os_commands(commands)
+        return getoutput(commands)
     else:
         return i18n.t("msg.file_notfound", file=file_autooscam)
         
@@ -1443,7 +1371,7 @@ def force_autooscam():
             rm -f /etc/oscam.update
             /usr/bin/autooscam.sh
             """
-        return execute_os_commands(commands)
+        return getoutput(commands)
     else:
         return i18n.t('msg.oscam_conclave_error')
 
@@ -1453,9 +1381,7 @@ def get_active_emu():
 
 def emu_list():
     distro = enigma_distro()
-    if distro == VTI:
-        command = "ls /usr/script/*.sh"
-    elif distro == "openspa":
+    if distro == "openspa":
         command = "ls /usr/script/*cam.sh"
     else: #(distro == "openatv" or distro == "openpli"):
         command = "ls /etc/init.d/softcam.*"
@@ -1476,9 +1402,6 @@ def set_active_emu(emuladora):
 
     if (distro == "openatv" or distro == "openpli" or distro == "teamblue"):
         pass
-    elif (distro == VTI):
-        new_emu = "/usr/script/" + emuladora
-        script = "/etc/init.d/current_cam.sh"
     else:
         return i18n.t('msg.emu_image_not_found') + distro
     if os.path.exists(new_emu):
@@ -1554,7 +1477,7 @@ def dellinea_cccam(linea):
     command = "sed -i '{}d' {}".format(num_linea, cccam_cfg)
     execute_os_commands(command)
     command = "cat {}".format(cccam_cfg)
-    return execute_os_commands(command)
+    return getoutput(command)
 
 def list_lines_cccam():
     cccam_cfg = '/etc/CCcam.cfg'
@@ -1684,28 +1607,32 @@ def list_disabled_readers_oscam():
         return i18n.t('msg.oscam_not_readers_enabled').split("_")
 
 # JUNGLESCRIPT
-@with_confirmation
+@with_confirmation  
 def junglescript_install():
     command = "opkg update"
     execute_os_commands(command)
     hay_junglescript = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-junglescript | wc -l"))
     if hay_junglescript > 0:
         commands = "opkg upgrade enigma2-plugin-extensions-junglescript"
+        message = "junglescript esta instalado. Upgrading si procede..."
     else:
         commands = """
                     opkg remove junglescript
                     opkg install enigma2-plugin-extensions-junglescript
                     """
-    return execute_os_commands(commands)
+        message = "Instalando junglescript..."
+    output = getoutput(commands)
+    return f"{message}\n{output}"
+
 
 @with_confirmation
 def junglescript_run():
-    return execute_os_commands("/usr/bin/enigma2_pre_start.sh")
+    return getoutput("/usr/bin/enigma2_pre_start.sh")
 
 @with_confirmation
 def junglescript_uninstall():
     commands = "opkg remove enigma2-plugin-extensions-junglescript"
-    return execute_os_commands(commands)
+    return getoutput(commands)
        
 def junglescript_log():
     if os.path.exists('/tmp/enigma2_pre_start.log'):
@@ -1720,7 +1647,7 @@ def junglescript_channels():
             rm -f /etc/enigma2/actualizacion
             /usr/bin/enigma2_pre_start.sh
             """
-    return execute_os_commands(commands)
+    return getoutput(commands)
 
 @with_confirmation
 def junglescript_picons():
@@ -1730,7 +1657,7 @@ def junglescript_picons():
                 rm -f {}
                 /usr/bin/enigma2_pre_start.sh
                 """.format(picons_act)
-    return execute_os_commands(commands)
+    return getoutput(commands)
     
 def junglescript_fecha_listacanales():
     listacanales_act = "/etc/enigma2/actualizacion"
@@ -1791,7 +1718,9 @@ def junglescript_addfavbouquet(bouquet):
 
 def junglescript_fav_bouquets():
     fichero = "/etc/enigma2/fav_bouquets"
-    items = execute_os_commands("cat " + fichero).split('\n')
+    if os.path.isfile(fichero):
+        file = open(fichero).read()
+        items = file.splitlines()
     if len(items) > 0:
         return items
     else:
@@ -1827,7 +1756,9 @@ def junglescript_addsavebouquet(bouquet):
 
 def junglescript_save_bouquets():
     fichero = "/etc/enigma2/save_bouquets"
-    items = execute_os_commands("cat " + fichero).split('\n')
+    if os.path.isfile(fichero):
+        file = open(fichero).read()
+        items = file.splitlines()
     if len(items) > 0:
         return items
     else:
@@ -1847,12 +1778,6 @@ def junglescript_delsavebouquet(bouquet):
     else:
         return i18n.t('msg.file_notfound', file=fichero)
 
-def junglescript_delhidemarked_vti():
-    distro = enigma_distro()
-    if distro == VTI:
-        commands = "find /etc/enigma2/ -name '*.tv' | xargs sed -i '/#SERVICE 1:832:d:0:0:0:0:0:0:0:/d'"
-        return execute_os_commands(commands)
-
 #JUNGLEBOT
 @with_confirmation 
 def junglebot_update():
@@ -1860,10 +1785,7 @@ def junglebot_update():
     if new_version == True:
         distro = enigma_distro()
         package = 'enigma2-plugin-extensions-junglebot'
-        if distro == VTI:
-            command = "opkg remove junglebot --force-remove; opkg remove enigma2-plugin-extensions-junglebot-vti --force-remove; opkg install {package}; opkg upgrade {package}".format(package=package)
-        else:
-            command = "opkg remove junglebot --force-remove; opkg upgrade {package}".format(package=package)
+        command = "opkg remove junglebot --force-remove; opkg upgrade {package}".format(package=package)
         os.system(command)
     else:
         bot.send_message(G_CONFIG['chat_id'], i18n.t('msg.junglebot_update', version=VERSION))
@@ -1881,7 +1803,7 @@ def junglebot_purge_log():
 
 def junglebot_changelog():
     commands = "head -n 15 /usr/bin/junglebot/CHANGELOG.md"
-    return execute_os_commands(commands)
+    return getoutput(commands)
 
 # GRABACIONES
 def list_recordings():
@@ -1906,7 +1828,7 @@ def delete_recordings(index_sref):
             if j['movies'][indice]:
                 filename = j['movies'][indice]['filename']
                 command = 'rm -f "' + filename + '"'
-                return execute_os_commands(command)
+                return getoutput(command)
             else:
                 return salida
         else:
@@ -1920,7 +1842,7 @@ def delete_all_recordings():
     if j['movies']:
         if j['locations'][0]:
             command = "rm -rf " + j['locations'][0] + "*"
-            return execute_os_commands(command)
+            return getoutput(command)
     else:        
         return i18n.t('msg.recording_notexist', location=j['locations'][0])                
 
@@ -2003,11 +1925,11 @@ def find_epg_application():
     appli_crossepg = getoutput("opkg list-installed | grep " + crossepg).strip()
     appli_epgimport = getoutput("opkg list-installed | grep " + epgimport).strip()
     if not appli_crossepg and not appli_epgimport:
-	    salida = i18n.t('msg.epg_app_install')
+         salida = i18n.t('msg.epg_app_install')
     elif appli_crossepg and not appli_epgimport:
-		salida = i18n.t('msg.crossepg_installed')
+         salida = i18n.t('msg.crossepg_installed')
     elif not appli_crossepg and appli_epgimport:
-	    salida = i18n.t('msg.epgimport_installed')
+         salida = i18n.t('msg.epgimport_installed')
     else:
         salida = i18n.t('msg.epg_two_apps_installed')
     return salida
@@ -2059,23 +1981,64 @@ def geolocalizar_ip(geolocalizar=''):
     return json.dumps(json.loads(r.content),indent=4)
     
 def bloquear_ip(bloquear):
-    commands = "route add -host {} reject".format(bloquear)
-    execute_os_commands(commands)
+    ips_bloqueadas = "/usr/bin/junglebot/ips_bloqueadas.txt"
+    if os.path.exists(ips_bloqueadas):
+        with open (ips_bloqueadas,'a') as f:
+            f.write(bloquear + "\n")
+            commands = "route add -host {} reject".format(bloquear)
+            execute_os_commands(commands)
+            logger.info("Ip Bloqueda: " + bloquear)
+            f.close()
+    else:
+        with open (ips_bloqueadas,'w') as f:
+            f.write(bloquear + "\n")
+            commands = "route add -host {} reject".format(bloquear)
+            execute_os_commands(commands)
+            logger.info("Ip Bloqueda: " + bloquear)
+            f.close()
     return i18n.t('msg.geo_block_ip')
 
 def desbloquear_ip(desbloquear):
-    commands = "route del {} reject".format(desbloquear)
-    execute_os_commands(commands)
-    return i18n.t('msg.geo_unblock_ip')
-    
+    ips_bloqueadas = "/usr/bin/junglebot/ips_bloqueadas.txt"
+    with open(ips_bloqueadas, 'r') as f:
+        lines = f.readlines()
+        f.close()
+    with open (ips_bloqueadas, 'w') as f:
+        for line in lines:
+            if line.strip("\n") != desbloquear:
+                f.write(line)
+        commands = "route del {} reject".format(desbloquear)
+        execute_os_commands(commands)
+        f.close()
+        return i18n.t('msg.geo_unblock_ip')
+
+def cargar_ips_bloquedas():
+    ips_bloqueadas = "/usr/bin/junglebot/ips_bloqueadas.txt"
+    if os.path.exists(ips_bloqueadas):
+        with open (ips_bloqueadas, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                ip = line.rstrip('\n')
+                commands = "route add -host {} reject".format(ip)
+                execute_os_commands(commands)
+                logger.info("Ip {} bloqueada".format(ip))
+        f.close()
+    else:
+        logger.info(i18n.t('msg.file_notfound', file=ips_bloqueadas))
+
 def rejected_ips():
-    lines = getoutput("route -n")
+    ips_bloqueadas = "/usr/bin/junglebot/ips_bloqueadas.txt"
     rejected_ips = []
-    for line in lines.split('\n'):
-        items = line.split()
-        if len(items) > 6 and items[3].startswith('!'):
-            rejected_ips.append(items[0])
-    return rejected_ips
+    if os.path.exists(ips_bloqueadas):
+        with open (ips_bloqueadas, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                ip = line.rstrip('\n')
+                rejected_ips.append(ip)
+            return rejected_ips
+        f.close()
+    else:
+        logger.info(i18n.t('msg.file_notfound', file=ips_bloqueadas))
 
 def mostrar_ip():
     return '\n'.join(rejected_ips())
@@ -2117,7 +2080,7 @@ def remove_crossepg():
        
 #CONEXIONES
 def controlssh():
-    conexiones = commands.getoutput("netstat -tan | grep \:'22 ' | grep ESTAB | awk '{print $5}' |sed -e 's/::ffff://'| cut -d: -f1 | sort") 
+    conexiones = getoutput("netstat -tan | grep \:'22 ' | grep ESTAB | awk '{print $5}' |sed -e 's/::ffff://'| cut -d: -f1 | sort") 
     conexiones = conexiones.split('\n')
     output = []
     for linea in conexiones:
@@ -2129,12 +2092,12 @@ def controlssh():
         return i18n.t('msg.ssh_conn_notfound')
 	
 def controlftp():
-    conexiones = commands.getoutput("netstat -tan | grep \:'21 ' | grep ESTAB | awk '{print $5}' |sed -e 's/::ffff://'| cut -d: -f1 | sort") 
+    conexiones = getoutput("netstat -tan | grep \:'21 ' | grep ESTAB | awk '{print $5}' |sed -e 's/::ffff://'| cut -d: -f1 | sort") 
     conexiones = conexiones.split('\n')
     output = []
     for linea in conexiones:
         if linea:
-		     output.append(i18n.t('msg.ftp_conn', info=linea))
+           output.append(i18n.t('msg.ftp_conn', info=linea))
     if output:
         return "\n".join(output)
     else:
@@ -2154,15 +2117,15 @@ def conn_autossh():
 
 class hash_table:
     def __init__(self):
-	self.size = 113	
-	self.table = [None] * self.size
+        self.size = 113	
+        self.table = [None] * self.size
 
     def __len__(self):
-	count = 0
-	for value in self.table:
-	    if value != None:
-		count += 1
-	return count
+        count = 0
+        for value in self.table:
+           if value != None:
+               count += 1
+        return count
 
     def Hash_func(self, value):
         key = 0
@@ -2222,12 +2185,12 @@ def remotecontrol_status():
 
 @with_confirmation
 def remotecontrol_reboot():
-    line = execute_os_commands("reboot")
+    line = getoutput("reboot")
     return i18n.t('msg.command_reboot') + "\n" + line
 
 @with_confirmation
 def remotecontrol_restartgui():
-    line = execute_os_commands("killall -9 enigma2")
+    line = getoutput("killall -9 enigma2")
     return i18n.t('msg.command_restartgui') + "\n" + line
 
 def remotecontrol_standby_wakeup():
@@ -2250,7 +2213,7 @@ def remotecontrol_screenshot():
     return ''
 
 def remotecontrol_send_message(message):
-    resp = webif_api("message?type=1&text={}".format(bytearray(message, 'utf8')))
+    resp = webif_api("message?type=1&text={}".format(bytearray(message, 'utf8').decode('utf8')))
     if resp.get('result', False):
         return i18n.t('msg.send_msg_success')
     else:
@@ -2429,35 +2392,486 @@ def zerotier_leave_network(netid):
         output.append(i18n.t('msg.info_zerotier_notinstalled'))
     return "\n".join(output)
 
+@with_confirmation
 def zerotier_install():
     hay_zerotier = int(getoutput("opkg list-installed | grep zerotier | wc -l"))
-    distro = enigma_distro()
-    es_arm = info_arquitecture()
     output = []
     if hay_zerotier == 0:
-        if distro == VTI:
-            command = "opkg install zerotiervti"
-        else:
-            if es_arm == "arm":
-                command = "opkg install zerotierarm"
-            else:
-                command = "opkg install zerotier"
+        command = "opkg install zerotier"
         line = getoutput(command)
         output.append(line)
     else:
         output.append(i18n.t('msg.info_zerotier_installed'))
     return "\n".join(output)
 
+@with_confirmation
 def zerotier_uninstall():
     hay_zerotier = int(getoutput("opkg list-installed | grep zerotier | wc -l"))
     output = []
     if hay_zerotier > 0:
-        command = "opkg remove zerotier*"
+        command = "opkg remove zerotier"
         line = getoutput(command)
         output.append(line)
     else:
         output.append(i18n.t('msg.info_zerotier_notinstalled'))
     return "\n".join(output)
+    
+# TAILSCALE
+def tailscale_up():
+    var_tailscale = getoutput("which /usr/bin/tailscale")
+    output = []
+    if var_tailscale:
+        command = ("/usr/bin/tailscale up")
+        line = getoutput(command)
+        output.append(i18n.t('msg.info_tailscale_up'))
+    else:
+        output.append(i18n.t('msg.info_tailscale_notinstalled'))
+    return "\n".join(output)
+    
+@with_confirmation    
+def tailscale_install():
+    hay_tailscale = int(getoutput("opkg list-installed | grep tailscale | wc -l"))
+    output = []
+    if hay_tailscale == 0:
+        command = "opkg install tailscale"
+        line = getoutput(command)
+        output.append(line)
+    else:
+        output.append(i18n.t('msg.info_tailscale_installed'))
+    return "\n".join(output)
+    
+@with_confirmation    
+def tailscale_uninstall():
+    hay_tailscale = int(getoutput("opkg list-installed | grep tailscale | wc -l"))
+    output = []
+    if hay_tailscale > 0:
+        command = "opkg remove tailscale"
+        line = getoutput(command)
+        output.append(line)
+    else:
+        output.append(i18n.t('msg.info_tailscale_notinstalled'))
+    return "\n".join(output)
+    
+def tailscale_down():
+    var_tailscale = getoutput("which /usr/bin/tailscale")
+    output = []
+    if var_tailscale:
+        command = ("/usr/bin/tailscale down")
+        line = getoutput(command)
+        output.append(i18n.t('msg.info_tailscale_down'))
+    else:
+        output.append(i18n.t('msg.info_tailscale_notinstalled'))
+    return "\n".join(output)
+    
+def tailscale_ip():
+    var_tailscale = getoutput("which /usr/bin/tailscale")
+    output = []
+    if var_tailscale:
+        output.append(i18n.t('msg.info_ip_tailscale'))
+        line = getoutput("/usr/bin/tailscale ip")
+        output.append(line.splitlines()[0])
+    else:
+        output.append('msg.info_tailscale_notinstalled')
+    return "\n".join(output)
+
+def tailscale_status():
+    var_tailscale = getoutput("which /usr/bin/tailscale")
+    output = []
+    if var_tailscale:
+        output.append(i18n.t('msg.info_status_tailscale'))
+        line = getoutput("/usr/bin/tailscale status")
+        output.append(line)
+    else:
+        output.append(i18n.t('msg.info_tailscale_notinstalled'))
+    return "\n".join(output)
+
+# MAS INFO
+
+def plugin_instalados():
+    output = []
+    output.append(i18n.t('msg.info_plugin_installed'))
+    line = getoutput("/usr/bin/opkg list-installed")
+    output.append(line)
+    return "\n".join(output)
+      
+def crontab_tareas():
+    cron = CronTab(user='root')
+    jobs = []
+    output = []
+    output.append(i18n.t('msg.info_crontab_tareas'))
+    for job in cron:
+        output.append(str(job))
+    return "\n".join(output)
+    
+def get_ram_disponible():
+    output = []
+    available_memory = psutil.virtual_memory().available
+    available_memory_mb = round(available_memory / (1024**2), 2)
+    output.append(str(available_memory_mb) + " MB")
+    return "\n".join(output)
+    
+def get_cpu_uso():
+    output = []
+    cpu_uso = psutil.cpu_percent()
+    output.append(f"{cpu_uso}%")
+    return "\n".join(output)
+
+def get_disco_interno_disponible():
+    output = []
+    disco_interno = psutil.disk_usage('/')
+    espacio_libre_mb = round(disco_interno.free / (1024**2), 2)
+    output.append(f"{espacio_libre_mb} MB")
+    return "\n".join(output)
+    
+def get_puntos_de_montaje():
+    output = []
+    for partition in psutil.disk_partitions():
+        output.append(f"{partition.device}: {partition.mountpoint}")
+    return "\n".join(output)
+    
+def get_bytes_red():
+    output = []
+    bytes_enviados = psutil.net_io_counters().bytes_sent
+    bytes_recibidos = psutil.net_io_counters().bytes_recv
+    output.append(f"Enviados: {bytes_enviados} bytes")
+    output.append(f"Recibidos: {bytes_recibidos} bytes")
+    return "\n".join(output)
+
+def get_conexiones_de_red():
+    output = []
+    for connection in psutil.net_connections(kind='inet'):
+        if connection.status == 'ESTABLISHED':
+            output.append(f"{connection.laddr.ip}:{connection.laddr.port} -> {connection.raddr.ip}:{connection.raddr.port}")
+    return "\n".join(output)
+    
+def get_proceso_con_mas_consumo():
+    output = []
+    max_cpu_percent = -1
+    max_mem_percent = -1
+    max_process = None
+    for process in psutil.process_iter():
+        try:
+            cpu_percent = process.cpu_percent()
+            mem_percent = process.memory_percent()
+            if cpu_percent > max_cpu_percent:
+                max_cpu_percent = cpu_percent
+                max_process = process
+            if mem_percent > max_mem_percent:
+                max_mem_percent = mem_percent
+                max_process = process
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    if max_process is not None:
+        output.append(f"PID: {max_process.pid}, \nNombre: {max_process.name()}, \nConsumo CPU: {max_cpu_percent}%, \nConsumo Memoria: {max_mem_percent}%")
+    return "\n".join(output)
+
+def get_interfaces_de_red_activas():
+    output = []
+    for interface, addrs in psutil.net_if_addrs().items():
+        for addr in addrs:
+            if addr.family == socket.AF_INET and not addr.address.startswith('127.'):
+                output.append(f"{interface}: {addr.address} ({addr.netmask})")
+    return "\n".join(output)
+    
+def get_dmesg():
+    output = []
+    with open('/var/log/dmesg', 'r') as f:
+        output.append(f.read())
+    return "\n".join(output)
+    
+@with_confirmation   
+def repo_jungle_install():
+    url = 'http://tropical.jungle-team.online/script/jungle-feed.conf'
+    local_path = '/etc/opkg/jungle-feed.conf'
+    output = []
+    if os.path.exists(local_path):
+        output.append(f'Archivo {local_path} ya existe, no se instala')
+    else:
+        response = requests.get(url)
+        if response.status_code == 200:
+            with open(local_path, 'wb') as f:
+                f.write(response.content)
+            output.append(f'Instalando {url} to {local_path}')
+        else:
+            output.append(f'Descarga fallida {url}: {response.status_code} {response.reason}')
+    return "\n".join(output)
+    
+@with_confirmation    
+def repo_oeAlliance():
+    output = []
+    url = "http://updates.mynonpublic.com/oea/feed"
+    process = subprocess.Popen(["bash", "-c", f"curl -s {url} | bash"],
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+
+    if process.returncode != 0:
+        output.append(f"Error executing command: {stderr.decode()}")
+    else:
+        output.append(stdout.decode())
+    
+    return "\n".join(output)
+
+@with_confirmation  
+def install_junglescripttool():
+    command = "opkg update"
+    execute_os_commands(command)
+    hay_junglescripttool = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-junglescripttool | wc -l"))
+    if hay_junglescripttool > 0:
+        commands = "opkg upgrade enigma2-plugin-extensions-junglescripttool"
+        message = "Junglescripttool esta instalado. Upgrading si procede..."
+    else:
+        commands = """
+                    opkg remove enigma2-plugin-extensions-junglescripttool
+                    opkg install enigma2-plugin-extensions-junglescripttool
+                    """
+        message = "Instalando Junglescripttool..."
+    output = getoutput(commands)
+    return f"{message}\n{output}"
+
+
+@with_confirmation
+def junglescripttool_uninstall():
+    commands = "opkg remove enigma2-plugin-extensions-junglescripttool"
+    return getoutput(commands)
+    
+@with_confirmation  
+def install_epgimport():
+    command = "opkg update"
+    execute_os_commands(command)
+    hay_epgimport = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-epgimport | wc -l"))
+    if hay_epgimport > 0:
+        commands = "opkg upgrade enigma2-plugin-extensions-epgimport"
+        message = "epgimport esta instalado. Upgrading si procede..."
+    else:
+        commands = """
+                    opkg remove enigma2-plugin-extensions-epgimport
+                    opkg install enigma2-plugin-extensions-epgimport
+                    """
+        message = "Instalando epgimport..."
+    output = getoutput(commands)
+    return f"{message}\n{output}"
+
+
+@with_confirmation
+def epgimport_uninstall():
+    commands = "opkg remove enigma2-plugin-extensions-epgimport"
+    return getoutput(commands)
+    
+@with_confirmation  
+def install_tdtchannels():
+    command = "opkg update"
+    execute_os_commands(command)
+    hay_tdtchannels = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-tdtchannels | wc -l"))
+    if hay_tdtchannels > 0:
+        commands = "opkg upgrade enigma2-plugin-extensions-tdtchannels"
+        message = "tdtchannels esta instalado. Upgrading si procede..."
+    else:
+        commands = """
+                    opkg remove enigma2-plugin-extensions-tdtchannels
+                    opkg install enigma2-plugin-extensions-tdtchannels
+                    """
+        message = "Instalando tdtchannels..."
+    output = getoutput(commands)
+    return f"{message}\n{output}"
+
+
+@with_confirmation
+def tdtchannels_uninstall():
+    commands = "opkg remove enigma2-plugin-extensions-epgimport"
+    return getoutput(commands)
+    
+@with_confirmation  
+def install_emuoscamconclave():
+    command = "opkg update"
+    execute_os_commands(command)
+    hay_oscamconclave = int(getoutput("opkg list-installed | grep enigma2-plugin-softcams-oscam-conclave | wc -l"))
+    if hay_oscamconclave > 0:
+        commands = "opkg upgrade enigma2-plugin-softcams-oscam-conclave"
+        message = "oscamconclave esta instalado. Upgrading si procede..."
+    else:
+        commands = """
+                    opkg remove enigma2-plugin-softcams-oscam-conclave
+                    opkg install enigma2-plugin-softcams-oscam-conclave
+                    """
+        message = "Instalando oscamconclave..."
+    output = getoutput(commands)
+    return f"{message}\n{output}"
+
+
+@with_confirmation
+def emuoscamconclave_uninstall():
+    commands = "opkg remove enigma2-plugin-softcams-oscam-conclave"
+    return getoutput(commands)
+    
+@with_confirmation  
+def install_skinkoala():
+    distro = enigma_distro()
+    if distro == openatv:
+        command = "opkg update"
+        execute_os_commands(command)
+        hay_skinkoala = int(getoutput("opkg list-installed | grep enigma2-plugin-skins-op-artkoala | wc -l"))
+        if hay_skinkoala > 0:
+            commands = "opkg upgrade enigma2-plugin-skins-op-artkoala"
+            message = "op-artkoala esta instalado. Upgrading si procede..."
+        else:
+            commands = """
+                        opkg remove enigma2-plugin-skins-op-artkoala
+                        opkg install enigma2-plugin-skins-op-artkoala
+                        """
+            message = "Instalando op-artkoala..."
+    else:
+        message = "No se instala, solo es compatible con imagen OpenATV"        
+    output = getoutput(commands)
+    return f"{message}\n{output}"
+
+
+@with_confirmation
+def skinkoala_uninstall():
+    commands = "opkg remove enigma2-plugin-skins-op-artkoala"
+    return getoutput(commands)
+    
+
+@with_confirmation  
+def install_jedimaker():
+    command = "opkg update"
+    execute_os_commands(command)
+    hay_jedimaker = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-jedimakerxtream | wc -l"))
+    if hay_jedimaker > 0:
+        commands = "opkg upgrade enigma2-plugin-extensions-jedimakerxtream"
+        message = "jedimakerxtream esta instalado. Upgrading si procede..."
+    else:
+        commands = """
+                    opkg remove enigma2-plugin-extensions-jedimakerxtream
+                    opkg install enigma2-plugin-extensions-jedimakerxtream
+                    """
+        message = "Instalando jedimakerxtream..."
+    output = getoutput(commands)
+    return f"{message}\n{output}"
+
+
+@with_confirmation
+def jedimaker_uninstall():
+    commands = "opkg remove enigma2-plugin-extensions-jedimakerxtream"
+    return getoutput(commands)
+    
+@with_confirmation  
+def install_openvpn():
+    command = "opkg update"
+    execute_os_commands(command)
+    hay_openvpn = int(getoutput("opkg list-installed | grep openvpn | wc -l"))
+    if hay_openvpn > 0:
+        commands = "opkg upgrade openvpn"
+        message = "openvpn esta instalado. Upgrading si procede..."
+    else:
+        commands = """
+                    opkg remove openvpn
+                    opkg install openvpn
+                    """
+        message = "Instalando openvpn..."
+    output = getoutput(commands)
+    return f"{message}\n{output}"
+
+
+@with_confirmation
+def openvpn_uninstall():
+    commands = "opkg remove openvpn"
+    return getoutput(commands)
+    
+def change_password(change):
+    commands = "echo 'root:{}' | chpasswd".format(change)
+    execute_os_commands(commands)
+    return i18n.t('msg.change_password_ok')
+    
+def programar_tarea_cron(comando, tiempo):
+    output = []
+    cron = CronTab(user='root')
+    args = shlex.split("/" + comando)
+    command = " ".join([shlex.quote(arg) for arg in args])
+    job = cron.new(command=command)
+    job.setall(tiempo)
+    cron.write()
+    output.append("Tarea cron programada exitosamente")
+    return "\n".join(output)
+    
+@with_confirmation    
+def install_jediepgxtream():
+    command = "opkg update"
+    execute_os_commands(command)
+    hay_jediepgxtream = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-jediepgxtream | wc -l"))
+    if hay_jediepgxtream > 0:
+        commands = "opkg upgrade enigma2-plugin-extensions-jediepgxtream"
+        message = "jediepgxtream esta instalado. Upgrading si procede..."
+    else:
+        repo_jediepgxtream = int(getoutput("opkg list | grep enigma2-plugin-extensions-jedimakerxtream | wc -l"))
+        if repo_jediepgxtream > 0:
+            commands = """
+                        opkg remove enigma2-plugin-extensions-jediepgxtream
+                        opkg install enigma2-plugin-extensions-jediepgxtream
+                        """
+            message = "Instalando jediepgxtream..."
+        else:
+            message = "El paquete jediepgxtream no se encuentra en los repositorios."
+            commands = ""
+    output = getoutput(commands)
+    return f"{message}\n{output}"
+    
+@with_confirmation
+def jediepgxtream_uninstall():
+    commands = "opkg remove enigma2-plugin-extensions-jediepgxtream"
+    return getoutput(commands)
+    
+@with_confirmation    
+def install_footonsat():
+    command = "opkg update"
+    execute_os_commands(command)
+    hay_footonsat = int(getoutput("opkg list-installed | grep enigma2-plugin-extensions-footonsat | wc -l"))
+    if hay_footonsat > 0:
+        message = "footonsat ya esta instalado"
+        output = ""
+    else:
+        command = 'wget -q --no-check-certificate https://raw.githubusercontent.com/ziko-ZR1/FootOnsat/main/Download/install.sh -O - | /bin/sh'
+        subprocess.run(command, shell=True, check=True)
+        message = "Instalando footonsat..."
+        output = getoutput(command)
+    return f"{message}\n{output}"
+
+    
+@with_confirmation
+def footonsat_uninstall():
+    commands = "opkg remove enigma2-plugin-extensions-footonsat"
+    return getoutput(commands)
+
+def list_bouquets():
+    output = []
+    index_rec = 0
+    j = webif_api("getservices")
+    services = j['services']
+    for s in services:	
+        output.append(str(index_rec) + " - " + s['servicename'])
+        index_rec = index_rec + 1
+    return "\n".join(output)
+
+def descarga_m3u(index_bouquet):
+    j = webif_api("getservices")
+    if j['services']:
+        tamano = len(j['services'])
+        indice = int(index_bouquet)
+        salida = "Bouquet no existe"
+        if indice <= tamano:
+            if j['services'][indice]:
+                bouquet_ref = j['services'][indice]['servicereference']
+                bouquet_name = j['services'][indice]['servicename']
+                url = "http://{}/web/services.m3u?bRef={}&bName={}".format(obtener_ip_deco(), bouquet_ref, bouquet_name)
+            response = requests.get(url)
+            if response.status_code == 200:
+                archivo_m3u = "/tmp/{}.m3u".format(bouquet_name)
+                with open(archivo_m3u, "wb") as f:
+                    f.write(response.content)
+                if os.path.exists(archivo_m3u):
+                    bot.send_document(G_CONFIG['chat_id'], open(archivo_m3u, 'rb'))
+                    getoutput("rm -f '{}'".format(archivo_m3u))
+                else:
+                    bot.send_message(G_CONFIG['chat_id'], i18n('msg.command_not_found'))
 
 # MAIN
 menu_info = MenuOption(name = 'info', description = i18n.t('menu.info.title'))
@@ -2465,28 +2879,98 @@ menu_info.add_option(MenuOption(name = "channel", description = i18n.t('menu.inf
 menu_info.add_option(MenuOption(name = "sistema", description = i18n.t('menu.info.system'), command = system_info))
 menu_info.add_option(MenuOption(name = "machineid", description = i18n.t('menu.info.machineid'), command = info_machineid))
 menu_info.add_option(MenuOption(name = "top", description = i18n.t('menu.info.top'), command = info_top))
+menu_info.add_option(MenuOption(name = "estado_receptor", description = i18n.t('menu.info.estado_receptor'), command = remotecontrol_status))
+menu_info.add_option(MenuOption(name = "plugin_instalados", description = i18n.t('menu.info.plugin_installed'), command = plugin_instalados))
+menu_info.add_option(MenuOption(name = "tareas_crontab", description = i18n.t('menu.info.crontab_info'), command = crontab_tareas))
+menu_info.add_option(MenuOption(name = "get_ram", description = i18n.t('menu.info.ram_info'), command = get_ram_disponible))
+menu_info.add_option(MenuOption(name = "get_cpu", description = i18n.t('menu.info.cpu_uso'), command = get_cpu_uso))
+menu_info.add_option(MenuOption(name = "get_emmc", description = i18n.t('menu.info.emmc_uso'), command = get_disco_interno_disponible))
+menu_info.add_option(MenuOption(name = "get_montajes", description = i18n.t('menu.info.puntos_montaje'), command = get_puntos_de_montaje))
+menu_info.add_option(MenuOption(name = "get_bytes", description = i18n.t('menu.info.bytes'), command = get_bytes_red))
+menu_info.add_option(MenuOption(name = "get_conexiones", description = i18n.t('menu.info.conexiones'), command = get_conexiones_de_red))
+menu_info.add_option(MenuOption(name = "get_maxprocesos", description = i18n.t('menu.info.maxproceso'), command = get_proceso_con_mas_consumo))
+menu_info.add_option(MenuOption(name = "get_interfacered", description = i18n.t('menu.info.interfazred'), command = get_interfaces_de_red_activas))
+menu_info.add_option(MenuOption(name = "get_dmesg", description = i18n.t('menu.info.dmesg'), command = get_dmesg))
 
-menu_network = MenuOption(name = 'red', description = i18n.t('menu.network.title'))
-menu_network.add_option(MenuOption(name = "status", description = i18n.t('menu.network.status'), command = network_status))
-menu_network.add_option(MenuOption(name = "conexiones", description = i18n.t('menu.network.connections'), command = info_conexiones))
-menu_network.add_option(MenuOption(name = "speedtest", description = i18n.t('menu.network.speedtest'), command = info_speedtest, params=[[JB_BUTTONS, lambda: info_speedtest_options()]]))
-menu_network.add_option(MenuOption(name = "check_duckdns_ip", description = i18n.t('menu.network.check_duckdns_ip'), command = info_check_duckdns_ip, params =["host"]))
-menu_network.add_option(MenuOption(name = "check_open_port", description = i18n.t('menu.network.check_open_port'), command = info_check_open_port, params =["host", "port"]))
-menu_network.add_option(MenuOption(name = "geolocalizar_ip", description = i18n.t('menu.network.geolocate'), command = geolocalizar_ip, params=['geolocalizar']))
-menu_network.add_option(MenuOption(name = "bloquear_ip", description = i18n.t('menu.network.block_ip'), command = bloquear_ip, params=['bloquear']))
-menu_network.add_option(MenuOption(name = "desbloquear_ip", description = i18n.t('menu.network.unblock_ip'), command = desbloquear_ip, params=[[JB_BUTTONS, lambda: zip(rejected_ips(), rejected_ips())]]))
-menu_network.add_option(MenuOption(name = "ver_ip_bloqueadas", description = i18n.t('menu.network.show_blocked_ips'), command = mostrar_ip))
+menu_jungle = MenuOption(name = 'jungle', description = i18n.t('menu.jungle.title'))
+menu_ghostreamy = MenuOption(name = 'ghostreamy', description = i18n.t('menu.ghostreamy.title'))
+menu_ghostreamy.add_option(MenuOption(name = "status", description = i18n.t('menu.ghostreamy.status'), command = ghostreamy_status))
+menu_ghostreamy.add_option(MenuOption(name = "stop", description = i18n.t('menu.ghostreamy.stop'), command = ghostreamy_stop))
+menu_ghostreamy.add_option(MenuOption(name = "start", description = i18n.t('menu.ghostreamy.start'), command = ghostreamy_start))
+menu_ghostreamy.add_option(MenuOption(name = "restart", description = i18n.t('menu.ghostreamy.restart'), command = ghostreamy_restart))
+menu_ghostreamy.add_option(MenuOption(name = "config", description = i18n.t('menu.ghostreamy.config'), command = lambda : config("/etc/enigma2/ghostreamy.env")))
+menu_ghostreamy.add_option(MenuOption(name = "set_config", description = i18n.t('menu.ghostreamy.set_config'), command = lambda x,y: set_value("/etc/enigma2/ghostreamy.env", x,y), params=['clave', 'valor']))
+menu_ghostreamy.add_option(MenuOption(name = "ver_log", description = i18n.t('menu.ghostreamy.log'), command = ghostreamy_log))
+menu_ghostreamy.add_option(MenuOption(name = "ver_version", description = i18n.t('menu.ghostreamy.version'), command = ghostreamy_version))
+menu_junglebot = MenuOption(name = 'junglebot', description = i18n.t('menu.junglebot.title'), info = 'https://jungle-team.com/junglebotv2-telegram-enigma2/')
+menu_junglebot.add_option(MenuOption(name = "config", description = i18n.t('menu.junglebot.config'), command = lambda : config("/usr/bin/junglebot/parametros.py")))
+menu_junglebot.add_option(MenuOption(name = "set_config_parameters", description = i18n.t('menu.junglebot.set_config'), command = set_value_parameters, params =['clave', 'valor']))
+menu_junglebot.add_option(MenuOption(name = "update", description = i18n.t('menu.junglebot.update'), command = junglebot_update, params=params_confirmation))
+menu_junglebot.add_option(MenuOption(name = "reboot", description = i18n.t('menu.junglebot.reboot'), command = junglebot_restart, params=params_confirmation))
+menu_junglebot.add_option(MenuOption(name = "log", description = i18n.t('menu.junglebot.log'), command = junglebot_log))
+menu_junglebot.add_option(MenuOption(name = "purgelog", description = i18n.t('menu.junglebot.purge_log'), command = junglebot_purge_log))
+menu_junglebot.add_option(MenuOption(name = "changelog", description = i18n.t('menu.junglebot.changelog'), command = junglebot_changelog))
+menu_junglescript = MenuOption(name = 'junglescript', description = i18n.t('menu.junglescript.title'), info  ='https://jungle-team.com/junglescript-lista-canales-y-picon-enigma2-movistar/')
+menu_junglescript.add_option(MenuOption(name = "config", description = i18n.t('menu.junglescript.config'), command = lambda : config("/usr/bin/enigma2_pre_start.conf")))
+menu_junglescript.add_option(MenuOption(name = "set_config", description = i18n.t('menu.junglescript.set_config'), command = lambda x, y: set_value("/usr/bin/enigma2_pre_start.conf", x,y), params =['clave', 'valor']))
+menu_junglescript.add_option(MenuOption(name = "show_version", description = i18n.t('menu.junglescript.version'), command = junglescript_version))
+menu_junglescript.add_option(MenuOption(name = "run", description = i18n.t('menu.junglescript.run'), command = junglescript_run, params=params_confirmation))
+menu_junglescript.add_option(MenuOption(name = "force_channels", description = i18n.t('menu.junglescript.force_channels'), command = junglescript_channels, params=params_confirmation))
+menu_junglescript.add_option(MenuOption(name = "force_picons", description = i18n.t('menu.junglescript.force_picons'), command = junglescript_picons, params=params_confirmation))
+menu_junglescript.add_option(MenuOption(name = "log", description = i18n.t('menu.junglescript.log'), command = junglescript_log))
+menu_junglescript.add_option(MenuOption(name = "ver_fecha_lista", description = i18n.t('menu.junglescript.channel_list'), command = junglescript_fecha_listacanales))
+menu_junglescript.add_option(MenuOption(name = "ver_fecha_picons", description = i18n.t('menu.junglescript.picon_list'), command = junglescript_fecha_picons))
+menu_junglescript.add_option(MenuOption(name = "addbouquetfav", description = i18n.t('menu.junglescript.add_bouquet'), command = junglescript_addfavbouquet, params=['bouquet']))
+menu_junglescript.add_option(MenuOption(name = "delbouquetfav", description = i18n.t('menu.junglescript.del_bouquet'), command = junglescript_delfavbouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_fav_bouquets(), junglescript_fav_bouquets())]]))
+menu_junglescript.add_option(MenuOption(name = "addbouquetsave", description = i18n.t('menu.junglescript.add_save_bouquet'), command = junglescript_addsavebouquet, params=['bouquet']))
+menu_junglescript.add_option(MenuOption(name = "delbouquetsave", description = i18n.t('menu.junglescript.del_save_bouquet'), command = junglescript_delsavebouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_save_bouquets(), junglescript_save_bouquets())]]))
+menu_jungle.add_option(MenuOption(name = "backupjungleconfigs", description = i18n.t('menu.command.backup_jungle_configs'), command = backup_jungle_configs))
+menu_bugsbunny = MenuOption(name = 'bugsbunny', description = i18n.t('menu.bugsbunny.title'))
+menu_bugsbunny.add_option(MenuOption(name = "install_feed_jungle", description = i18n.t('menu.bugsbunny.feedjungle'), command = repo_jungle_install, params=params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_feed_Oe", description = i18n.t('menu.bugsbunny.feedoe'), command = repo_oeAlliance, params=params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_junglescript", description = i18n.t('menu.bugsbunny.install_junglescript'), command = junglescript_install, params=params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_junglescript", description = i18n.t('menu.bugsbunny.uninstall_junglescript'), command = junglescript_uninstall, params=params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_ghostreamy", description = i18n.t('menu.bugsbunny.install_ghostreamy'), command = ghostreamy_install, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_ghostreamy", description = i18n.t('menu.bugsbunny.uninstall_ghostreamy'), command = ghostreamy_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_jungletools", description = i18n.t('menu.bugsbunny.install_jungletools'), command = install_junglescripttool, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_jungletools", description = i18n.t('menu.bugsbunny.uninstall_jungletools'), command = junglescripttool_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_epgimport", description = i18n.t('menu.bugsbunny.install_epgimport'), command = install_epgimport, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_epgimport", description = i18n.t('menu.bugsbunny.uninstall_epgimport'), command = epgimport_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_tdtchannels", description = i18n.t('menu.bugsbunny.install_tdtchannels'), command = install_tdtchannels, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_tdtchannels", description = i18n.t('menu.bugsbunny.uninstall_tdtchannels'), command = tdtchannels_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_oscamconclave", description = i18n.t('menu.bugsbunny.install_oscamconclave'), command = install_emuoscamconclave, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_oscamconclave", description = i18n.t('menu.bugsbunny.uninstall_oscamconclave'), command = emuoscamconclave_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_skinkoala", description = i18n.t('menu.bugsbunny.install_skinkoala'), command = install_skinkoala, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_skinkoala", description = i18n.t('menu.bugsbunny.uninstall_skinkoala'), command = skinkoala_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_jedimaker", description = i18n.t('menu.bugsbunny.install_jedimaker'), command = install_jedimaker, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_jedimaker", description = i18n.t('menu.bugsbunny.uninstall_jedimaker'), command = jedimaker_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_openvpn", description = i18n.t('menu.bugsbunny.install_openvpn'), command = install_openvpn, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_openvpn", description = i18n.t('menu.bugsbunny.uninstall_openvpn'), command = openvpn_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "zerotier_install", description = i18n.t('menu.bugsbunny.install_zerotier'), command = zerotier_install, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "zerotier_uninstall", description = i18n.t('menu.bugsbunny.uninstall_zerotier'), command = zerotier_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "tailscale_install", description = i18n.t('menu.bugsbunny.install_tailscale'), command = tailscale_install, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "tailscale_uninstall", description = i18n.t('menu.bugsbunny.uninstall_tailscale'), command = tailscale_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_jediepgxtream", description = i18n.t('menu.bugsbunny.install_jediepgxtream'), command = install_jediepgxtream, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_jediepgxtream", description = i18n.t('menu.bugsbunny.uninstall_jediepgxtream'), command = jediepgxtream_uninstall, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "install_footonsat", description = i18n.t('menu.bugsbunny.install_footonsat'), command = install_footonsat, params = params_confirmation))
+menu_bugsbunny.add_option(MenuOption(name = "uninstall_footonsat", description = i18n.t('menu.bugsbunny.uninstall_footonsat'), command = footonsat_uninstall, params = params_confirmation))
+menu_jungle.add_option(menu_ghostreamy)
+menu_jungle.add_option(menu_junglebot)
+menu_jungle.add_option(menu_junglescript)
+menu_jungle.add_option(menu_bugsbunny )
 
-menu_command = MenuOption(name = 'command', description = i18n.t('menu.command.title'))
-menu_command.add_option(MenuOption(name = "freeram", description = i18n.t('menu.command.freeram'), command = command_freeram))
-menu_command.add_option(MenuOption(name = "update", description = i18n.t('menu.command.update'), command = command_update))
-menu_command.add_option(MenuOption(name = "upgrade", description = i18n.t('menu.command.upgrade'), command = command_upgrade, params=params_confirmation))
-menu_command.add_option(MenuOption(name = "restaurar", description = i18n.t('menu.command.factory_reset'), command = command_restaurar, params=params_confirmation))
-menu_command.add_option(MenuOption(name = "resetpass", description = i18n.t('menu.command.resetpass'), command = command_resetpass, params=params_confirmation))
-menu_command.add_option(MenuOption(name = "runcommand", description = i18n.t('menu.command.exec_command'), command = command_runcommand, params=['comando']))
-menu_command.add_option(MenuOption(name = "getfile", description = i18n.t('menu.command.get_file'), command = file_download, params=['path del fichero sin la primera barra de la ruta, ej: tmp/oscam.log']))
-menu_command.add_option(MenuOption(name = "backupjungleconfigs", description = i18n.t('menu.command.backup_jungle_configs'), command = backup_jungle_configs))
 
+menu_redes = MenuOption(name = 'redes', description = i18n.t('menu.redes.title'))
+menu_network = MenuOption(name='network', description=i18n.t('menu.network.title'))
+menu_network.add_option(MenuOption(name='status', description=i18n.t('menu.network.status'), command=network_status))
+menu_network.add_option(MenuOption(name='connections', description=i18n.t('menu.network.connections'), command=info_conexiones))
+menu_network.add_option(MenuOption(name='speedtest', description=i18n.t('menu.network.speedtest'), command=info_speedtest, params=[[JB_BUTTONS, lambda: info_speedtest_options()]]))
+menu_network.add_option(MenuOption(name='check_duckdns_ip', description=i18n.t('menu.network.check_duckdns_ip'), command=info_check_duckdns_ip, params=['host']))
+menu_network.add_option(MenuOption(name='check_open_port', description=i18n.t('menu.network.check_open_port'), command=info_check_open_port, params=['host', 'port']))
+menu_network.add_option(MenuOption(name='geolocate_ip', description=i18n.t('menu.network.geolocate'), command=geolocalizar_ip, params=['geolocalizar']))
+menu_network.add_option(MenuOption(name='block_ip', description=i18n.t('menu.network.block_ip'), command=bloquear_ip, params=['bloquear']))
+menu_network.add_option(MenuOption(name='unblock_ip', description=i18n.t('menu.network.unblock_ip'), command=desbloquear_ip, params=[[JB_BUTTONS, lambda: zip(rejected_ips(), rejected_ips())]]))
+menu_network.add_option(MenuOption(name='show_blocked_ips', description=i18n.t('menu.network.show_blocked_ips'), command=mostrar_ip))
 menu_stream = MenuOption(name = 'stream', description = i18n.t('menu.stream.title'))
 menu_stream.add_option(MenuOption(name = "ver", description = i18n.t('menu.stream.show'), command = cotillearamigos))
 menu_stream.add_option(MenuOption(name = "amigos", description = i18n.t('menu.stream.friends'), command = amigos))
@@ -2496,19 +2980,64 @@ menu_stream.add_option(MenuOption(name = "autocheck", description = i18n.t('menu
 menu_stream.add_option(MenuOption(name = "stopstream", description = i18n.t('menu.stream.stop_streamproxy'), command = command_stopstream))
 menu_stream.add_option(MenuOption(name = "listar_instrusos", description = i18n.t('menu.stream.intruders_list'), command = intrusos))
 menu_stream.add_option(MenuOption(name = "delinstruso", description = i18n.t('menu.stream.delete_intruder'), command = stream_delintruso, params=[[JB_BUTTONS, lambda: zip(stream_intrusos(), stream_intrusos())]]))
-
 menu_conexiones = MenuOption(name = 'conexiones', description = i18n.t('menu.connections.title'))
-menu_conexiones.add_option(MenuOption(name = "config", description = i18n.t('menu.connections.config'), command = lambda : config("/usr/bin/junglebot/parametros.py")))
-menu_conexiones.add_option(MenuOption(name = "set_config_parameters", description = i18n.t('menu.connections.set_config'), command = set_value_parameters, params =['clave', 'valor']))
-menu_conexiones.add_option(MenuOption(name = "addamigo", description = i18n.t('menu.connections.add_friend'), command = stream_addamigo, params=['ip amigo']))
-menu_conexiones.add_option(MenuOption(name = "delamigo", description = i18n.t('menu.connections.del_friend'), command = stream_delamigo, params=[[JB_BUTTONS, lambda: zip(stream_amigos(), stream_amigos())]]))
-menu_conexiones.add_option(MenuOption(name = "amigos", description = i18n.t('menu.connections.friends'), command = amigos))
 menu_conexiones.add_option(MenuOption(name = "ssh", description = i18n.t('menu.connections.ssh'), command = controlssh))
 menu_conexiones.add_option(MenuOption(name = "ftp", description = i18n.t('menu.connections.ftp'), command = controlftp))
 menu_conexiones.add_option(MenuOption(name = "autossh", description = i18n.t('menu.connections.autossh'), command = conn_autossh, params=params_confirmation))
 menu_conexiones.add_option(MenuOption(name = "autoftp", description = i18n.t('menu.connections.autoftp'), command = conn_autoftp, params=params_confirmation))
-menu_conexiones.add_option(MenuOption(name = "listar_instrusos", description = i18n.t('menu.stream.intruders_list'), command = intrusos))
-menu_conexiones.add_option(MenuOption(name = "delinstruso", description = i18n.t('menu.stream.delete_intruder'), command = stream_delintruso, params=[[JB_BUTTONS, lambda: zip(stream_intrusos(), stream_intrusos())]]))
+menu_vpn = MenuOption(name = 'vpn', description = i18n.t('menu.vpn.title'))
+menu_zerotier = MenuOption(name = 'zerotier', description = i18n.t('menu.zerotier.title'))
+menu_zerotier.add_option(MenuOption(name = "zerotier_status", description = i18n.t('menu.zerotier.status'), command = zerotier_status))
+menu_zerotier.add_option(MenuOption(name = "zerotier_start", description = i18n.t('menu.zerotier.start'), command = zerotier_start))
+menu_zerotier.add_option(MenuOption(name = "zerotier_stop", description = i18n.t('menu.zerotier.stop'), command = zerotier_stop))
+menu_zerotier.add_option(MenuOption(name = "zerotier_force_reload", description = i18n.t('menu.zerotier.force_reload'), command = zerotier_force_reload))
+menu_zerotier.add_option(MenuOption(name = "zerotier_join", description = i18n.t('menu.zerotier.join'), command = zerotier_join_network, params=['network id']))
+menu_zerotier.add_option(MenuOption(name = "zerotier_leave", description = i18n.t('menu.zerotier.leave'), command = zerotier_leave_network, params=['network id']))
+menu_tailscale = MenuOption(name = 'tailscale', description = i18n.t('menu.tailscale.title'))
+menu_tailscale.add_option(MenuOption(name = "tailscale_up", description = i18n.t('menu.tailscale.up'), command = tailscale_up))
+menu_tailscale.add_option(MenuOption(name = "tailscale_down", description = i18n.t('menu.tailscale.down'), command = tailscale_down))
+menu_tailscale.add_option(MenuOption(name = "tailscale_ip", description = i18n.t('menu.tailscale.ip'), command = tailscale_ip))
+menu_tailscale.add_option(MenuOption(name = "tailscale_status", description = i18n.t('menu.tailscale.status'), command = tailscale_status))
+menu_vpn.add_option(menu_zerotier)
+menu_vpn.add_option(menu_tailscale)
+menu_redes.add_option(menu_network)
+menu_redes.add_option(menu_stream)
+menu_redes.add_option(menu_conexiones)
+menu_redes.add_option(menu_vpn)
+
+menu_gestion = MenuOption(name = 'gestion', description = i18n.t('menu.gestion.title'))
+menu_gestion.add_option(MenuOption(name = "runcommand", description = i18n.t('menu.command.exec_command'), command = command_runcommand, params=['comando']))
+menu_command = MenuOption(name = 'command', description = i18n.t('menu.command.title'))
+menu_command.add_option(MenuOption(name = "freeram", description = i18n.t('menu.command.freeram'), command = command_freeram))
+menu_command.add_option(MenuOption(name = "update", description = i18n.t('menu.command.update'), command = command_update))
+menu_command.add_option(MenuOption(name = "upgrade", description = i18n.t('menu.command.upgrade'), command = command_upgrade, params=params_confirmation))
+menu_command.add_option(MenuOption(name = "restaurar", description = i18n.t('menu.command.factory_reset'), command = command_restaurar, params=params_confirmation))
+menu_command.add_option(MenuOption(name = "resetpass", description = i18n.t('menu.command.resetpass'), command = command_resetpass, params=params_confirmation))
+menu_command.add_option(MenuOption(name = "getfile", description = i18n.t('menu.command.get_file'), command = file_download, params=['path del fichero sin la primera barra de la ruta, ej: tmp/oscam.log']))
+menu_command.add_option(MenuOption(name='change_password', description=i18n.t('menu.command.change_password'), command=change_password, params=['change']))
+menu_command.add_option(MenuOption(name = "cron_tarea_programada", description = i18n.t('menu.command.cron_tarea_programada'), command = programar_tarea_cron, params =['comando a programar sin usar primera /, ejem: usr/bin/python /etc/miscript.py', 'de cuando quieres que se ejecute, ejm: 30']))
+menu_command.add_option(MenuOption(name = "list_bouquets", description = i18n.t('menu.command.list_bouquets'), command = list_bouquets))
+menu_command.add_option(MenuOption(name = "descarga_m3u", description = i18n.t('menu.command.descarga_m3u'), command = descarga_m3u, params =['Numero de la lista de bouquets']))
+menu_grabaciones = MenuOption(name = 'grabaciones', description = i18n.t('menu.records.title'))
+menu_grabaciones.add_option(MenuOption(name = "listado_timers", description = i18n.t('menu.records.list'), command = list_recording_timers))
+menu_grabaciones.add_option(MenuOption(name = "borrar_timer", description = i18n.t('menu.records.delete'), command = delete_timer, params=params_confirmation))
+menu_grabaciones.add_option(MenuOption(name = "limpiar_timers", description = i18n.t('menu.records.clean'), command = clean_expired_timers, params=params_confirmation))
+menu_grabaciones.add_option(MenuOption(name = "grabar_ahora", description = i18n.t('menu.records.save'), command = record_now))
+menu_grabaciones.add_option(MenuOption(name = "listado_ficher_grabacion", description = i18n.t('menu.records.file_list'), command = list_recordings))
+menu_grabaciones.add_option(MenuOption(name = "borrado_ficher_grabacion", description = i18n.t('menu.records.delete_file'), command = delete_recordings, params =["indice"]))
+menu_grabaciones.add_option(MenuOption(name = "borrado_completo_grabaciones", description = i18n.t('menu.records.delete_all'), command = delete_all_recordings, params=params_confirmation))
+menu_grabaciones.add_option(MenuOption(name = "show_path_grabaciones", description = i18n.t('menu.records.path'), command = show_path_recordings))
+menu_epg = MenuOption(name = 'epg', description = i18n.t('menu.epg.title'))
+menu_epg.add_option(MenuOption(name = "listar_ruta_epg", description = i18n.t('menu.epg.path_epg'), command = find_epg_dat))
+menu_epg.add_option(MenuOption(name = "listar_fecha_epg", description = i18n.t('menu.epg.date_epg'), command = find_date_epg_dat))
+menu_epg.add_option(MenuOption(name = "update_epg", description = i18n.t('menu.epg.update_epg'), command = update_epg, params =["dias (3, 7, 15 o 30)"]))
+menu_epg.add_option(MenuOption(name = "borrar_epg", description = i18n.t('menu.epg.del_epg'), command = delete_epg_dat, params=params_confirmation))
+menu_epg.add_option(MenuOption(name = "reiniciar_interfaz", description = i18n.t('menu.epg.restart_gui'), command = remotecontrol_restartgui, params=params_confirmation))
+menu_epg.add_option(MenuOption(name = "desinstalar_epgimport", description = i18n.t('menu.epg.uninstall_epgimport'), command = remove_epgimport, params=params_confirmation))
+menu_epg.add_option(MenuOption(name = "desinstalar_crossepg", description = i18n.t('menu.epg.uninstall_crossepg'), command = remove_crossepg, params=params_confirmation))
+menu_gestion.add_option(menu_command)
+menu_gestion.add_option(menu_grabaciones)
+menu_gestion.add_option(menu_epg)
 
 menu_emu = MenuOption(name='emu', description= i18n.t('menu.emu.title'), info = 'https://jungle-team.com/conclave-oscam-autoupdate/')
 menu_emu.add_option(MenuOption(name = "status", description = i18n.t('menu.emu.status'), command = emucam_status))
@@ -2527,64 +3056,6 @@ menu_emu.add_option(MenuOption(name = "update_autooscam", description = i18n.t('
 menu_emu.add_option(MenuOption(name = "run_autooscam", description = i18n.t('menu.emu.run_autooscam'), command = run_autooscam, params=params_confirmation))
 menu_emu.add_option(MenuOption(name = "force_autooscam", description = i18n.t('menu.emu.force_autooscam'), command = force_autooscam, params=params_confirmation))
 menu_emu.add_option(MenuOption(name = "change_active_emu", description = i18n.t('menu.emu.activate_emu'), command = set_active_emu, params=[[JB_BUTTONS, lambda: zip(emu_list(), emu_list())]]))
-
-menu_ghostreamy = MenuOption(name = 'ghostreamy', description = i18n.t('menu.ghostreamy.title'))
-menu_ghostreamy.add_option(MenuOption(name = "status", description = i18n.t('menu.ghostreamy.status'), command = ghostreamy_status))
-menu_ghostreamy.add_option(MenuOption(name = "stop", description = i18n.t('menu.ghostreamy.stop'), command = ghostreamy_stop))
-menu_ghostreamy.add_option(MenuOption(name = "start", description = i18n.t('menu.ghostreamy.start'), command = ghostreamy_start))
-menu_ghostreamy.add_option(MenuOption(name = "restart", description = i18n.t('menu.ghostreamy.restart'), command = ghostreamy_restart))
-menu_ghostreamy.add_option(MenuOption(name = "config", description = i18n.t('menu.ghostreamy.config'), command = lambda : config("/etc/enigma2/ghostreamy.env")))
-menu_ghostreamy.add_option(MenuOption(name = "set_config", description = i18n.t('menu.ghostreamy.set_config'), command = lambda x,y: set_value("/etc/enigma2/ghostreamy.env", x,y), params=['clave', 'valor']))
-menu_ghostreamy.add_option(MenuOption(name = "install", description = i18n.t('menu.ghostreamy.install'), command = ghostreamy_install, params = params_confirmation))
-menu_ghostreamy.add_option(MenuOption(name = "uninstall", description = i18n.t('menu.ghostreamy.uninstall'), command = ghostreamy_uninstall, params = params_confirmation))
-menu_ghostreamy.add_option(MenuOption(name = "ver_log", description = i18n.t('menu.ghostreamy.log'), command = ghostreamy_log))
-menu_ghostreamy.add_option(MenuOption(name = "ver_version", description = i18n.t('menu.ghostreamy.version'), command = ghostreamy_version))
-
-menu_junglebot = MenuOption(name = 'junglebot', description = i18n.t('menu.junglebot.title'), info = 'https://jungle-team.com/junglebotv2-telegram-enigma2/')
-menu_junglebot.add_option(MenuOption(name = "config", description = i18n.t('menu.junglebot.config'), command = lambda : config("/usr/bin/junglebot/parametros.py")))
-menu_junglebot.add_option(MenuOption(name = "set_config_parameters", description = i18n.t('menu.junglebot.set_config'), command = set_value_parameters, params =['clave', 'valor']))
-menu_junglebot.add_option(MenuOption(name = "update", description = i18n.t('menu.junglebot.update'), command = junglebot_update, params=params_confirmation))
-menu_junglebot.add_option(MenuOption(name = "reboot", description = i18n.t('menu.junglebot.reboot'), command = junglebot_restart, params=params_confirmation))
-menu_junglebot.add_option(MenuOption(name = "log", description = i18n.t('menu.junglebot.log'), command = junglebot_log))
-menu_junglebot.add_option(MenuOption(name = "purgelog", description = i18n.t('menu.junglebot.purge_log'), command = junglebot_purge_log))
-menu_junglebot.add_option(MenuOption(name = "changelog", description = i18n.t('menu.junglebot.changelog'), command = junglebot_changelog))
-
-menu_junglescript = MenuOption(name = 'junglescript', description = i18n.t('menu.junglescript.title'), info  ='https://jungle-team.com/junglescript-lista-canales-y-picon-enigma2-movistar/')
-menu_junglescript.add_option(MenuOption(name = "config", description = i18n.t('menu.junglescript.config'), command = lambda : config("/usr/bin/enigma2_pre_start.conf")))
-menu_junglescript.add_option(MenuOption(name = "set_config", description = i18n.t('menu.junglescript.set_config'), command = lambda x, y: set_value("/usr/bin/enigma2_pre_start.conf", x,y), params =['clave', 'valor']))
-menu_junglescript.add_option(MenuOption(name = "show_version", description = i18n.t('menu.junglescript.version'), command = junglescript_version))
-menu_junglescript.add_option(MenuOption(name = "install", description = i18n.t('menu.junglescript.install'), command = junglescript_install, params=params_confirmation))
-menu_junglescript.add_option(MenuOption(name = "uninstall", description = i18n.t('menu.junglescript.uninstall'), command = junglescript_uninstall, params=params_confirmation))
-menu_junglescript.add_option(MenuOption(name = "run", description = i18n.t('menu.junglescript.run'), command = junglescript_run, params=params_confirmation))
-menu_junglescript.add_option(MenuOption(name = "force_channels", description = i18n.t('menu.junglescript.force_channels'), command = junglescript_channels, params=params_confirmation))
-menu_junglescript.add_option(MenuOption(name = "force_picons", description = i18n.t('menu.junglescript.force_picons'), command = junglescript_picons, params=params_confirmation))
-menu_junglescript.add_option(MenuOption(name = "log", description = i18n.t('menu.junglescript.log'), command = junglescript_log))
-menu_junglescript.add_option(MenuOption(name = "ver_fecha_lista", description = i18n.t('menu.junglescript.channel_list'), command = junglescript_fecha_listacanales))
-menu_junglescript.add_option(MenuOption(name = "ver_fecha_picons", description = i18n.t('menu.junglescript.picon_list'), command = junglescript_fecha_picons))
-menu_junglescript.add_option(MenuOption(name = "addbouquetfav", description = i18n.t('menu.junglescript.add_bouquet'), command = junglescript_addfavbouquet, params=['bouquet']))
-menu_junglescript.add_option(MenuOption(name = "delbouquetfav", description = i18n.t('menu.junglescript.del_bouquet'), command = junglescript_delfavbouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_fav_bouquets(), junglescript_fav_bouquets())]]))
-menu_junglescript.add_option(MenuOption(name = "addbouquetsave", description = i18n.t('menu.junglescript.add_save_bouquet'), command = junglescript_addsavebouquet, params=['bouquet']))
-menu_junglescript.add_option(MenuOption(name = "delbouquetsave", description = i18n.t('menu.junglescript.del_save_bouquet'), command = junglescript_delsavebouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_save_bouquets(), junglescript_save_bouquets())]]))
-menu_junglescript.add_option(MenuOption(name = "del_hidemarked_vti", description = i18n.t('menu.junglescript.del_hidemarked_vti'), command = junglescript_delhidemarked_vti))
-
-menu_grabaciones = MenuOption(name = 'grabaciones', description = i18n.t('menu.records.title'))
-menu_grabaciones.add_option(MenuOption(name = "listado_timers", description = i18n.t('menu.records.list'), command = list_recording_timers))
-menu_grabaciones.add_option(MenuOption(name = "borrar_timer", description = i18n.t('menu.records.delete'), command = delete_timer, params=params_confirmation))
-menu_grabaciones.add_option(MenuOption(name = "limpiar_timers", description = i18n.t('menu.records.clean'), command = clean_expired_timers, params=params_confirmation))
-menu_grabaciones.add_option(MenuOption(name = "grabar_ahora", description = i18n.t('menu.records.save'), command = record_now))
-menu_grabaciones.add_option(MenuOption(name = "listado_ficher_grabacion", description = i18n.t('menu.records.file_list'), command = list_recordings))
-menu_grabaciones.add_option(MenuOption(name = "borrado_ficher_grabacion", description = i18n.t('menu.records.delete_file'), command = delete_recordings, params =["indice"]))
-menu_grabaciones.add_option(MenuOption(name = "borrado_completo_grabaciones", description = i18n.t('menu.records.delete_all'), command = delete_all_recordings, params=params_confirmation))
-menu_grabaciones.add_option(MenuOption(name = "show_path_grabaciones", description = i18n.t('menu.records.path'), command = show_path_recordings))
-
-menu_epg = MenuOption(name = 'epg', description = i18n.t('menu.epg.title'))
-menu_epg.add_option(MenuOption(name = "listar_ruta_epg", description = i18n.t('menu.epg.path_epg'), command = find_epg_dat))
-menu_epg.add_option(MenuOption(name = "listar_fecha_epg", description = i18n.t('menu.epg.date_epg'), command = find_date_epg_dat))
-menu_epg.add_option(MenuOption(name = "update_epg", description = i18n.t('menu.epg.update_epg'), command = update_epg, params =["dias (3, 7, 15 o 30)"]))
-menu_epg.add_option(MenuOption(name = "borrar_epg", description = i18n.t('menu.epg.del_epg'), command = delete_epg_dat, params=params_confirmation))
-menu_epg.add_option(MenuOption(name = "reiniciar_interfaz", description = i18n.t('menu.epg.restart_gui'), command = remotecontrol_restartgui, params=params_confirmation))
-menu_epg.add_option(MenuOption(name = "desinstalar_epgimport", description = i18n.t('menu.epg.uninstall_epgimport'), command = remove_epgimport, params=params_confirmation))
-menu_epg.add_option(MenuOption(name = "desinstalar_crossepg", description = i18n.t('menu.epg.uninstall_crossepg'), command = remove_crossepg, params=params_confirmation))
 
 menu_remotecontrol = MenuOption(name = 'remotecontrol', description = i18n.t('menu.remotecontrol.title'))
 menu_remotecontrol.add_option(MenuOption(name = "standby_wakeup", description = i18n.t('menu.remotecontrol.standby_wakeup'), command = remotecontrol_standby_wakeup))
@@ -2610,30 +3081,18 @@ menu_remotecontrol.add_option(MenuOption(name = "send_mute", description = i18n.
 menu_remotecontrol.add_option(MenuOption(name = "send_vol_up", description = i18n.t('menu.remotecontrol.volume_up'), command = remotecontrol_send_vol_up))
 menu_remotecontrol.add_option(MenuOption(name = "send_vol_down", description = i18n.t('menu.remotecontrol.volume_down'), command = remotecontrol_send_vol_down))
 
-menu_zerotier = MenuOption(name = 'zerotier', description = i18n.t('menu.zerotier.title'))
-menu_zerotier.add_option(MenuOption(name = "zerotier_install", description = i18n.t('menu.zerotier.install'), command = zerotier_install))
-menu_zerotier.add_option(MenuOption(name = "zerotier_uninstall", description = i18n.t('menu.zerotier.uninstall'), command = zerotier_uninstall))
-menu_zerotier.add_option(MenuOption(name = "zerotier_status", description = i18n.t('menu.zerotier.status'), command = zerotier_status))
-menu_zerotier.add_option(MenuOption(name = "zerotier_start", description = i18n.t('menu.zerotier.start'), command = zerotier_start))
-menu_zerotier.add_option(MenuOption(name = "zerotier_stop", description = i18n.t('menu.zerotier.stop'), command = zerotier_stop))
-menu_zerotier.add_option(MenuOption(name = "zerotier_force_reload", description = i18n.t('menu.zerotier.force_reload'), command = zerotier_force_reload))
-menu_zerotier.add_option(MenuOption(name = "zerotier_join", description = i18n.t('menu.zerotier.join'), command = zerotier_join_network, params=['network id']))
-menu_zerotier.add_option(MenuOption(name = "zerotier_leave", description = i18n.t('menu.zerotier.leave'), command = zerotier_leave_network, params=['network id']))
-
 menu_ayuda = MenuOption(name = 'ayuda', description = i18n.t('menu.help.title'))
 
-g_menu = [menu_ayuda, menu_info, menu_network, menu_zerotier, menu_junglebot, menu_stream, menu_conexiones, menu_grabaciones, menu_epg, menu_emu, menu_remotecontrol, menu_command, menu_junglescript, menu_ghostreamy]   
+g_menu = [menu_ayuda, menu_info, menu_gestion, menu_emu, menu_remotecontrol, menu_redes, menu_jungle]   
 g_current_menu_option = None
 
 if __name__ == "__main__":
     try:
         logger.info('junglebot esta funcionando...' + VERSION)
         send_large_message(G_CONFIG['chat_id'], i18n.t('msg.boot_info') + VERSION)
-        ga('system', enigma_distro())
-        ga('version', VERSION)
-        ga('locale', G_CONFIG['locale'])
         check_version()
         inicializar_intrusos()
+        cargar_ips_bloquedas()
         start_autostream()
         start_autossh()
         start_autoftp()
@@ -2643,5 +3102,5 @@ if __name__ == "__main__":
         fill_command_list()
     except Exception as e:
         logger.exception(e)
-    bot.infinity_polling(none_stop=True)
+    bot.infinity_polling()
 

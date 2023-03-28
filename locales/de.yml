@@ -1,142 +1,198 @@
 de:
     menu:
         command:
-            title: Befehle
+            title: Dienstprogramme
             stopstream: Streamproxy stoppen
-            freeram: RAM reinigen
-            update: Sources aktualisieren
+            freeram: Speicher freigeben
+            update: Quellen aktualisieren
             upgrade: Pakete aktualisieren
-            factory_reset: Werkeinstellung zurücksetzen
-            resetpass: Root paswort löschen
-            exec_command: Befehlen ausführen
-            get_file: Download-Datei
-            backup_jungle_configs: Backup der Jungle-Team-Konfigurationen
+            factory_reset: Auf Werkseinstellungen zurücksetzen
+            resetpass: Root-Passwort entfernen
+            exec_command: Terminalkonsole
+            get_file: Datei herunterladen
+            backup_jungle_configs: 💻  Jungle-Team-Konfigurationen sichern
+            change_password: Receiver-Passwort ändern
+            cron_tarea_programada: Cron-Aufgabe planen
+            descarga_m3u: M3U-Bouquet herunterladen
+            list_bouquets: Bouquets auflisten
         connections:
-            title: Verbindungsmanagement
+            title: Verbindungsverwaltung
             config: Parameter
             set_config: Parameter ändern
-            add_friend: Freund Autorisieren
+            add_friend: Freund hinzufügen
             del_friend: Freund entfernen
-            friends: Liste deiner Freunde
+            friends: Freundesliste
             ssh: SSH-Verbindungen anzeigen
             ftp: FTP-Verbindungen anzeigen
             autossh: Nicht autorisierte SSH-Kontrolle
             autoftp: Nicht autorisierte FTP-Kontrolle
         emu:
-            title: Emulator CCCAM / OSCAM
+            title: CCCAM / OSCAM-Emulator
             status: Status
-            addlinecccam: cccam-Zeile hinzufügen
-            addlineoscam: oscam-Zeile hinzufügen
+            addlinecccam: CCCAM-Linie hinzufügen
+            addlineoscam: OSCAM-Linie hinzufügen
             start: Emulator starten
             stop: Emulator stoppen
-            restart: Emulator neustarten
-            oscam_version: Siehe oscam version
-            cccam_version: Siehe cccam version
-            install_conclave: Oscam Autoupdater instalieren
-            update_autooscam: Autooscam.sh script aktualisieren
-            run_autooscam: Oscam Autoupdater aktualisieren
-            force_autooscam: Oscam Autoupdater aktualisieren zwingen
-            show_installed_emus: Show installed emus
-            activate_emu: Activate emu
-            dellineoscam: Delete oscam line
-            dellinecccam: Delete cccam line
-            enablelineoscam: Enable oscam line
-            disablelineoscam: Disable oscam line
+            restart: Emulator neu starten
+            oscam_version: OSCAM-Version anzeigen
+            cccam_version: CCCAM-Version anzeigen
+            install_conclave: OSCAM Conclave installieren
+            update_autooscam: AutoOSCAM-Skript aktualisieren
+            run_autooscam: OSCAM Conclave aktualisieren
+            force_autooscam: OSCAM Conclave-Update erzwingen
+            show_installed_emus: Installierte Emulatoren anzeigen
+            activate_emu: Emulator aktivieren
+            dellineoscam: OSCAM-Linie löschen
+            dellinecccam: CCCAM-Linie löschen
+            enablelineoscam: OSCAM-Linie aktivieren
+            disablelineoscam: OSCAM-Linie deaktivieren
         epg:
-            title: EPG-Management
-            path_epg: Siehe epg.dat Pfad
-            date_epg: Siehe epg.dat Datum 
+            title: EPG-Verwaltung
+            path_epg: Pfad der epg.dat anzeigen
+            date_epg: Datum der epg.dat anzeigen
             update_epg: EPG aktualisieren
             del_epg: EPG löschen
-            restart_gui: Interface neustarten
-            uninstall_epgimport: EPGImport Desinstalieren
-            uninstall_crossepg: CrossEPG Desinstalieren
+            restart_gui: Oberfläche neu starten
+            uninstall_epgimport: EPGImport deinstallieren
+            uninstall_crossepg: CrossEPG deinstallieren
         ghostreamy:
-            title: ghostreamy Management
-            status: ghostreamy Status
-            stop: ghostreamy stoppen
-            start: ghostreamy starten
-            restart: ghostreamy neustarten
-            config: Einstellungen
-            set_config: Einstellungen ändern
-            check_config: Einstellungen überprüfen
-            install: ghostreamy instalieren/aktualisieren
-            uninstall: ghostreamy deinstalieren
-            log: ghostreamy Log Sehen
-            version: ghostreamy version Sehen
+            title: 👻 Ghostreamy-Verwaltung
+            status: Ghostreamy-Status
+            stop: Ghostreamy anhalten
+            start: Ghostreamy starten
+            restart: Ghostreamy neu starten
+            config: Konfiguration
+            set_config: Konfiguration ändern
+            check_config: Konfiguration überprüfen
+            log: Ghostreamy-Log anzeigen
+            version: Ghostreamy-Version anzeigen
         help:
-            title: Hilfemenü mit Liste der verfügbaren Menüs
+            title: Hilfe-Menü mit Liste der verfügbaren Menüs
         info:
-            title: Informationen zum Empfängersystem
+            title: Informationen über den Empfänger
             channel: Aktueller Kanal
-            system: System Information
-            machineid: Rezeptoren-ID
-            top: Top 10 Prozesse mit CPU
+            system: Systeminformationen
+            machineid: Empfänger-ID
+            top: Top 10 Prozesse nach CPU-Auslastung
+            plugin_installed: Installierte Plugins anzeigen
+            estado_receptor: Empfängerstatus
+            crontab_info: Crontab-Aufgaben
+            ram_info: Verfügbare RAM
+            cpu_uso: CPU-Auslastung
+            emmc_uso: Verfügbare EMMC-Speicher
+            puntos_montaje: Mountpoints
+            bytes: Netzwerk-Fluss
+            conexiones: Aktive Netzwerkverbindungen
+            maxproceso: Prozess mit höchster Auslastung
+            interfazred: Aktive Netzwerkschnittstelle
+            dmesg: dmesg anzeigen
+        jungle:
+            title: Jungle Team Dienstprogramme
+        redes:
+            title: Netzwerkverwaltung
+        vpn:
+            title: VPN-Dienstprogramme
+        bugsbunny:
+            title: 🥕 Bugs Bunny Dienstprogramme
+            feedjungle: Jungle-Repository installieren
+            feedoe: OEAlliance-Repository installieren
+            install_jungletools: JungleScript Tools installieren/aktualisieren
+            uninstall_jungletools: JungleScript Tools deinstallieren
+            install_junglescript: JungleScript installieren/aktualisieren
+            uninstall_junglescript: JungleScript deinstallieren
+            install_ghostreamy: ghostreamy installieren/aktualisieren
+            uninstall_ghostreamy: ghostreamy deinstallieren
+            install_epgimport: epgimport installieren/aktualisieren
+            uninstall_epgimport: epgimport deinstallieren
+            install_tdtchannels: tdtchannels installieren/aktualisieren
+            uninstall_tdtchannels: tdtchannels deinstallieren
+            install_oscamconclave: oscamconclave installieren/aktualisieren
+            uninstall_oscamconclave: oscamconclave deinstallieren
+            install_skinkoala: op-artkoala Skin installieren/aktualisieren
+            uninstall_skinkoala: op-artkoala Skin deinstallieren
+            install_jedimaker: jedimakerxtream installieren/aktualisieren
+            uninstall_jedimaker: jedimakerxtream deinstallieren
+            install_openvpn: openvpn installieren/aktualisieren
+            uninstall_openvpn: openvpn deinstallieren
+            install_zerotier: zerotier installieren/aktualisieren
+            uninstall_zerotier: zerotier deinstallieren
+            install_tailscale: Tailscale installieren/aktualisieren
+            uninstall_tailscale: Tailscale deinstallieren
+            install_jediepgxtream: jediepgxtream installieren/aktualisieren
+            uninstall_jediepgxtream: jediepgxtream deinstallieren
+            install_footonsat: footonsat installieren
+            uninstall_footonsat: footonsat deinstallieren  
+        gestion:
+            title: Empfängerverwaltung
+        tailscale:
+            title: Tailscale-Verwaltung
+            up: Tailscale verbinden
+            down: Tailscale trennen
+            ip: Tailscale IP anzeigen
+            status: Tailscale-Status
         junglebot:
-            title: Bot-Einstellungen
+            title: 🤖 JungleBot-Verwaltung
             config: Parameter
             set_config: Parameter ändern
             update: Bot aktualisieren
-            reboot: Bot neustarten
-            log: Bot Log anzeigen
-            purge_log: Bot Log leeren
+            reboot: Bot neu starten
+            log: Bot-Protokoll anzeigen
+            purge_log: Bot-Protokoll leeren
             changelog: Changelog
         junglescript:
-            title: JungleScript-Einstellung
+            title: 🐲 JungleScript-Verwaltung
             config: Parameter
             set_config: Parameter ändern
-            install: JungleScript Instalieren
-            uninstall: JungleScript Desinstalieren 
             run: JungleScript ausführen
-            force_channels: Aktualisieren Kanalliste
-            force_picons: Forzar update picons
-            log: JungleScript Log sehen
-            channel_list: Siehe Datum der Kanalliste
-            picon_list: Siehe Datum der Picons
-            add_bouquet: Bouquet zu favoriten hinzufügen
-            del_bouquet: Bouquet von favoriten löschen
-            version: Siehe Skriptversion
-            add_save_bouquet: Add bouquet save
-            del_save_bouquet: Remove bouquet save
-            del_hidemarked_vti: Remove hidemarked vti
+            force_channels: Update der Kanalliste erzwingen
+            force_picons: Update der Picons erzwingen
+            log: JungleScript-Protokoll anzeigen
+            channel_list: Datum der Kanalliste anzeigen
+            picon_list: Datum der Picons anzeigen
+            add_bouquet: Favoritenbouquet hinzufügen
+            del_bouquet: Favoritenbouquet löschen
+            version: Script-Version anzeigen
+            add_save_bouquet: Bouquet speichern hinzufügen
+            del_save_bouquet: Gespeichertes Bouquet löschen
+            del_hidemarked_vti: Hidemarked VTI entfernen
         network:
             title: Netzwerkinformationen
             status: Status
-            connections: TCP-Verbindungen hergestellt
+            connections: Etablierte TCP-Verbindungen
             speedtest: Netzwerkgeschwindigkeitstest
-            check_duckdns_ip: Duckdns-IP überprüfen
+            check_duckdns_ip: DuckDNS-IP überprüfen
             check_open_port: Offenen Port überprüfen
-            zerotier: Zerotier Status
-            geolocate: Geolocate IP
-            block_ip: Block IP
-            unblock_ip: Unblock IP
-            show_blocked_ips: Show blocked ips
+            zerotier: Zerotier-Status
+            geolocate: IP geolokalisieren
+            block_ip: IP blockieren
+            unblock_ip: IP freigeben
+            show_blocked_ips: Blockierte IPs anzeigen
         records:
-            title: Aufnahmemanagement
-            list: Aufnahmeliste
-            delete: Aufnahme löschen
-            clean: Abgelaufene Aufnahmen löschen
-            save: Aktuelles Programm aufnehmen
+            title: Aufzeichnungsverwaltung
+            list: Aufzeichnungsliste
+            delete: Aufzeichnung löschen
+            clean: Abgelaufene Aufzeichnungen löschen
+            save: Aktuelles Programm aufzeichnen
             file_list: Dateiliste
             delete_file: Datei löschen
             delete_all: Alle Dateien löschen
-            path: aufnahmepfad
+            path: Aufzeichnungspfad
         remotecontrol:
             title: Fernbedienung
             status: STATUS
-            reboot: REBOOT
+            reboot: NEUSTART
             standby_wakeup: ⭕️
             restartgui: 🔄
             screenshot: 📷
             send_message: 💬
-            change_channel: CH+-
+            change_channel: KANAL+-
             up: 🔼
             down: 🔽
             left: ◀️
             right: ▶️
             ok: 🆗
-            menu: MENU
-            exit: EXIT
+            menu: MENÜ
+            exit: BEENDEN
             red: 🔴
             yellow: 🟡
             blue: 🔵
@@ -145,158 +201,166 @@ de:
             volume_up: 🔈+
             volume_down: 🔈-
             mute: 🔇
+            digit: 0-9
         stream:
-            title: Stream-Management
-            show: Was sehen deine Freunde?
-            friends: Deiner Freunde
-            add_friend: Freund zum Streamen autorisieren
-            delete_friend: Freund zum Streamen löschen
-            autocheck: Nicht autorisierte Streams kontrollieren
+            title: Stream-Verwaltung
+            show: Was deine Freunde sehen
+            friends: Freundesliste
+            add_friend: Freund für Stream autorisieren
+            delete_friend: Freund für Stream entfernen
+            autocheck: Kontrolle nicht autorisierter Streams
             stop_streamproxy: Streamproxy stoppen
             intruders_list: Liste der Eindringlinge
             delete_intruder: Eindringling löschen
         zerotier:
-            title: Zerotier management
-            install: Install zerotier
-            uninstall: Uninstall zerotier
-            status: Status zerotier
-            stop: Stop zerotier
-            start: Start zerotier
-            join: Join network
-            leave: Leave network 
-            force_reload: Force reload
+            title: Zerotier-Verwaltung
+            status: Zerotier-Status
+            stop: Zerotier stoppen
+            start: Zerotier starten
+            join: Netzwerk beitreten
+            leave: Netzwerk verlassen
+            force_reload: Erneutes Laden erzwingen
     msg:
-        boot_info: "Bot wird gestartet "
-        autoftp_started: "Autoftp wird gestartet"
-        autoram_started: "Autoram wird gestartet"
-        autossh_started: "Autossh wird gestartet"
-        autostream_started: "Autostream wird gestartet"
-        autotemp_started: "Autotemp wird gestartet"
-        cccam_not_installed: "Die CCcam Emulator ist nicht instaliert"
-        cccam_stopped: "Cccam gestoppt"
-        cccam_version_error: "⚠️ Existe binario de cccam pero no puedo chequear la version"
-        check_certs: "ZERTIFIKAT WIRD GEPRÜFT:"
-        check_external_ip: "EXTERNE IP WIRD GEPRÜFT"
-        check_external_port: "EXTERNER PORT WITD GEPRÜFT"
-        check_ip_deco: "DECO IP WIRD GEPRÜFT"
-        check_ip_deco_error: "⚠️ ERROR: Die IP deco_ip %{deco_ip} passt nicht mit der Deco IP %{real_ip}"
-        choose_option: "Choose an option"
-        click_button: "Drück de knopf zum Ausführen:\n\n"
+        boot_info: "Bot gestartet "
+        autoftp_started: "AutoFTP gestartet"
+        autoram_started: "AutoRAM gestartet"
+        autossh_started: "AutoSSH gestartet"
+        autostream_started: "AutoStream gestartet"
+        autotemp_started: "AutoTemp gestartet"
+        cccam_not_installed: "⚠️ CCcam-EMU ist nicht installiert"
+        cccam_stopped: "Cccam angehalten"
+        cccam_version_error: "⚠️ Es gibt ein CCcam-Binärdatei, aber ich kann die Version nicht überprüfen"
+        check_certs: "Überprüfen von Zertifikat:"
+        check_external_ip: "Überprüfung der externen IP"
+        check_external_port: "Überprüfung des externen Ports"
+        check_ip_deco: "Überprüfung der Deco-IP"
+        check_ip_deco_error: "⚠️ FEHLER: Deco-IP %{deco_ip} stimmt nicht mit der IP des Decoders %{real_ip} überein"
+        choose_option: "Wählen Sie eine Option"
+        click_button: "Drücken Sie die Taste, um auszuführen:\n\n"
         cline_info: "* Cline: %{name} (%{ip}:%{port}): %{connect}"
-        cline_bad_format: "Falsches Zeilenformat. Format -> C: Server port user paswort"
+        cline_bad_format: "Ungültiges Cline-Format. Format -> C: Server Port Benutzername Passwort"
         command_execute_success: "Befehl erfolgreich ausgeführt"
-        command_not_found: "command not found"
-        command_freeram: "Der RAM-Speicher wurde bereinigt"
-        command_reboot: "Rezeptor wuird neugestartet"
-        command_resetpass: "Root passwort würde vom Rezeptor gelöscht"
-        command_restartgui: "Enigma2 wird neugestartet"
-        command_restore: "Rezeptor wurde mit mit dem Werkswerte zurück gesetzt"
-        command_screenshot: "Bildschirmfoto wird bearbeitet..."
-        command_sleep: "Rezeptor wird ins ruhe-modus gesetzt"
+        command_not_found: "Befehl nicht gefunden"
+        command_freeram: "RAM-Speicherplatz wurde bereinigt"
+        command_reboot: "Decoder wird vollständig neu gestartet"
+        command_resetpass: "Root-Passwort des Receivers wurde entfernt"
+        command_restartgui: "Enigma2-System wird neu gestartet"
+        command_restore: "Receiver wird auf die Werkseinstellungen zurückgesetzt"
+        command_screenshot: "Erstellung des Screenshots läuft..."
+        command_sleep: "Receiver wird in den Standby-Modus versetzt"
         command_stopstream: "Streamproxy wird gestoppt: "
-        command_update: "Sourcen des Systems werde aktualisiert:"
-        command_upgrade: "Rezeptor paketen werden aktualisiert, bitte haben sie geduld. Im anschluss wird es neugestartet"
-        command_wakeup: "Rezeptor wird eingeschaltet"
-        confirmation: "¿Bist du sicher?"
-        control_flash_background: "⚠️ El disco flash, ha superado el 90% de ocupación"
-        control_ftp_unauthorized: "Nicht autorisierte FTP-Verbindung"
-        control_ram_background: "⚠️ El consumo de ram es elevado ha superado el 80%"
-        control_ssh_unauthorized: "⚠️ Nicht autorisierte SSH-Verbindung"
-        control_temp_background: "⚠️ La temperaturas es elevada, ha superado los 90 grados"
-        control_access: "⚠️ Eindringling!!!!  "
-        crossepg_installed: "Crossepg instaliert"
-        crossepg_uninstalled: "CrossEPG Deinstalation ausgeführt"
-        crossepg_uninstall_error: "Du hast CrossEPG nicht instaliert, also ist es unmöglich es zu löschen"
-        emu_active: "Aktiver Emulator erfolgreich geändert"
-        emu_image_not_found: "Option im Bild nicht verfügbar"
-        emu_not_active: "Es gibt kein aktiven Emulator"
-        emu_info_sharing: "Informationsaustausch"
-        emu_notification: "Der angegebene Emulator existiert nicht oder hat keinen aktiven Emulator"
-        emu_not_found: "Ich kann den aktuell aktiven Emulator nicht finden."
-        emu_not_installed: "Ich kann keine installierte Emulatoren finden"
-        emu_not_lines: "There arent lines in the file"
+        command_update: "Systemquellen werden aktualisiert:"
+        command_upgrade: "Receiver-Pakete werden aktualisiert, bitte warten Sie, bis der Receiver neu gestartet wird"
+        command_wakeup: "Receiver wird aus dem Standby-Modus aufgeweckt"
+        confirmation: "Sind Sie sicher?"
+        control_flash_background: "⚠️ Der Flash-Speicher ist zu mehr als 90% belegt"
+        control_ftp_unauthorized: "⚠️ FTP-Verbindung nicht autorisiert"
+        control_ram_background: "⚠️ Der RAM-Speicher ist hoch, mehr als 80% sind bereits in Benutzung"
+        control_ssh_unauthorized: "⚠️ SSH-Verbindung nicht autorisiert"
+        control_temp_background: "⚠️ Die Temperatur ist hoch, mehr als 90 Grad"
+        control_access: "⚠️ Eindringling!!!!"
+        crossepg_installed: "CrossEPG installiert"
+        crossepg_uninstalled: "CrossEPG deinstalliert"
+        crossepg_uninstall_error: "CrossEPG ist nicht installiert, daher kann es nicht deinstalliert werden"
+        emu_active: "Emulator erfolgreich geändert"
+        emu_image_not_found: "Option in Image nicht verfügbar"
+        emu_not_active: "Keine aktive Emulator"
+        emu_info_sharing: "Sharing Informationen"
+        emu_notification: "Kein gültiger Emulator oder kein aktiver Emulator vorhanden"
+        emu_not_found: "Kein aktiver Emulator gefunden"
+        emu_not_installed: "Kein installierter Emulator gefunden"
+        emu_not_lines: "Keine Zeilen in der Datei"
         emu_stopped: "Emulator gestoppt"
-        epgimport_installed: "EPGImport instaliert"
-        epgimport_uninstalled: "EPGImport Desintalation ausgeführt"
-        epgimport_uninstall_error: "Du hastEPGImport nicht instaliert, also ist es unmöglich es zu löschen"
-        epg_days_error: "Anzahl der Tage falsch eingegeben"
-        epg_two_apps_installed: "Du hast sowohl Crossepg als auch EPGImport installiert, bitte lass nur einen"
-        epg_update_error: "Update konnte nicht abgeschlossen werden"
-        epg_app_install: "Du musst zuerst Crossepg oder EPGImport installieren"
-        epg_update_success: " %{info} Tage Aktualisierung erfolgreich ausgeführt"
         dir_notexist: "⚠️ Verzeichnis existiert nicht"
-        dir_empty: "⚠️ Das Verzeichnis darf nicht leer sein"
-        file_erased: "Die datei %{file} wurde elfolgreich gelöscht"
-        file_empty: "⚠️ Leere Akte"
-        file_notfound: "Die datei %{file} existiert nicht"
-        file_upload: "[*] Hochgeladene Datei:"
-        ftp_conn: "FTP-Verbindung = %{info}" 
-        ftp_conn_notfound: "Es wurden keine FTP-Verbindungen hergestellt"
-        geo_block_ip: "Die eingegebene IP wurde gesperrt"
-        geo_unblock_ip: "Die eingegebene IP wurde entsperrt"
-        ghostreamy_restart: "Daemon ghostreamy wird neugestartet"
-        ghostreamy_start: "Daemon ghostreamy wird gestartet"
-        ghostreamy_started: "ghostreamy startet"
-        ghostreamy_stop: "Daemon ghostreamy wird gestoppt"
-        ghostreamy_stopped: "ghostreamy ist gestoppt"
-        text_help: "JungleBot <i> %{version} </i>\nIch kann dir bei der Verwaltung Ihres Enigma2-Empfängers helfen %{brand} durch Telegramm. Wenn du neu in diener Verwendung bist, besuche die folgende <a href=%{telegram_url}> Telegramm Gruppe</a>\n\n <b>Liste der verfügbaren Befehle:\n\n</b>"
-        info_connections: "Hergestellte Verbindungen an deinem rezeptor"
-        info_cpu: "CPU auslastung"
+        dir_empty: "⚠️ Verzeichnis darf nicht leer sein"
+        epgimport_installed: "EPGImport installiert"
+        epgimport_uninstalled: "EPGImport deinstalliert"
+        epgimport_uninstall_error: "EPGImport nicht installiert"
+        epg_days_error: "Ungültige Anzahl von Tagen"
+        epg_two_apps_installed: "Sowohl Crossepg als auch EPGImport installiert, bitte nur eines behalten"
+        epg_update_error: "Update konnte nicht durchgeführt werden"
+        epg_app_install: "Bitte installieren Sie zuerst Crossepg oder EPGImport"
+        epg_update_success: "%{info} Tage EPG erfolgreich aktualisiert"
+        file_erased: "Datei %{file} erfolgreich gelöscht"
+        file_empty: "⚠️ Datei ist leer"
+        file_notfound: "Datei %{file} nicht gefunden"
+        file_upload: "[*] Datei hochgeladen:"
+        ftp_conn: "FTP-Verbindung: %{info}"
+        ftp_conn_notfound: "Keine FTP-Verbindungen vorhanden"
+        geo_block_ip: "IP-Adresse erfolgreich blockiert"
+        geo_unblock_ip: "IP-Adresse erfolgreich freigegeben"
+        change_password_ok: "Receiver-Passwort erfolgreich geändert"
+        ghostreamy_restart: "Ghostreamy-Daemon wird neu gestartet"
+        ghostreamy_start: "Ghostreamy-Daemon wird gestartet"
+        ghostreamy_started: "Ghostreamy läuft"
+        ghostreamy_stop: "Ghostreamy-Daemon wird gestoppt"
+        ghostreamy_stopped: "Ghostreamy gestoppt"
+        text_help: "JungleBot <i> %{version} </i>\nHallo @%{username}, ich kann Ihnen helfen, Ihren Enigma2 %{brand} Receiver über Telegram zu verwalten. Wenn Sie neu im Umgang damit sind, besuchen Sie <a href=%{telegram_url}>Telegram-Gruppe</a>\n\n <b>Verfügbare Befehle:\n\n</b>"
+        info_connections: "Die Verbindungen auf Ihrem Receiver"
+        info_cpu: "CPU-Auslastung"
         info_duckdns_ok: "OK %{host} => %{public_ip}"
-        info_duckdns_ko: "ERROR public ip: %{public_ip} %{host} ip: %{host_ip}"
-        info_port_open: "Port offen %{host}:%{port}"
-        info_port_closed: "Port zu %{host}:%{port}, oder service gestoppt"
-        info_mac: "Gefundene MACs"
-        info_machineid: "Die ID des Rezeptores lautet"
+        info_duckdns_ko: "FEHLER öffentliche IP: %{public_ip} %{host} IP: %{host_ip}"
+        info_port_open: "Port geöffnet %{host}:%{port}"
+        info_port_closed: "Port geschlossen %{host}:%{port}, oder Dienst gestoppt"
+        info_mac: "gefundene MAC-Adressen"
+        info_machineid: "Die ID unseres Receivers ist"
         info_networkcard: "Die Netzwerkkartenkonfiguration ist"
-        info_ram: "Ram Verbrauch"
-        info_speedtest_error: "🚫 Se ha producido un error o el codigo del host no es correcto"
-        info_temp: "La temperatura CPU es:"
-        info_top: "Die 10 Prozesse, die am meisten verbrauchen, sind"
-        info_uptime: "Zeit An"
-        info_zerotier: "[+] ZEROTIER INFORMATION"
-        info_zerotier_installed: "Zerotier ist instaliert"
-        info_zerotier_notinstalled: "Zerotier ist nicht instaliert"
-        init: "Willkommen bei Jungle Bot, um dem Rezeptor vom Telegramm aus zu steuern, Gebe /hilfe um verfügbare Befehle anzuzeigen"
-        junglebot_update: "Ya tienes la última versión %{version} instalada"
-        next_param: "Gebe mir den wert **%{param}**:"
+        info_ram: "RAM-Verbrauch"
+        info_speedtest_error: "🚫 Ein Fehler ist aufgetreten oder der Host-Code ist falsch"
+        info_temp: "Die CPU-Temperatur:"
+        info_top: "Die 10 am meisten beanspruchten Prozesse sind"
+        info_uptime: "Einschaltzeit"
+        info_zerotier: "[+] ZEROTIER-INFORMATIONEN"
+        info_zerotier_installed: "Zerotier ist bereits installiert"
+        info_zerotier_notinstalled: "Zerotier ist nicht installiert"
+        info_tailscale_notinstalled: "Tailscale ist nicht installiert"
+        info_tailscale_up: "Tailscale ist verbunden"
+        info_tailscale_down: "Tailscale ist getrennt"
+        info_tailscale_installed: "Tailscale ist bereits installiert"
+        info_ip_tailscale: "Die Tailscale-IP Ihres Geräts lautet:\n\n"
+        info_status_tailscale: "Der aktuelle Status von Tailscale lautet:\n\n"
+        info_crontab_tareas: "Die folgenden Crontab-Aufgaben wurden gefunden:\n\n"
+        init: "Willkommen @%{username} bei Junglebot, um unseren Receiver über Telegram zu steuern, geben Sie /ayuda um verfügbare Befehle anzuzeigen"
+        info_plugin_installed: "Die folgenden Plugins sind auf Ihrem Receiver installiert:\n\n"
+        junglebot_update: "Sie haben bereits die neueste Version %{version} installiert"
+        next_param: "Geben Sie den Wert von **%{param}** ein:"
         new_version: "Es gibt eine neue Version von Junglebot %{version}"
         text_no: "Nein"
-        not_signal: "Es gibt keine Signalinformationen, da die Deko im Schlaf-modus / Aus ist"
+        not_signal: "Es gibt keine Signalinformationen, da der Decoder im Ruhezustand / ausgeschaltet ist"
         ok: "OK"
-        operation_cancelled: "Vorgang abgebrochen"
-        oscam_conn_error: "Ich kann mich mit oscam nicht verbinden"
-        oscam_conclave_error: "Oscam Autoupdater ist nicht richtig instaliert"
-        oscam_conclave_installed: "Der oscam Autoupdater emulator ist bereits installiert"
-        oscam_delete_line_ok: "Line %{linea} deleted successfully"
-        oscam_delete_line_error: "There was an error and the line %{linea} cannot be deleted"
-        oscam_line_enable_error: "There was an error and the line %{linea} cannot be enabled"
-        oscam_not_readers_disabled: "There aren't active readers for disable"
-        oscam_not_readers_enabled: "There aren't unactive readers for enable"
+        operation_cancelled: "Operation abgebrochen"
+        oscam_conn_error: "Ich kann keine Verbindung zu Oscam herstellen"
+        oscam_conclave_error: "Oscam Conclave ist nicht richtig installiert"
+        oscam_conclave_installed: "Der Emulator von Oscam Conclave ist bereits installiert"
+        oscam_delete_line_ok: "Zeile %{linea} erfolgreich gelöscht"
+        oscam_delete_line_error: "Es gab einen Fehler und ich kann die Zeile %{linea} nicht löschen"
+        oscam_line_enable_error: "Es gab einen Fehler beim Aktivieren der Zeile %{linea}"
+        oscam_not_readers_disabled: "Es gibt keine Reader zum Deaktivieren"
+        oscam_not_readers_enabled: "Es gibt keine Reader zum Aktivieren"
         oscam_stopped: "Oscam gestoppt"
-        oscam_tunner: "Derzeit ist kein tunner aktiv"
-        oscam_version: "%{version} version"
-        oscam_version_error: "Es gibt eine Oscam-Binärdatei, aber ich kann die Version nicht überprüfen"
-        recording_delete_success: "Aufnahme erfolgreich gelöscht"
-        recording_indexnotexist : "Dieser Index existiert für keine Aufzeichnung. Konsultieren Sie die Liste"
-        recording_notexist: "Es gibt keine Aufnahme in %{location}"
-        recording_schedule_notexist: "Es ist keine Aufnahme geplant"
-        restarting: "Neustarten"
-        satbox_standby: "Rezeptor im Ruhe-modus"
-        satbox_started: "Rezeptor an"
+        oscam_tunner: "Derzeit ist kein Tuner aktiv"
+        oscam_version: "%{version} Version"
+        oscam_version_error: "Oscam-Binärdatei vorhanden, aber ich kann die Version nicht überprüfen"
+        recording_delete_success: "Aufzeichnung erfolgreich gelöscht"
+        recording_indexnotexist : "Dieser Index existiert für keine Aufzeichnung, überprüfen Sie die Liste"
+        recording_notexist: "Keine Aufzeichnung in %{location}"
+        recording_schedule_notexist: "Keine geplante Aufzeichnung vorhanden"
+        restarting: "Neustart"
+        satbox_standby: "Receiver im Standby-Modus"
+        satbox_started: "Receiver gestartet"
         send_msg_error: "🚫 Fehler beim Senden der Nachricht"
         send_msg_success: "Nachricht erfolgreich gesendet"
-        send_remote_error: "🚫 Error: Es sind nur Ziffern von 0 bis 9 zulässig"
-        send_remote_char_error: "🚫 Error: Only characters from A-Z are allowed"
-        starting: "Startet"
-        stoping: "Stoppt"
-        streams_notexist: "Keine Streams in Bearbeitung"
-        ssh_conn: "SSH-Verbindung = %{info}"  
-        ssh_conn_notfound: "Es wurden keine SSH-Verbindungen hergestellt"
-        unauthorized: "🚫 ZUGANG VERWEIGERT!!"
-        unknown_error: "Unknown error: %{error}"
-        updated_at: "Letzte Änderung: %{date}" 
+        send_remote_error: "🚫 Fehler: Nur Ziffern von 0 bis 9 sind zulässig"
+        send_remote_char_error: "🚫 Fehler: Nur Zeichen von A bis Z sind zulässig"
+        starting: "Starten"
+        stoping: "Stoppen"
+        streams_notexist: "Keine Streams verfügbar"
+        ssh_conn: "SSH-Verbindung = %{info}"
+        ssh_conn_notfound: "Keine SSH-Verbindungen hergestellt"
+        unauthorized: "🚫 ZUGRIFF VERWEIGERT!!"
+        unknown_error: "Unbekannter Fehler: %{error}"
+        updated_at: "Letzte Änderung: %{date}"
         user_connected: "* Benutzer verbunden: %{user} (%{ip}): %{status}"
-        wrong_external_access: "WARNING: Nicht konfigurierter externer Zugriff"
-        wrong_password: "ERROR: Benutzer und Passwort falsch konfiguriert"
+        wrong_external_access: "WARNUNG: Externer Zugriff nicht konfiguriert"
+        wrong_password: "🚫 FEHLER: Falscher Benutzername oder Passwort"
         text_yes: "Ja"
