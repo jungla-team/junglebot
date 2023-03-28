@@ -30,6 +30,7 @@ $ wget [http://tropical.jungle-team.online/script/jungle-feed.conf](http://tropi
 Una vez tenemos en nuestro receptor instalado el repositorio de paquetes, simplemente para instalar `junglebot`desde la fuente, ejecutaremos:
 
 $ opkg update
+
 $ enigma2-plugin-extensions-junglebot
 
 ## Inicio rápido
