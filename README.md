@@ -31,7 +31,7 @@ Una vez tenemos en nuestro receptor instalado el repositorio de paquetes, simple
 
 $ opkg update
 
-$ enigma2-plugin-extensions-junglebot
+$ opkg install enigma2-plugin-extensions-junglebot
 
 ## Inicio rápido
 
