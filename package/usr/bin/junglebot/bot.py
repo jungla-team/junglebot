@@ -28,7 +28,7 @@ import psutil
 import socket
 import shlex
 
-VERSION="4.1.1"   
+VERSION="4.1.2"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 openatv="openatv"
 new_version = False
@@ -1644,26 +1644,24 @@ def junglescript_log():
 @with_confirmation
 def junglescript_channels():
     commands = """
-            rm -f /etc/enigma2/actualizacion
+            sed -i 's/^FECHA_LISTACANALES=.*$/FECHA_LISTACANALES=/' /usr/bin/enigma2_pre_start.conf
             /usr/bin/enigma2_pre_start.sh
             """
     return getoutput(commands)
 
 @with_confirmation
 def junglescript_picons():
-    picons_act = buscar_fich_act_picons()
-    if os.path.exists(picons_act):
-        commands = """
-                rm -f {}
-                /usr/bin/enigma2_pre_start.sh
-                """.format(picons_act)
+    commands = """
+            sed -i 's/^FECHA_PICONS=.*$/FECHA_PICONS=/' /usr/bin/enigma2_pre_start.conf
+            /usr/bin/enigma2_pre_start.sh
+            """
     return getoutput(commands)
     
 def junglescript_fecha_listacanales():
-    listacanales_act = "/etc/enigma2/actualizacion"
-    if os.path.exists(listacanales_act): 
-       fecha_listacanales = getoutput("cat " + listacanales_act)
-    return fecha_listacanales       
+    junglescript_conf = "/usr/bin/enigma2_pre_start.conf"
+    if os.path.exists(junglescript_conf): 
+       fecha_listacanales = getoutput("grep -i FECHA_LISTACANALES= " + junglescript_conf)
+    return fecha_listacanales     
 
 def junglescript_version():
     junglescript_file = "/usr/bin/enigma2_pre_start.sh"
@@ -1695,12 +1693,10 @@ def buscar_fich_act_picons():
                    return i18n.t("msg.file_notfound", file=fichero_act_picons)
 
 def junglescript_fecha_picons():
-    picons_act = buscar_fich_act_picons()
-    if os.path.exists(picons_act): 
-       fecha_picons = getoutput("cat " + picons_act)
-       return fecha_picons
-    else:
-       return picons_act
+    junglescript_conf = "/usr/bin/enigma2_pre_start.conf"
+    if os.path.exists(junglescript_conf): 
+       fecha_picons = getoutput("grep -i FECHA_PICONS= " + junglescript_conf)
+    return fecha_picons  
 
 def fav_bouquet():
     fichero = "/etc/enigma2/fav_bouquets"
@@ -2925,39 +2921,39 @@ menu_junglescript.add_option(MenuOption(name = "delbouquetfav", description = i1
 menu_junglescript.add_option(MenuOption(name = "addbouquetsave", description = i18n.t('menu.junglescript.add_save_bouquet'), command = junglescript_addsavebouquet, params=['bouquet']))
 menu_junglescript.add_option(MenuOption(name = "delbouquetsave", description = i18n.t('menu.junglescript.del_save_bouquet'), command = junglescript_delsavebouquet, params=[[JB_BUTTONS, lambda: zip(junglescript_save_bouquets(), junglescript_save_bouquets())]]))
 menu_jungle.add_option(MenuOption(name = "backupjungleconfigs", description = i18n.t('menu.command.backup_jungle_configs'), command = backup_jungle_configs))
-menu_bugsbunny = MenuOption(name = 'bugsbunny', description = i18n.t('menu.bugsbunny.title'))
-menu_bugsbunny.add_option(MenuOption(name = "install_feed_jungle", description = i18n.t('menu.bugsbunny.feedjungle'), command = repo_jungle_install, params=params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_feed_Oe", description = i18n.t('menu.bugsbunny.feedoe'), command = repo_oeAlliance, params=params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_junglescript", description = i18n.t('menu.bugsbunny.install_junglescript'), command = junglescript_install, params=params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_junglescript", description = i18n.t('menu.bugsbunny.uninstall_junglescript'), command = junglescript_uninstall, params=params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_ghostreamy", description = i18n.t('menu.bugsbunny.install_ghostreamy'), command = ghostreamy_install, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_ghostreamy", description = i18n.t('menu.bugsbunny.uninstall_ghostreamy'), command = ghostreamy_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_jungletools", description = i18n.t('menu.bugsbunny.install_jungletools'), command = install_junglescripttool, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_jungletools", description = i18n.t('menu.bugsbunny.uninstall_jungletools'), command = junglescripttool_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_epgimport", description = i18n.t('menu.bugsbunny.install_epgimport'), command = install_epgimport, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_epgimport", description = i18n.t('menu.bugsbunny.uninstall_epgimport'), command = epgimport_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_tdtchannels", description = i18n.t('menu.bugsbunny.install_tdtchannels'), command = install_tdtchannels, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_tdtchannels", description = i18n.t('menu.bugsbunny.uninstall_tdtchannels'), command = tdtchannels_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_oscamconclave", description = i18n.t('menu.bugsbunny.install_oscamconclave'), command = install_emuoscamconclave, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_oscamconclave", description = i18n.t('menu.bugsbunny.uninstall_oscamconclave'), command = emuoscamconclave_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_skinkoala", description = i18n.t('menu.bugsbunny.install_skinkoala'), command = install_skinkoala, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_skinkoala", description = i18n.t('menu.bugsbunny.uninstall_skinkoala'), command = skinkoala_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_jedimaker", description = i18n.t('menu.bugsbunny.install_jedimaker'), command = install_jedimaker, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_jedimaker", description = i18n.t('menu.bugsbunny.uninstall_jedimaker'), command = jedimaker_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_openvpn", description = i18n.t('menu.bugsbunny.install_openvpn'), command = install_openvpn, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_openvpn", description = i18n.t('menu.bugsbunny.uninstall_openvpn'), command = openvpn_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "zerotier_install", description = i18n.t('menu.bugsbunny.install_zerotier'), command = zerotier_install, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "zerotier_uninstall", description = i18n.t('menu.bugsbunny.uninstall_zerotier'), command = zerotier_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "tailscale_install", description = i18n.t('menu.bugsbunny.install_tailscale'), command = tailscale_install, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "tailscale_uninstall", description = i18n.t('menu.bugsbunny.uninstall_tailscale'), command = tailscale_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_jediepgxtream", description = i18n.t('menu.bugsbunny.install_jediepgxtream'), command = install_jediepgxtream, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_jediepgxtream", description = i18n.t('menu.bugsbunny.uninstall_jediepgxtream'), command = jediepgxtream_uninstall, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "install_footonsat", description = i18n.t('menu.bugsbunny.install_footonsat'), command = install_footonsat, params = params_confirmation))
-menu_bugsbunny.add_option(MenuOption(name = "uninstall_footonsat", description = i18n.t('menu.bugsbunny.uninstall_footonsat'), command = footonsat_uninstall, params = params_confirmation))
+menu_speedy = MenuOption(name = 'speedy', description = i18n.t('menu.speedy.title'))
+menu_speedy.add_option(MenuOption(name = "install_feed_jungle", description = i18n.t('menu.speedy.feedjungle'), command = repo_jungle_install, params=params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_feed_Oe", description = i18n.t('menu.speedy.feedoe'), command = repo_oeAlliance, params=params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_junglescript", description = i18n.t('menu.speedy.install_junglescript'), command = junglescript_install, params=params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_junglescript", description = i18n.t('menu.speedy.uninstall_junglescript'), command = junglescript_uninstall, params=params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_ghostreamy", description = i18n.t('menu.speedy.install_ghostreamy'), command = ghostreamy_install, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_ghostreamy", description = i18n.t('menu.speedy.uninstall_ghostreamy'), command = ghostreamy_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_jungletools", description = i18n.t('menu.speedy.install_jungletools'), command = install_junglescripttool, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_jungletools", description = i18n.t('menu.speedy.uninstall_jungletools'), command = junglescripttool_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_epgimport", description = i18n.t('menu.speedy.install_epgimport'), command = install_epgimport, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_epgimport", description = i18n.t('menu.speedy.uninstall_epgimport'), command = epgimport_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_tdtchannels", description = i18n.t('menu.speedy.install_tdtchannels'), command = install_tdtchannels, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_tdtchannels", description = i18n.t('menu.speedy.uninstall_tdtchannels'), command = tdtchannels_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_oscamconclave", description = i18n.t('menu.speedy.install_oscamconclave'), command = install_emuoscamconclave, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_oscamconclave", description = i18n.t('menu.speedy.uninstall_oscamconclave'), command = emuoscamconclave_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_skinkoala", description = i18n.t('menu.speedy.install_skinkoala'), command = install_skinkoala, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_skinkoala", description = i18n.t('menu.speedy.uninstall_skinkoala'), command = skinkoala_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_jedimaker", description = i18n.t('menu.speedy.install_jedimaker'), command = install_jedimaker, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_jedimaker", description = i18n.t('menu.speedy.uninstall_jedimaker'), command = jedimaker_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_openvpn", description = i18n.t('menu.speedy.install_openvpn'), command = install_openvpn, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_openvpn", description = i18n.t('menu.speedy.uninstall_openvpn'), command = openvpn_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "zerotier_install", description = i18n.t('menu.speedy.install_zerotier'), command = zerotier_install, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "zerotier_uninstall", description = i18n.t('menu.speedy.uninstall_zerotier'), command = zerotier_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "tailscale_install", description = i18n.t('menu.speedy.install_tailscale'), command = tailscale_install, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "tailscale_uninstall", description = i18n.t('menu.speedy.uninstall_tailscale'), command = tailscale_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_jediepgxtream", description = i18n.t('menu.speedy.install_jediepgxtream'), command = install_jediepgxtream, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_jediepgxtream", description = i18n.t('menu.speedy.uninstall_jediepgxtream'), command = jediepgxtream_uninstall, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "install_footonsat", description = i18n.t('menu.speedy.install_footonsat'), command = install_footonsat, params = params_confirmation))
+menu_speedy.add_option(MenuOption(name = "uninstall_footonsat", description = i18n.t('menu.speedy.uninstall_footonsat'), command = footonsat_uninstall, params = params_confirmation))
 menu_jungle.add_option(menu_ghostreamy)
 menu_jungle.add_option(menu_junglebot)
 menu_jungle.add_option(menu_junglescript)
-menu_jungle.add_option(menu_bugsbunny )
+menu_jungle.add_option(menu_speedy )
 
 
 menu_redes = MenuOption(name = 'redes', description = i18n.t('menu.redes.title'))

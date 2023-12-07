@@ -92,8 +92,8 @@ en:
             title: Network Management
         vpn:
             title: VPN Utilities
-        bugsbunny:
-            title: 🥕 Bugs Bunny Utilities
+        speedy:
+            title: 🥕 Speedy Utilities
             feedjungle: Install Jungle Repository
             feedoe: Install OEAlliance Repository
             install_jungletools: Install/Update JungleScript Tools

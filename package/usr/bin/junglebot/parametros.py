@@ -20,5 +20,5 @@ AUTORAM=0
 AUTOTEMP=0
 # Se lanza el autocheckflash cada vez que arranca el bot. Activado 1, no activado 0
 AUTOFLASH=0
-# Variable idioma español (es), inglés (en), alemán (, italiano (it)
+# Variable idioma español (es), inglés (en), alemáde), italiano (it)
 LOCALE=es

@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.1.2]
+
+- Se actualiza versión de las dependencias pyTelegramBotAPI y netaddr
+- Cambiado menú Bugs Bunny por Speedy
+- Se arreglan las opciones de Junglescript: forzado de lista de canales /jungle_junglescript_force_channels y forzado de picons /jungle_junglescript_force_channels
+
 ## [4.1.1]
 
 - Corregido comando /start de inicio bot ahora funciona correctamente

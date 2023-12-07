@@ -92,8 +92,8 @@ it:
             title: Gestione reti
         vpn:
             title: Utilità VPN
-        bugsbunny:
-            title: 🥕 Utilità Bugs Bunny
+        speedy:
+            title: 🥕 Utilità Speedy
             feedjungle: Installa repository Jungle
             feedoe: Installa repository OEAlliance
             install_jungletools: Installa/Aggiorna JungleScript Tools

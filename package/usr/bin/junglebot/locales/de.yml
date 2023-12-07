@@ -92,8 +92,8 @@ de:
             title: Netzwerkverwaltung
         vpn:
             title: VPN-Dienstprogramme
-        bugsbunny:
-            title: 🥕 Bugs Bunny Dienstprogramme
+        speedy:
+            title: 🥕 Speedy Dienstprogramme
             feedjungle: Jungle-Repository installieren
             feedoe: OEAlliance-Repository installieren
             install_jungletools: JungleScript Tools installieren/aktualisieren
