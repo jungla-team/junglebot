@@ -28,7 +28,7 @@ import psutil
 import socket
 import shlex
 
-VERSION="4.1.2"   
+VERSION="4.1.3"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 openatv="openatv"
 new_version = False

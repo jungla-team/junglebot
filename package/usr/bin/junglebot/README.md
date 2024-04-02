@@ -19,7 +19,7 @@ Para su implementación se usa la  API de la  biblioteca `telebot`, ademas para 
 
 ### [](jungleteam#note)Nota
 
-JungleBot esta desarrollado bajo  `OpenATV 7.2` no es compatible con imagenes que usen `python 2.x` , en otras imagenes que usen `python 3.x`, puede ser compatible y funcional pero igual no estan disponibles todas las funciones.
+JungleBot esta desarrollado bajo `OpenATV 7.3` y no es compatible con imagenes que usen `python 2.x`, en otras imagenes que usen `python 3.x`, puede ser compatible y funcional pero igual no estan disponibles todas las funciones.
 
 ## [](jungleteam#instalando)Instalando
 

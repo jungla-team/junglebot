@@ -5,9 +5,10 @@ then
     wget http://tropical.jungle-team.online/script/jungle-feed.conf -P /etc/opkg/
 fi
 
-pip install --upgrade setuptools
-pip install -r /usr/bin/junglebot/requirements.txt
-pip install pyTelegramBotAPI
+python -m ensurepip --upgrade
+pip3 install --upgrade pip
+pip3 install --upgrade setuptools
+pip3 install -r /usr/bin/junglebot/requirements.txt
 
 chmod 755 /usr/bin/junglebot/bot.py
 rm -f /etc/rc3.d/S98junglebot-daemon
@@ -15,4 +16,3 @@ cd /etc/rc3.d
 ln -sf ../init.d/junglebot-daemon S98junglebot-daemon
 
 /etc/init.d/junglebot-daemon start
-

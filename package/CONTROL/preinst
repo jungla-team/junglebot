@@ -4,5 +4,3 @@ if [ -f /etc/init.d/junglebot-daemon ];
 then
    /etc/init.d/junglebot-daemon stop
 fi
-curl https://bootstrap.pypa.io/get-pip.py --output /tmp/get-pip.py
-python /tmp/get-pip.py
