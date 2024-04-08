@@ -1,6 +1,6 @@
 ![enter image description here](https://jungle-team.com/wp-content/uploads/2023/03/logobot.png)
 
-[![Junglebot version](4.1.4)](https://jungle-team.com/guia-junglebot-revolution-4-1-1/) [   ![Licencia Junglebot](https://jungle-team.com/wp-content/uploads/2023/03/licence.png)
+[![Junglebot version](https://jungle-team.com/wp-content/uploads/2023/03/releases.png)](https://jungle-team.com/guia-junglebot-revolution-4-1-1/) [   ![Licencia Junglebot](https://jungle-team.com/wp-content/uploads/2023/03/licence.png)
 ](https://github.com/jungla-team/junglebot/blob/master/LICENSE) [![chat telegram](https://jungle-team.com/wp-content/uploads/2023/03/telegram.png)
 ](https://t.me/joinchat/R_MzlCWf4Kahgb5G) [![donar a jungle](https://jungle-team.com/wp-content/uploads/2023/03/donate.png)
 ](https://paypal.me/jungleteam)
