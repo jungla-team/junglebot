@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.1.4]
+
+- Se actualizan las dependencias para que sea compatible con versiones nuevas de OpenATV 7.4
+
+## [4.1.3]
+
+- Se actualizan las dependencias para que sea compatible con versiones nuevas de OpenATV 7.3
+
 ## [4.1.2]
 
 - Se actualiza versión de las dependencias pyTelegramBotAPI y netaddr
