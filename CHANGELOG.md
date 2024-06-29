@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.1.5]
+
+- Se arregla el bug que había consultado el estado de la emuladora /emu_status con las nuevas versiones de oscam conclave
+- Se actualizan las dependencias para temas de seguridad
+
 ## [4.1.4]
 
 - Se actualizan las dependencias para que sea compatible con versiones nuevas de OpenATV 7.4

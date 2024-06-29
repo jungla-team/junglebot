@@ -28,7 +28,7 @@ import psutil
 import socket
 import shlex
 
-VERSION="4.1.4"   
+VERSION="4.1.5"   
 CONFIG_FILE = '/usr/bin/junglebot/parametros.py' 
 openatv="openatv"
 new_version = False
@@ -1292,9 +1292,9 @@ def oscam_status():
                 table = True
             if line.find('</tbody>') >= 0:
                 table = False
-            if line.find('<LI><B>OSCam:</B>') >= 0:
+            if line.find('<title>OSCam') >= 0:
                 parts = re.split('[<>]', line)
-                version = "Version OSCam {}:{}\n".format(parts[6].strip(), parts[10].strip())
+                version = "Version {}\n".format(parts[2].strip())
         output.insert(0, version)
         output.append(estado_clines_oscam())
         output.append(oscam_info())

@@ -1,5 +1,5 @@
 Package: enigma2-plugin-extensions-junglebot
-Version: 4.1.4
+Version: 4.1.5
 Architecture: all
 Depends: curl,python3-ensurepip,python3-tomllib,python3-requests,python3-threading,python3-pyopenssl,python3-logging,python3-pkgutil,python3-xmlrpc,python3-compile,procps,python3-setuptools,python3-psutil,python3-plistlib
 Recommends:
